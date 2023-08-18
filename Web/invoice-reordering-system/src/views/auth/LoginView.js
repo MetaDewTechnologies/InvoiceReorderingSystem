@@ -33,7 +33,7 @@ const useStyles = makeStyles((theme) => ({
 
 const LoginView = () => {
   const classes = useStyles();
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
   const [userDetails, setUserDetails] = useState({
     username: "",
     password: ""
@@ -44,14 +44,15 @@ const LoginView = () => {
   const [messageModel, setmessageModel] = useState([]);
 
   async function login(values) {
-    let result = await services.login(values);
-    if (result.statusCode == "Error") {
-      setIsHidden(true);
-      setmessageModel(result.message);
-      return;
-    }
+    // let result = await services.login(values);
+    // if (result.statusCode == "Error") {
+    //   setIsHidden(true);
+    //   setmessageModel(result.message);
+    //   return;
+    // }
     // sessionStorage.setItem('token', result.data);
-    // navigate('/newLoader');
+    sessionStorage.setItem('token','sample-token123')
+    navigate('app/manageInvoices/listing');
   }
 
   return (
@@ -97,7 +98,7 @@ const LoginView = () => {
                   xs={12}
                   md={12}
                 >
-                  {isHidden ? <Alert severity="error">
+                  {isHidden ? <Alert severity= "error">
                     <AlertTitle>Error: <strong>{messageModel}</strong></AlertTitle>
 
                   </Alert> : null}
@@ -130,13 +131,13 @@ const LoginView = () => {
                 />
                 <Box my={2} style={{marginTop:12}}>
                   <Button
-                    color="primary"
                     disabled={isSubmitting}
                     fullWidth
                     size="large"
                     type="submit"
                     variant="contained"
-                  >
+                    style = {{ color:'#FFFFFF', backgroundColor:"#489EE7"}}
+                  > 
                     LOGIN
                   </Button>
                 </Box>
