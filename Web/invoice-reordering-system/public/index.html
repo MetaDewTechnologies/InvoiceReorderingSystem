@@ -3,6 +3,8 @@
   <head>
     <meta charset="utf-8" />
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css?family=Roboto+Mono|Roboto+Slab|Roboto:300,400,500,700" />
     <link
     rel="stylesheet"
     href="https://fonts.googleapis.com/icon?family=Material+Icons"
@@ -43,5 +45,19 @@
       To begin the development, run `npm start` or `yarn start`.
       To create a production bundle, use `npm run build` or `yarn build`.
     -->
+    <script>
+      fetch("/appsetting.json")
+        .then(response => {
+          return response.json();
+        })
+        .then(jsondata => {
+          var urls = {
+            apidomain: jsondata.apidomain,
+            identityDomain: jsondata.identityDomain,
+            reactDomain: jsondata.reactDomain,
+          };
+          sessionStorage.setItem('urls', JSON.stringify(urls));
+        });
+    </script>
   </body>
 </html>
