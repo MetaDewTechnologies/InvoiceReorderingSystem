@@ -14,7 +14,7 @@ import {
 } from '@material-ui/core';
 import { Alert, AlertTitle } from '@material-ui/lab';
 import Page from '../../components/Page';
-// import services from './Services';
+import services from './Services';
 import { trackPromise } from 'react-promise-tracker';
 import { LoadingComponent } from '../../utils/newLoader';
 
@@ -60,6 +60,7 @@ const LoginView = () => {
       className={classes.root}
       title="Login"
       display="flex"
+      style={{marginLeft:"30%", marginRight:"30%"}}
     >
       <LoadingComponent/>
       <Box
@@ -90,8 +91,8 @@ const LoginView = () => {
               values
             }) => (
               <form onSubmit={handleSubmit}>
-                <Box mb={3}>
-                  <img style={{ width: 200, height: 115, marginLeft: 0, marginBottom: 20 }} src="/static/images/logo/clientLogo.jpg" alt="login" />
+                <Box mb={3} style={{display:'flex' ,justifyContent:'center'}}>
+                  <img style={{ width: 200, height: 115, marginLeft: 0, marginBottom: 10 }} src="/static/images/logo/clientLogo.jpg" alt="login" />
                 </Box>
                 <Grid
                   item
