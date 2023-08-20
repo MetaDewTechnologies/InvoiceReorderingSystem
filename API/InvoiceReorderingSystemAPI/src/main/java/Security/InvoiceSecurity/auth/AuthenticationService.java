@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -38,19 +39,33 @@ public class AuthenticationService {
 
     }
 
-    public AuthenticationResponse authenticate(AuthenticationRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getUsername(),
-                        request.getPassword()
-                )
-        );
-        var user = repository.findByUsername(request.getUsername())
-                .orElseThrow();
-        var jwtToken = jwtService.generateToken(user);
-        return AuthenticationResponse.builder()
-                .token(jwtToken)
-                .role(user.getRole())
-                .build();
+    public LoginResponse authenticate(AuthenticationRequest request) {
+       try {
+           authenticationManager.authenticate(
+                   new UsernamePasswordAuthenticationToken(
+                           request.getUsername(),
+                           request.getPassword()
+
+                   )
+           );
+           var user = repository.findByUsername(request.getUsername())
+                   .orElseThrow();
+
+           var jwtToken = jwtService.generateToken(user);
+           AuthenticationResponse authResponse = AuthenticationResponse.builder()
+                   .token(jwtToken)
+                   .role(user.getRole())  // Assuming the 'getRole()' method exists in the User class
+                   .build();
+           return LoginResponse.builder()
+                   .statusCode("200")
+                   .message("SUCCESS")
+                   .authenticationResponse(authResponse)
+                   .build();
+       }catch (AuthenticationException e){
+           return LoginResponse.builder()
+                   .statusCode("400")
+                   .message("ERROR")
+                   .build();
+       }
     }
 }
