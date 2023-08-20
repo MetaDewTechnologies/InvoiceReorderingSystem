@@ -40,6 +40,7 @@ const useStyles = makeStyles((theme) => ({
 const screenCode = 'RETAILERREGISTRATION';
 export default function ManageInvoiceListing(props) {
   const invo = [{
+    invoiceID:2,
     reservationNumber:2200,
     roomNumber : 23,
     arrivalDate : '2023-02-23',
@@ -53,11 +54,11 @@ export default function ManageInvoiceListing(props) {
   })
   const [invoiceData, setInvoiceData] = useState([]);
   const [tableData, setTableData] = useState([]);
-//   const navigate = useNavigate();
+  const navigate = useNavigate();
   let encryptedID = "";
   const handleClick = () => {
     encryptedID = btoa('0');
-    // navigate('/app/retailerRegistration/addedit/' + encryptedID);
+    navigate('/app/manageInvoices/addEdit/' + encryptedID);
   }
 
   useEffect(() => {
@@ -81,9 +82,9 @@ export default function ManageInvoiceListing(props) {
     setInvoiceData(invo)
   }
 
-  const EditInvoiceDetails = (retailerID) => {
-    encryptedID = btoa(retailerID.toString());
-    // navigate('/app/retailerRegistration/addedit/' + encryptedID);
+  const EditInvoiceDetails = (invoiceID) => {
+    encryptedID = btoa(invoiceID.toString());
+    navigate('/app/manageInvoices/addEdit/' + encryptedID);
   }
 
   function handleChange(e) {

@@ -13,21 +13,21 @@ import {
   InputLabel,
   Switch,
   CardHeader,
-  MenuItem
+  MenuItem,
+  Typography,
+  FormControl
 } from '@material-ui/core';
-import Page from 'src/components/Page';
+import Page from '../../../components/Page';
 import services from '../Services';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Formik, validateYupSchema } from 'formik';
 import * as Yup from "yup";
-import PageHeader from 'src/views/Common/PageHeader';
+import PageHeader from '../../Common/PageHeader';
 import { useAlert } from "react-alert";
 import { LoadingComponent } from '../../../utils/newLoader';
 import { trackPromise } from 'react-promise-tracker';
-import authService from '../../../utils/permissionAuth';
-import tokenService from '../../../utils/tokenDecoder';
-import NumberFormat from 'react-number-format';
-import PropTypes from 'prop-types';
+// import authService from '../../../utils/permissionAuth';
+// import tokenService from '../../../utils/tokenDecoder';
 import MaterialTable from "material-table";
 
 const useStyles = makeStyles((theme) => ({
@@ -42,67 +42,41 @@ const useStyles = makeStyles((theme) => ({
   }
 
 }));
-var screenCode = "ROUTE"
 
-function NumberFormatCustom(props) {
-  const { inputRef, onChange, ...other } = props;
-
-  return (
-    <NumberFormat
-      {...other}
-      getInputRef={inputRef}
-      onValueChange={(values) => {
-        onChange({
-          target: {
-            name: props.name,
-            value: values.value,
-          },
-        });
-      }}
-      decimalScale={2}
-      isNumericString
-
-    />
-  );
-}
-NumberFormatCustom.propTypes = {
-  inputRef: PropTypes.func.isRequired,
-  name: PropTypes.string.isRequired,
-  onChange: PropTypes.func.isRequired,
-};
-
-export default function DivisionAddEdit(props) {
-  const [title, setTitle] = useState("Add Division")
+export default function InvoiceAddEdit(props) {
+  const [title, setTitle] = useState("Inprogress Invoices")
   const [isUpdate, setIsUpdate] = useState(false);
-  const [isDisableButton, setIsDisableButton] = useState(false);
   const classes = useStyles();
-  const [factories, setFactories] = useState();
-  const [products, setProducts] = useState();
-  const [groups, setGroups] = useState();
-  const [route, setRoute] = useState({
-    groupID: '0',
-    factoryID: '0',
-    routeName: '',
-    routeCode: '',
-    routeLocation: '',
-    transportRate: '',
-    targetCrop: '',
-    productID: '0',
-    isActive: true,
+  const [invoiceData, setInvoiceData] = useState({
+      reservationNumber:'',
+      roomNumber:'',
+      arrivalDate:new Date(),
+      departureDate:new Date(),
+      customerName:'',
+      customerEmail:'',
+      address:'',
+      city:'',
+      country:''
   });
-  const [FieldData, setFieldData] = useState({
-    field: "",
-    area: "",
-    numberOfTrees: "",
-    monthlyTargetCropDiv: ""
+  const [itemData, setItemData] = useState({
+    date: new Date()
+    .toISOString()
+    .slice(0, 10),
+    description:"",
+    comment: "",
+    settlementType: "1",
+    settlement:"",
+    paymentMethod:"0",
+    cashier:""
   })
-  const [FieldDataList, setFieldDataList] = useState([])
-  const [routeIsActive, setRouteIsActive] = useState(true);
+  const [ItemDataList, setItemDataList] = useState([])
+  const [isDisableButton, setIsDisableButton] = useState(false)
+  const [selectedRow, setSelectedRow] = useState()
+
   const navigate = useNavigate();
   const handleClick = () => {
 
-    navigate('/app/division/listing');
-
+    navigate('/app/manageInvoices/listing/');
   }
 
   const [permissionList, setPermissions] = useState({
@@ -110,22 +84,11 @@ export default function DivisionAddEdit(props) {
     isFactoryFilterEnabled: false
   });
   const alert = useAlert();
-  const { routeID } = useParams();
+  const { invoiceID } = useParams();
   let decrypted = 0;
 
   useEffect(() => {
-    getPermissions();
-    getGroupsForDropdown();
-  }, []);
-
-  useEffect(() => {
-    trackPromise(
-      getfactoriesForDropDown()
-    );
-  }, [route.groupID]);
-
-  useEffect(() => {
-    decrypted = atob(routeID.toString());
+    decrypted = atob(invoiceID.toString());
     if (decrypted != 0) {
       trackPromise(
         getGroupDetails(decrypted)
@@ -133,72 +96,50 @@ export default function DivisionAddEdit(props) {
     }
   }, []);
 
-  useEffect(() => {
-    trackPromise(
-      getfactoriesForDropDown()
-    );
-  }, []);
 
-  useEffect(() => {
-    trackPromise(
-      getProductsForDropDown()
-    );
-  }, [route.factoryID]);
+  // async function getPermissions() {
+  //   var permissions = await authService.getPermissionsByScreen(screenCode);
+  //   var isAuthorized = permissions.find(p => p.permissionCode == 'ADDEDITROUTE');
 
-  async function getPermissions() {
-    var permissions = await authService.getPermissionsByScreen(screenCode);
-    var isAuthorized = permissions.find(p => p.permissionCode == 'ADDEDITROUTE');
+  //   if (isAuthorized === undefined) {
+  //     navigate('/404');
+  //   }
 
-    if (isAuthorized === undefined) {
-      navigate('/404');
-    }
+  //   var isGroupFilterEnabled = permissions.find(p => p.permissionCode == 'GROUPDROPDOWN');
+  //   var isFactoryFilterEnabled = permissions.find(p => p.permissionCode == 'FACTORYDROPDOWN');
 
-    var isGroupFilterEnabled = permissions.find(p => p.permissionCode == 'GROUPDROPDOWN');
-    var isFactoryFilterEnabled = permissions.find(p => p.permissionCode == 'FACTORYDROPDOWN');
+  //   setPermissions({
+  //     ...permissionList,
+  //     isGroupFilterEnabled: isGroupFilterEnabled !== undefined,
+  //     isFactoryFilterEnabled: isFactoryFilterEnabled !== undefined,
+  //   });
 
-    setPermissions({
-      ...permissionList,
-      isGroupFilterEnabled: isGroupFilterEnabled !== undefined,
-      isFactoryFilterEnabled: isFactoryFilterEnabled !== undefined,
-    });
+  //   setRoute({
+  //     ...route,
+  //     groupID: parseInt(tokenService.getGroupIDFromToken()),
+  //     factoryID: parseInt(tokenService.getFactoryIDFromToken())
+  //   })
+  // }
 
-    setRoute({
-      ...route,
-      groupID: parseInt(tokenService.getGroupIDFromToken()),
-      factoryID: parseInt(tokenService.getFactoryIDFromToken())
-    })
-  }
 
-  async function getfactoriesForDropDown() {
-    const factory = await services.getfactoriesForDropDown(route.groupID);
-    setFactories(factory);
-  }
-
-  async function getProductsForDropDown() {
-    const product = await services.getProductsByFactoryID(route.factoryID);
-    setProducts(product);
-  }
+  // async function getProductsForDropDown() {
+  //   const product = await services.getProductsByFactoryID(invoiceData.factoryID);
+  //   setProducts(product);
+  // }
 
   async function getGroupDetails(routeID) {
     let response = await services.getRouteDetailsByID(routeID);
     let data = response[0];
     setTitle("Update Division");
     data.transportRate = data.transportRate.toFixed(2)
-    setRoute(data);
+    setInvoiceData(data);
     setIsUpdate(true);
-    setRouteIsActive(response[0]);
-
-  }
-
-  async function getGroupsForDropdown() {
-    const groups = await services.getGroupsForDropdown();
-    setGroups(groups);
   }
 
   async function saveRoute(values) {
     if (isUpdate == true) {
       let updateModel = {
-        routeID: atob(routeID.toString()),
+        routeID: atob(invoiceID.toString()),
         routeCode: values.routeCode,
         routeName: values.routeName,
         routeLocation: values.routeLocation,
@@ -216,10 +157,6 @@ export default function DivisionAddEdit(props) {
         navigate('/app/division/listing');
       }
       else {
-        setRoute({
-          ...route,
-          isActive: routeIsActive
-        });
         alert.error(response.message);
       }
     }
@@ -251,8 +188,8 @@ export default function DivisionAddEdit(props) {
   function handleChange1(e) {
     const target = e.target;
     const value = target.value
-    setRoute({
-      ...route,
+    setInvoiceData({
+      ...invoiceData,
       [e.target.name]: value
     });
   }
@@ -260,10 +197,47 @@ export default function DivisionAddEdit(props) {
   function handleChange2(e) {
     const target = e.target;
     const value = target.value
-    setFieldData({
-      ...FieldData,
+    setItemData({
+      ...itemData,
       [e.target.name]: value
     });
+  }
+
+  function handleClickEdit (data){
+    const dataDelete = [...ItemDataList];
+    const index = data.tableData.id;
+    var deletedValue =dataDelete.splice(index, 1)[0];
+    setSelectedRow(deletedValue);
+    setItemDataList([...dataDelete])
+    setIsUpdate(true)
+    setItemData({
+      date : data.date != null ?data.date.split('T')[0]:"",
+      description : data.description,
+      comment : data.comment,
+      settlementType : data.settlementType,
+      settlement : data.settlement,
+      paymentMethod : data.paymentMethod,
+      cashier : data.cashier
+    })
+  }
+
+  async function handleClickRemove(data) {
+    const dataDelete = [...ItemDataList];
+    const index = data.tableData.id;
+    var deletedValue =dataDelete.splice(index, 1)[0]
+    // if(dataDelete.length ==0 ){
+    //   var response = await services.deleteInvoiceItem(deletedValue.ItemID)
+    //   if (response.statusCode == "Success") {
+    //     alert.success(response.message);}
+    //   setDeleteGTN(false);
+    //   navigate('/app/GoodTransferNote/listing');
+    // }
+    // if(deletedValue.agentGTNDetailID){
+    //   var response = await services.deleteAgentGTNItem(deletedValue.agentGTNDetailID)
+    //   if (response.statusCode == "Success") {
+    //     alert.success(response.message);}
+    // }
+    setItemDataList([...dataDelete]);
   }
 
   function cardTitle(titleName) {
@@ -281,22 +255,29 @@ export default function DivisionAddEdit(props) {
     )
   }
 
-
   function AddFieldData() {
-
     let dataModel = {
-      field: FieldData.field,
-      area: FieldData.area,
-      numberOfTrees: FieldData.numberOfTrees,
-      monthlyTargetCrop: FieldData.monthlyTargetCropDiv
+      date: itemData.date,
+      description:itemData.description,
+      comment: itemData.comment,
+      settlementType: itemData.settlementType,
+      debit:itemData.settlementType == '1'? itemData.settlement:'',
+      credit:itemData.settlementType == '2'? itemData.settlement:'',
+      settlement: itemData.settlement,
+      paymentMethod:itemData.paymentMethod,
+      cashier:itemData.cashier
     }
-
-    setFieldDataList(FieldDataList => [...FieldDataList, dataModel]);
-    setFieldData({
-      field: "",
-      area: "",
-      numberOfTrees: "",
-      monthlyTargetCropDiv: ""
+    setItemDataList(ItemDataList => [...ItemDataList, dataModel]);
+    setItemData({
+      date: new Date()
+      .toISOString()
+      .slice(0, 10),
+      description:"",
+      comment: "",
+      settlementType: "1",
+      settlement:"",
+      paymentMethod:"1",
+      cashier:""
     })
   }
 
@@ -307,27 +288,32 @@ export default function DivisionAddEdit(props) {
         <Container maxWidth={false}>
           <Formik
             initialValues={{
-              groupID: route.groupID,
-              factoryID: route.factoryID,
-              routeName: route.routeName,
-              routeCode: route.routeCode,
-              routeLocation: route.routeLocation,
-              transportRate: route.transportRate,
-              targetCrop: route.targetCrop,
-              productID: route.productID,
-              isActive: route.isActive,
-
+              reservationNumber: invoiceData.reservationNumber,
+              roomNumber: invoiceData.roomNumber,
+              arrivalDate: invoiceData.arrivalDate,
+              departureDate: invoiceData.departureDate,
+              customerName: invoiceData.customerName,
+              customerEmail: invoiceData.customerEmail,
+              address: invoiceData.address,
+              city: invoiceData.city,
+              country: invoiceData.country,
             }}
             validationSchema={
               Yup.object().shape({
-                groupID: Yup.number().required('Group required').min("1", 'Group required'),
-                factoryID: Yup.number().required('Estate required').min("1", 'Estate required'),
-                routeName: Yup.string().max(255).matches(/^[a-zA-Z\d\s]+$/, 'Special Characters Not Allowed').required('RouteName required'),
-                routeCode: Yup.string().max(2, "RouteCode must be at most 2 characters").required('RouteCode required').matches(/^[0-9\b]+$/, 'Only allow numbers'),
-                routeLocation: Yup.string().max(255).matches(/^[a-zA-Z\d\s\,\.\/]+$/, 'Special Characters and Numbers Not Allowed').required('RouteLocation required'),
-                transportRate: Yup.string().required('TransportRate required').matches(/^\s*(?=.*[0-9])\d*(?:\.\d{1,2})?\s*$/, 'TransportRate Should Contain Only Numbers with 2 decimals'),
-                targetCrop: Yup.string().required('TargetCrop required').matches(/^[0-9]+([.][0-9]+)?$/, 'TargetCrop Should Contain Only Numbers'),
-                productID: Yup.number().required('Product required').min("1", 'Product required'),
+                // groupID: Yup.number().required('Group required').min("1", 'Group required'),
+                // factoryID: Yup.number().required('Estate required').min("1", 'Estate required'),
+                // routeName: Yup.string().max(255).matches(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/, 'Special Characters Not Allowed').required('RouteName required'),
+                // routeCode: Yup.string().max(2, "RouteCode must be at most 2 characters").required('RouteCode required').matches(/^[0-9\b]+$/, 'Only allow numbers'),
+                // routeLocation: Yup.string().max(255).matches(/^[a-zA-Z\d\s\,\.\/]+$/, 'Special Characters and Numbers Not Allowed').required('RouteLocation required'),
+                // transportRate: Yup.string().required('TransportRate required').matches(/^\s*(?=.*[0-9])\d*(?:\.\d{1,2})?\s*$/, 'TransportRate Should Contain Only Numbers with 2 decimals'),
+                // targetCrop: Yup.string().required('TargetCrop required').matches(/^[0-9]+([.][0-9]+)?$/, 'TargetCrop Should Contain Only Numbers'),
+                // productID: Yup.number().required('Product required').min("1", 'Product required'),
+
+                reservationNumber : Yup.string().required('Reservation Number is required'),
+                roomNumber : Yup.string().required("Room Number is required"),
+                customerName: Yup.string().required("Customer Name is required"),
+                customerEmail: Yup.string().required("Customer Email is required").matches(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/, 'Enter a valid email'),
+                address : Yup.string().required("Address is required")
               })
             }
             onSubmit={saveRoute}
@@ -349,264 +335,351 @@ export default function DivisionAddEdit(props) {
                     <CardHeader
                       title={cardTitle(title)}
                     />
-
                     <PerfectScrollbar>
                       <Divider />
                       <CardContent>
                         <Grid container spacing={3}>
-                          <Grid item md={4} xs={12}>
-                            <InputLabel shrink id="groupID">
-                              Group *
-                            </InputLabel>
-                            <TextField select
-                              error={Boolean(touched.groupID && errors.groupID)}
-                              fullWidth
-                              helperText={touched.groupID && errors.groupID}
-                              name="groupID"
-                              onBlur={handleBlur}
-                              onChange={(e) => handleChange1(e)}
-                              value={values.groupID}
-                              variant="outlined"
-                              id="groupID"
-                              InputProps={{
-                                readOnly: isUpdate || !permissionList.isGroupFilterEnabled ? true : false,
-                              }}
-                            >
-                              <MenuItem value="0">--Select Group--</MenuItem>
-                              {generateDropDownMenu(groups)}
-                            </TextField>
-                          </Grid>
-                          <Grid item md={4} xs={12}>
-                            <InputLabel shrink id="factoryID">
-                              Estate *
-                            </InputLabel>
-                            <TextField select
-                              error={Boolean(touched.factoryID && errors.factoryID)}
-                              fullWidth
-                              helperText={touched.factoryID && errors.factoryID}
-                              name="factoryID"
-                              onBlur={handleBlur}
-                              onChange={(e) => handleChange1(e)}
-                              value={route.factoryID}
-                              variant="outlined"
-                              id="factoryID"
-                              InputProps={{
-                                readOnly: isUpdate || !permissionList.isFactoryFilterEnabled ? true : false,
-                              }}
-                            >
-                              <MenuItem value="0">--Select Estate--</MenuItem>
-                              {generateDropDownMenu(factories)}
-                            </TextField>
-                          </Grid>
-                          <Grid item md={4} xs={12}>
-                            <InputLabel shrink id="productID">
-                              Product *
-                            </InputLabel>
-                            <TextField select
-                              error={Boolean(touched.productID && errors.productID)}
-                              fullWidth
-                              helperText={touched.productID && errors.productID}
-                              name="productID"
-                              onBlur={handleBlur}
-                              onChange={(e) => handleChange1(e)}
-                              value={route.productID}
-                              variant="outlined"
-                              id="productID"
-                              InputProps={{
-                                readOnly: isUpdate ? true : false,
-                              }}
-                            >
-                              <MenuItem value="0">--Select Product--</MenuItem>
-                              {generateDropDownMenu(products)}
-                            </TextField>
-                          </Grid>
-                        </Grid>
-                        <Grid container spacing={3}>
-                          <Grid item md={4} xs={12}>
-                            <InputLabel shrink id="routeCode">
-                              Division Code *
+                        <Grid item md={6} xs={12}>
+                            <InputLabel shrink id="reservationNumber">
+                              Reservation Number *
                             </InputLabel>
                             <TextField
-                              error={Boolean(touched.routeCode && errors.routeCode)}
+                              error={Boolean(touched.reservationNumber && errors.reservationNumber)}
                               fullWidth
-                              helperText={touched.routeCode && errors.routeCode}
-                              name="routeCode"
+                              helperText={touched.reservationNumber && errors.reservationNumber}
+                              name="reservationNumber"
                               onBlur={handleBlur}
                               onChange={(e) => handleChange1(e)}
-                              value={route.routeCode}
+                              value={invoiceData.reservationNumber}
                               variant="outlined"
                               disabled={isDisableButton}
-                              InputProps={{
-                                readOnly: isUpdate ? true : false,
-                              }}
+                              size="small"
                             />
                           </Grid>
-                          <Grid item md={4} xs={12}>
-                            <InputLabel shrink id="routeName">
-                              Division Name *
+                        <Grid item md={6} xs={12}>
+                            <InputLabel shrink id="roomNumber">
+                              Room Number *
                             </InputLabel>
                             <TextField
-                              error={Boolean(touched.routeName && errors.routeName)}
+                              error={Boolean(touched.roomNumber && errors.roomNumber)}
                               fullWidth
-                              helperText={touched.routeName && errors.routeName}
-                              name="routeName"
+                              helperText={touched.roomNumber && errors.roomNumber}
+                              name="roomNumber"
                               onBlur={handleBlur}
                               onChange={(e) => handleChange1(e)}
-                              value={route.routeName}
+                              value={invoiceData.roomNumber}
+                              variant="outlined"
+                              disabled={isDisableButton}
+                              size="small"
+                            />
+                          </Grid>
+                        <Grid item md={6} xs={12}>
+                        <InputLabel shrink id="arrivalDate">
+                          Arrival Date *
+                        </InputLabel>
+                        <FormControl
+                          variant="outlined"
+                          fullWidth
+                        >
+                          <TextField
+                            error={Boolean(touched.arrivalDate && errors.arrivalDate)}
+                            fullWidth
+                            helperText={touched.arrivalDate && errors.arrivalDate}
+                            name="arrivalDate"
+                            defaultValue={new Date()
+                              .toISOString()
+                              .slice(0, 10)}
+                            type="date"
+                            InputLabelProps={{ shrink: true }}
+                            value={itemData.arrivalDate}
+                            onChange={(e) => handleChange1(e)}
+                            onBlur={handleBlur}
+                            variant="outlined"
+                            size="small"
+                          />
+                        </FormControl>
+                      </Grid>
+                        <Grid item md={6} xs={12}>
+                        <InputLabel shrink id="departureDate">
+                          Departure Date *
+                        </InputLabel>
+                        <FormControl
+                          variant="outlined"
+                          fullWidth
+                        >
+                          <TextField
+                            error={Boolean(touched.departureDate && errors.departureDate)}
+                            fullWidth
+                            helperText={touched.departureDate && errors.departureDate}
+                            name="departureDate"
+                            defaultValue={new Date()
+                              .toISOString()
+                              .slice(0, 10)}
+                            type="date"
+                            InputLabelProps={{ shrink: true }}
+                            value={itemData.departureDate}
+                            onChange={(e) => handleChange1(e)}
+                            onBlur={handleBlur}
+                            variant="outlined"
+                            size="small"
+                          />
+                        </FormControl>
+                      </Grid>
+                        <Grid item md={6} xs={12}>
+                            <InputLabel shrink id="customerName">
+                              Customer Name *
+                            </InputLabel>
+                            <TextField
+                              error={Boolean(touched.customerName && errors.customerName)}
+                              fullWidth
+                              helperText={touched.customerName && errors.customerName}
+                              name="customerName"
+                              onBlur={handleBlur}
+                              onChange={(e) => handleChange1(e)}
+                              value={invoiceData.customerName}
                               variant="outlined"
                               disabled={isDisableButton}
                               inputProps={{ maxLength: 20 }}
+                              size="small"
                             />
                           </Grid>
-                          <Grid item md={4} xs={12}>
-                            <InputLabel shrink id="routeLocation">
-                              Division Location *
+                        <Grid item md={6} xs={12}>
+                            <InputLabel shrink id="customerEmail">
+                              Customer Email *
                             </InputLabel>
                             <TextField
-                              error={Boolean(touched.routeLocation && errors.routeLocation)}
+                              error={Boolean(touched.customerEmail && errors.customerEmail)}
                               fullWidth
-                              helperText={touched.routeLocation && errors.routeLocation}
-                              name="routeLocation"
+                              helperText={touched.customerEmail && errors.customerEmail}
+                              name="customerEmail"
                               onBlur={handleBlur}
                               onChange={(e) => handleChange1(e)}
-                              value={route.routeLocation}
+                              value={invoiceData.customerEmail}
                               variant="outlined"
                               disabled={isDisableButton}
-                              inputProps={{ maxLength: 30 }}
+                              inputProps={{ maxLength: 20 }}
+                              size="small"
                             />
                           </Grid>
-                        </Grid>
-                        <Grid container spacing={3}>
-                          {/* <Grid item md={4} xs={12}>
-                            <InputLabel shrink id="transportRate">
-                              Transport Rate(Rs.) *
+                        <Grid item md={6} xs={12}>
+                            <InputLabel shrink id="address">
+                              Address
                             </InputLabel>
                             <TextField
-                              error={Boolean(touched.transportRate && errors.transportRate)}
+                              error={Boolean(touched.address && errors.address)}
                               fullWidth
-                              helperText={touched.transportRate && errors.transportRate}
-                              name="transportRate"
+                              helperText={touched.address && errors.address}
+                              name="address"
                               onBlur={handleBlur}
                               onChange={(e) => handleChange1(e)}
-                              value={route.transportRate}
+                              value={invoiceData.address}
                               variant="outlined"
                               disabled={isDisableButton}
+                              inputProps={{ maxLength: 20 }}
+                              size="small"
                             />
-                          </Grid> */}
-                          <Grid item md={4} xs={12}>
-                            <InputLabel shrink id="targetCrop">
-                              Monthly Target Crop(KG) *
+                          </Grid>
+                        <Grid item md={6} xs={12}>
+                            <InputLabel shrink id="city">
+                              City
                             </InputLabel>
                             <TextField
-                              error={Boolean(touched.targetCrop && errors.targetCrop)}
+                              error={Boolean(touched.city && errors.city)}
                               fullWidth
-                              helperText={touched.targetCrop && errors.targetCrop}
-                              name="targetCrop"
+                              helperText={touched.city && errors.city}
+                              name="city"
                               onBlur={handleBlur}
                               onChange={(e) => handleChange1(e)}
-                              value={route.targetCrop}
+                              value={invoiceData.city}
                               variant="outlined"
                               disabled={isDisableButton}
+                              inputProps={{ maxLength: 20 }}
+                              size="small"
                             />
                           </Grid>
-                        </Grid>
-
-                        <Grid container spacing={3}>
-                          <Grid item md={4} xs={12}>
-                            <InputLabel shrink id="isActive">
-                              Active
+                        <Grid item md={6} xs={12}>
+                            <InputLabel shrink id="country">
+                              Country
                             </InputLabel>
-                            <Switch
-                              checked={values.isActive}
-                              onChange={handleChange}
-                              name="isActive"
+                            <TextField
+                              error={Boolean(touched.country && errors.country)}
+                              fullWidth
+                              helperText={touched.country && errors.country}
+                              name="country"
+                              onBlur={handleBlur}
+                              onChange={(e) => handleChange1(e)}
+                              value={invoiceData.country}
+                              variant="outlined"
                               disabled={isDisableButton}
+                              inputProps={{ maxLength: 20 }}
+                              size="small"
                             />
                           </Grid>
                         </Grid>
-
-
-
-                        <Grid container spacing={3}>
-                          <Grid item md={3} xs={12}>
-                            <InputLabel shrink id="field">
-                              Field
+                      </CardContent> 
+                    <Divider/>
+                      <CardContent>
+                      <Box style={{marginBottom:20}}>
+                      <Typography color={"textPrimary"} variant="h5">Add Items</Typography>
+                      </Box>
+                        <Grid container spacing={3} style={{marginBottom:10}}>
+                        <Grid item md={6} xs={12}>
+                        <InputLabel shrink id="date">
+                          Date *
+                        </InputLabel>
+                        <FormControl
+                          variant="outlined"
+                          fullWidth
+                        >
+                          <TextField
+                            error={Boolean(touched.date && errors.date)}
+                            fullWidth
+                            helperText={touched.date && errors.date}
+                            name="date"
+                            defaultValue={new Date()
+                              .toISOString()
+                              .slice(0, 10)}
+                            type="date"
+                            InputLabelProps={{ shrink: true }}
+                            value={itemData.date}
+                            onChange={(e) => handleChange2(e)}
+                            onBlur={handleBlur}
+                            variant="outlined"
+                            size="small"
+                          />
+                        </FormControl>
+                      </Grid>
+                          <Grid item md={6} xs={12}>
+                            <InputLabel shrink id="description">
+                              Description *
                             </InputLabel>
                             <TextField
                               fullWidth
-                              name="field"
+                              name="description"
                               onBlur={handleBlur}
                               onChange={(e) => handleChange2(e)}
-                              value={FieldData.field}
+                              size="small"
+                              value={itemData.description}
                               variant="outlined"
                             />
                           </Grid>
-
-                          <Grid item md={3} xs={12}>
-                            <InputLabel shrink id="area">
-                              Area (hectare / acre)
+                          <Grid item md={6} xs={12}>
+                            <InputLabel shrink id="comment">
+                              Comment
                             </InputLabel>
                             <TextField
                               fullWidth
-                              name="area"
+                              name="comment"
                               onBlur={handleBlur}
                               onChange={(e) => handleChange2(e)}
-                              value={FieldData.area}
+                              size="small"
+                              value={itemData.comment}
                               variant="outlined"
                             />
                           </Grid>
-
-                          <Grid item md={3} xs={12}>
-                            <InputLabel shrink id="numberOfTrees">
-                              Number of Trees
+                          <Grid item md={6} xs={12}  container alignItems="center">
+                          <Grid item xs={3}>
+                            <InputLabel shrink id="settlementType">
+                              Type *
                             </InputLabel>
-                            <TextField
+                            <TextField select
+                              // error={Boolean(touched.identityTypeID && errors.identityTypeID)}
+                              // helperText={touched.identityTypeID && errors.identityTypeID}
                               fullWidth
-                              name="numberOfTrees"
+                              size='small'
                               onBlur={handleBlur}
-                              onChange={(e) => handleChange2(e)}
-                              value={FieldData.numberOfTrees}
+                              id="settlementType"
+                              name="settlementType"
+                              value={itemData.settlementType}
                               variant="outlined"
-                            />
+                              onChange={(e) => handleChange2(e)}
+                            >
+                              <MenuItem value="1">Debit</MenuItem>
+                              <MenuItem value="2">Credit</MenuItem>
+                            </TextField>
                           </Grid>
-
-                          <Grid item md={3} xs={12}>
-                            <InputLabel shrink id="monthlyTargetCropDiv">
-                              Target Crop(KG) *
+                          <Grid item xs={9}>
+                            <InputLabel shrink id="settlement">
+                              Amount *
                             </InputLabel>
                             <TextField
+                              error={Boolean(touched.settlement && errors.settlement)}
                               fullWidth
-                              name="monthlyTargetCropDiv"
+                              helperText={touched.settlement && errors.settlement}
+                              size='small'
+                              name="settlement"
+                              id="settlement"
                               onBlur={handleBlur}
                               onChange={(e) => handleChange2(e)}
-                              value={FieldData.monthlyTargetCropDiv}
+                              value={itemData.settlement}
                               variant="outlined"
                             />
                           </Grid>
                         </Grid>
-
-                        <Box display="flex" justifyContent="flex-end" p={2}>
+                        <Grid item md={6} xs={12}>
+                            <InputLabel shrink id="paymentMethod">
+                              Payment Method *
+                            </InputLabel>
+                            <TextField select
+                              error={Boolean(touched.paymentMethod && errors.paymentMethod)}
+                              fullWidth
+                              size="small"
+                              helperText={touched.paymentMethod && errors.paymentMethod}
+                              name="paymentMethod"
+                              onBlur={handleBlur}
+                              onChange={(e) => handleChange2(e)}
+                              value={itemData.paymentMethod}
+                              variant="outlined"
+                              id="paymentMethod"
+                              disabled={itemData.settlementType ==='2'}
+                            >
+                              <MenuItem value="0">--Select Payment Method--</MenuItem>
+                              <MenuItem value="1">Cash</MenuItem>
+                              <MenuItem value="2">Card</MenuItem>
+                            </TextField>
+                          </Grid> 
+                        <Grid item md={6} xs={12}>
+                            <InputLabel shrink id="cashier">
+                              Cashier *
+                            </InputLabel>
+                            <TextField select
+                              error={Boolean(touched.cashier && errors.cashier)}
+                              fullWidth
+                              size="small"
+                              helperText={touched.cashier && errors.cashier}
+                              name="cashier"
+                              onBlur={handleBlur}
+                              onChange={(e) => handleChange1(e)}
+                              value={itemData.cashier}
+                              variant="outlined"
+                              id="cashier"
+                            >
+                              <MenuItem value="0">--Select Cashier--</MenuItem>
+                              {generateDropDownMenu()}
+                            </TextField>
+                          </Grid> 
+                        </Grid>
+                        <Box display="flex" justifyContent="flex-end" style={{paddingBottom:10}} >
                           <Button
                             color="primary"
                             variant="contained"
                             onClick={() => AddFieldData()}
+                            style={{color:'#FFFFFF', backgroundColor:"#489EE7"}}
                           >
                             Add
                           </Button>
                         </Box>
-
-
-                        <Box minWidth={1000} hidden={FieldDataList.length === 0}>
+                        <Box minWidth={1000} >
                           <MaterialTable
                             title="Multiple Actions Preview"
                             columns={[
-                              { title: 'Field', field: 'field' },
-                              { title: 'Area', field: 'area' },
-                              { title: 'Number of Trees', field: 'numberOfTrees' },
-                              { title: 'Target Crop', field: 'monthlyTargetCrop' }
-
+                              { title: 'Date', field: 'date' },
+                              { title: 'Description', field: 'description' },
+                              { title: 'Comment', field: 'comment' },
+                              { title: 'Debit', field:'debit'},
+                              { title: 'Credit', field: 'credit' }
                             ]}
-                            data={FieldDataList}
+                            data={ItemDataList}
                             options={{
                               exportButton: false,
                               showTitle: false,
@@ -619,7 +692,12 @@ export default function DivisionAddEdit(props) {
                               {
                                 icon: 'delete',
                                 tooltip: 'Remove',
-                                // onClick: (event, routeData) => handleClickEdit(routeData.routeID)
+                                onClick: (event, rowData) => handleClickRemove(rowData)
+                              },
+                              {
+                                icon: 'edit',
+                                tooltip: 'Edit',
+                                onClick: (event, rowData) => handleClickEdit(rowData)
                               }
                             ]}
                           />
@@ -627,12 +705,37 @@ export default function DivisionAddEdit(props) {
                       </CardContent>
                       <Box display="flex" justifyContent="flex-end" p={2}>
                         <Button
-                          color="primary"
+                          style={{color:'#FFFFFF', backgroundColor:"#489EE7"}}
                           disabled={isSubmitting || isDisableButton}
                           type="submit"
                           variant="contained"
                         >
                           {isUpdate == true ? "Update" : "Save"}
+                        </Button>
+                      </Box>
+                      <Box display="flex" justifyContent="flex-start" p={2}>
+                        <Button
+                          style={{color:'#FFFFFF', backgroundColor:"#489EE7"}}
+                          variant="contained"
+                          // onClick={handleCompleteInvoice}
+                        >
+                          Complete Invoice
+                        </Button>
+                        &nbsp;
+                        <Button
+                          style={{color:'#FFFFFF', backgroundColor:"#F10909"}}
+                          variant="contained"
+                          // onClick={handlePdfGenerate}
+                        >
+                          PDF
+                        </Button>
+                        &nbsp;
+                        <Button
+                          style={{color:'#FFFFFF', backgroundColor:"#56E58F"}}
+                          variant="contained"
+                          // onClick={handleEmailSend}
+                        >
+                          Email
                         </Button>
                       </Box>
                     </PerfectScrollbar>
