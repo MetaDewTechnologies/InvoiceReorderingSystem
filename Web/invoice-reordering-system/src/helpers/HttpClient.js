@@ -103,8 +103,6 @@ export const CommonPost = (url, queryString, body) => {
 export const CommonPostAxios = async (url, queryString, body) => {
     const encryptedResult = AESEncryption(JSON.stringify(body));
     let originURL;
-
-
     const options = {
         headers: {
             "Content-type": "application/json; charset=utf-8",
@@ -118,14 +116,12 @@ export const CommonPostAxios = async (url, queryString, body) => {
     } else {
         originURL = serviceUrl + url;
     }
-
     return await axios.post(originURL, body, options).then(response => {
-        console.log("res", response);
         if (response.statusText === 'Token Time Exceed') {
             window.logout.logout();
         } else {
             if (response.status >= 200 && response.status < 300) {
-                return (JSON.parse(AESDecryption(response.data)));
+                return (response.data);
             } else {
                 return response.statusText;
             }

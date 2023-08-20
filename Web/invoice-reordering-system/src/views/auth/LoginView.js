@@ -21,12 +21,10 @@ import { LoadingComponent } from '../../utils/newLoader';
 const useStyles = makeStyles((theme) => ({
   root: {
     backgroundColor: theme.palette.background.default,
-    paddingBottom: theme.spacing(10),
     paddingTop: theme.spacing(5),
     marginTop:theme.spacing(10),
-    marginBottom:theme.spacing(10),
-    marginLeft: theme.spacing(35),
-    marginRight:theme.spacing(35),
+    marginLeft:"30%",
+    marginRight:"30%",
     height:'auto'
   }
 }));
@@ -44,14 +42,13 @@ const LoginView = () => {
   const [messageModel, setmessageModel] = useState([]);
 
   async function login(values) {
-    // let result = await services.login(values);
-    // if (result.statusCode == "Error") {
-    //   setIsHidden(true);
-    //   setmessageModel(result.message);
-    //   return;
-    // }
-    // sessionStorage.setItem('token', result.data);
-    sessionStorage.setItem('token','sample-token123')
+    let result = await services.login(values);
+    if (!result) {
+      setIsHidden(true);
+      setmessageModel("Username or Password is wrong");
+      return;
+    }
+    sessionStorage.setItem('token', result.data);
     navigate('app/manageInvoices/listing');
   }
 
@@ -60,7 +57,6 @@ const LoginView = () => {
       className={classes.root}
       title="Login"
       display="flex"
-      style={{marginLeft:"30%", marginRight:"30%"}}
     >
       <LoadingComponent/>
       <Box
@@ -68,6 +64,7 @@ const LoginView = () => {
         flexDirection="column"
         height="100%"
         justifyContent="center"
+        style={{paddingBottom:20}}
       >
         <Container maxWidth="sm">
           <Formik
@@ -142,8 +139,10 @@ const LoginView = () => {
                     LOGIN
                   </Button>
                 </Box>
-                <Box style={{marginTop:15}}>
+                <Box style={{display:'flex', marginTop:30, justifyContent:'flex-end'}}>
                   <Typography color={"textSecondary"}>META DEW TECHNOLOGIES</Typography>
+                </Box>
+                <Box style={{display:'flex',justifyContent:'flex-end'}}>
                   <Typography color={"textSecondary"}>Customer Support:071 733 6065</Typography>
                 </Box>
               </form>

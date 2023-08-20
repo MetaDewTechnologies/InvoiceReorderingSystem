@@ -20,7 +20,7 @@ import {
 import Page from '../../../components/Page';
 import services from '../Services';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Formik, validateYupSchema } from 'formik';
+import { Formik, validateYupSchema ,Form} from 'formik';
 import * as Yup from "yup";
 import PageHeader from '../../Common/PageHeader';
 import { useAlert } from "react-alert";
@@ -91,7 +91,7 @@ export default function InvoiceAddEdit(props) {
     decrypted = atob(invoiceID.toString());
     if (decrypted != 0) {
       trackPromise(
-        getGroupDetails(decrypted)
+        getInvoiceDetails(decrypted)
       )
     }
   }, []);
@@ -127,17 +127,17 @@ export default function InvoiceAddEdit(props) {
   //   setProducts(product);
   // }
 
-  async function getGroupDetails(routeID) {
-    let response = await services.getRouteDetailsByID(routeID);
-    let data = response[0];
-    setTitle("Update Division");
-    data.transportRate = data.transportRate.toFixed(2)
-    setInvoiceData(data);
+  async function getInvoiceDetails(invoiceID) {
+    // let response = await services.getRouteDetailsByID(routeID);
+    // let data = response[0];
+    // setTitle("Update Invoice");
+    // data.transportRate = data.transportRate.toFixed(2)
+    // setInvoiceData(data);
     setIsUpdate(true);
   }
 
   async function saveRoute(values) {
-    if (isUpdate == true) {
+    if (isUpdate === true) {
       let updateModel = {
         routeID: atob(invoiceID.toString()),
         routeCode: values.routeCode,
@@ -151,7 +151,7 @@ export default function InvoiceAddEdit(props) {
         groupID: values.groupID
       }
       let response = await services.updateRoute(updateModel);
-      if (response.statusCode == "Success") {
+      if (response.statusCode === "Success") {
         alert.success(response.message);
         setIsDisableButton(true);
         navigate('/app/division/listing');
@@ -164,7 +164,7 @@ export default function InvoiceAddEdit(props) {
     else {
       let response = await services.saveRoute(values);
 
-      if (response.statusCode == "Success") {
+      if (response.statusCode === "Success") {
         alert.success(response.message);
         setIsDisableButton(true);
         navigate('/app/division/listing');
@@ -261,8 +261,8 @@ export default function InvoiceAddEdit(props) {
       description:itemData.description,
       comment: itemData.comment,
       settlementType: itemData.settlementType,
-      debit:itemData.settlementType == '1'? itemData.settlement:'',
-      credit:itemData.settlementType == '2'? itemData.settlement:'',
+      debit:itemData.settlementType === '1'? itemData.settlement:'',
+      credit:itemData.settlementType === '2'? itemData.settlement:'',
       settlement: itemData.settlement,
       paymentMethod:itemData.paymentMethod,
       cashier:itemData.cashier
@@ -300,15 +300,6 @@ export default function InvoiceAddEdit(props) {
             }}
             validationSchema={
               Yup.object().shape({
-                // groupID: Yup.number().required('Group required').min("1", 'Group required'),
-                // factoryID: Yup.number().required('Estate required').min("1", 'Estate required'),
-                // routeName: Yup.string().max(255).matches(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/, 'Special Characters Not Allowed').required('RouteName required'),
-                // routeCode: Yup.string().max(2, "RouteCode must be at most 2 characters").required('RouteCode required').matches(/^[0-9\b]+$/, 'Only allow numbers'),
-                // routeLocation: Yup.string().max(255).matches(/^[a-zA-Z\d\s\,\.\/]+$/, 'Special Characters and Numbers Not Allowed').required('RouteLocation required'),
-                // transportRate: Yup.string().required('TransportRate required').matches(/^\s*(?=.*[0-9])\d*(?:\.\d{1,2})?\s*$/, 'TransportRate Should Contain Only Numbers with 2 decimals'),
-                // targetCrop: Yup.string().required('TargetCrop required').matches(/^[0-9]+([.][0-9]+)?$/, 'TargetCrop Should Contain Only Numbers'),
-                // productID: Yup.number().required('Product required').min("1", 'Product required'),
-
                 reservationNumber : Yup.string().required('Reservation Number is required'),
                 roomNumber : Yup.string().required("Room Number is required"),
                 customerName: Yup.string().required("Customer Name is required"),
@@ -518,6 +509,34 @@ export default function InvoiceAddEdit(props) {
                         </Grid>
                       </CardContent> 
                     <Divider/>
+                    <Formik
+                      initialValues={{
+                          date: itemData.date,
+                          description : itemData.description,
+                          comment : itemData.comment,
+                          settlementType : itemData.settlementType,
+                          settlement: itemData.settlement,
+                          paymentMethod: itemData.paymentMethod,
+                          cashier : itemData.cashier
+                      }}
+                      validationSchema={
+                          Yup.object().shape({
+                              description : Yup.string().required("Description is required"),
+                              settlement:Yup.string().required("Amount is required").matches(/^[0-9]*(\.[0-9]{0,2})?$/, 'Only allow numbers with atmost two decimal places'),
+                              cashier: Yup.number().required("Cashier is required").min("1",'Cashier is required'),
+                              paymentMethod:itemData.settlementType ==="1"? Yup.number().required("Payment method is required").min("1",'Payment method is required'):null,
+                          })
+                      }
+                      enableReinitialize
+                      onSubmit={AddFieldData}
+                  >
+                      {({
+                          errors,
+                          handleBlur,
+                          touched,
+                          values,
+                      }) => (
+                      <Form>
                       <CardContent>
                       <Box style={{marginBottom:20}}>
                       <Typography color={"textPrimary"} variant="h5">Add Items</Typography>
@@ -554,6 +573,8 @@ export default function InvoiceAddEdit(props) {
                               Description *
                             </InputLabel>
                             <TextField
+                              error={Boolean(touched.description && errors.description)}
+                              helperText={touched.description && errors.description}
                               fullWidth
                               name="description"
                               onBlur={handleBlur}
@@ -580,7 +601,7 @@ export default function InvoiceAddEdit(props) {
                           <Grid item md={6} xs={12}  container alignItems="center">
                           <Grid item xs={3}>
                             <InputLabel shrink id="settlementType">
-                              Type *
+                              Type 
                             </InputLabel>
                             <TextField select
                               // error={Boolean(touched.identityTypeID && errors.identityTypeID)}
@@ -661,14 +682,16 @@ export default function InvoiceAddEdit(props) {
                         </Grid>
                         <Box display="flex" justifyContent="flex-end" style={{paddingBottom:10}} >
                           <Button
-                            color="primary"
                             variant="contained"
-                            onClick={() => AddFieldData()}
+                            type="submit"
                             style={{color:'#FFFFFF', backgroundColor:"#489EE7"}}
                           >
                             Add
                           </Button>
                         </Box>
+                      </CardContent>
+                      </Form>)}
+                      </Formik>
                         <Box minWidth={1000} >
                           <MaterialTable
                             title="Multiple Actions Preview"
@@ -702,7 +725,6 @@ export default function InvoiceAddEdit(props) {
                             ]}
                           />
                         </Box>
-                      </CardContent>
                       <Box display="flex" justifyContent="flex-end" p={2}>
                         <Button
                           style={{color:'#FFFFFF', backgroundColor:"#489EE7"}}
@@ -713,6 +735,7 @@ export default function InvoiceAddEdit(props) {
                           {isUpdate == true ? "Update" : "Save"}
                         </Button>
                       </Box>
+                      {isUpdate == true? (
                       <Box display="flex" justifyContent="flex-start" p={2}>
                         <Button
                           style={{color:'#FFFFFF', backgroundColor:"#489EE7"}}
@@ -737,7 +760,7 @@ export default function InvoiceAddEdit(props) {
                         >
                           Email
                         </Button>
-                      </Box>
+                      </Box>):null}
                     </PerfectScrollbar>
                   </Card>
                 </Box>

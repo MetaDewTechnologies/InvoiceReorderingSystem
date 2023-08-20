@@ -43,7 +43,6 @@ public class AuthenticationService {
                 new UsernamePasswordAuthenticationToken(
                         request.getUsername(),
                         request.getPassword()
-
                 )
         );
         var user = repository.findByUsername(request.getUsername())
