@@ -3,6 +3,7 @@ import { Navigate } from 'react-router-dom';
 import LoginView from './views/auth/LoginView';
 import ManageInvoiceListing from './views/ManageInvoice/Pages/Listing';
 import DashboardLayout from './layouts/DashboardLayout'
+import InvoiceAddEdit from './views/ManageInvoice/Pages/AddEdit';
 
 const routes = isLoggedIn => [
     {
@@ -14,7 +15,8 @@ const routes = isLoggedIn => [
             {
               path: 'manageInvoices',
               children : [
-                {path:'listing', element: <ManageInvoiceListing />}
+                {path:'listing', element: <ManageInvoiceListing />},
+                {path:'addEdit/:invoiceID', element: <InvoiceAddEdit />}
               ]
             }
         ]
