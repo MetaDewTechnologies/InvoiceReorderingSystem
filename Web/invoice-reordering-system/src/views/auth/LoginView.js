@@ -43,12 +43,13 @@ const LoginView = () => {
 
   async function login(values) {
     let result = await services.login(values);
-    if (!result) {
+    console.log("response", result);
+    if (result.statusCode==='400') {
       setIsHidden(true);
       setmessageModel("Username or Password is wrong");
       return;
     }
-    sessionStorage.setItem('token', result.data);
+    sessionStorage.setItem('token', result.authenticationResponse);
     navigate('app/manageInvoices/listing');
   }
 
