@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Fragment } from 'react';
+import React, { useState, useEffect, Fragment,useRef } from 'react';
 import PerfectScrollbar from 'react-perfect-scrollbar';
 import {
   Box,
@@ -29,6 +29,8 @@ import { trackPromise } from 'react-promise-tracker';
 // import authService from '../../../utils/permissionAuth';
 // import tokenService from '../../../utils/tokenDecoder';
 import MaterialTable from "material-table";
+import ReactToPrint from 'react-to-print';
+import CreatePDF from './CreatePDF';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -44,6 +46,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function InvoiceAddEdit(props) {
+  const componentRef = useRef();
   const [title, setTitle] = useState("Inprogress Invoices")
   const [isUpdate, setIsUpdate] = useState(false);
   const classes = useStyles();
@@ -745,13 +748,23 @@ export default function InvoiceAddEdit(props) {
                           Complete Invoice
                         </Button>
                         &nbsp;
-                        <Button
-                          style={{color:'#FFFFFF', backgroundColor:"#F10909"}}
-                          variant="contained"
-                          // onClick={handlePdfGenerate}
-                        >
-                          PDF
-                        </Button>
+                        <ReactToPrint
+                          documentTitle={"Kiha Beach"}
+                          trigger={() => <Button
+                            style={{color:'#FFFFFF', backgroundColor:"#FF0000"}}
+                            color="primary"
+                            id="btnRecord"
+                            variant="contained"
+                          >
+                            PDF
+                          </Button>}
+                          content={() => componentRef.current}
+                        />
+                        <div hidden={true}>
+                          <CreatePDF ref={componentRef}
+                            // companyData={sales} searchData={selectedSearchValues} total={totalNet.total}
+                          />
+                        </div>
                         &nbsp;
                         <Button
                           style={{color:'#FFFFFF', backgroundColor:"#56E58F"}}
