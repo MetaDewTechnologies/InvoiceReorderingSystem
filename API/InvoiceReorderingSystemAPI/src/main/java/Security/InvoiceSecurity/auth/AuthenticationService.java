@@ -26,6 +26,14 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
 
     public AuthenticationResponse register(RegisterRequest request) {
+
+        if (repository.existsByUsername(request.getUsername())) {
+            // Handle the case where the user already exists
+            return AuthenticationResponse.builder()
+                    .token("Username already exists")
+                    .build();
+        }
+
         var user = User.builder()
                 .username(request.getUsername())
                 .password(passwordEncoder.encode(request.getPassword()))
