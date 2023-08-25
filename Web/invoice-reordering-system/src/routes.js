@@ -4,6 +4,7 @@ import LoginView from './views/auth/LoginView';
 import ManageInvoiceListing from './views/ManageInvoice/Pages/Listing';
 import DashboardLayout from './layouts/DashboardLayout'
 import InvoiceAddEdit from './views/ManageInvoice/Pages/AddEdit';
+import ReorderInvoice from './views/ReorderInvoice/Pages/Listing'
 
 const routes = isLoggedIn => [
     {
@@ -17,6 +18,12 @@ const routes = isLoggedIn => [
               children : [
                 {path:'listing', element: <ManageInvoiceListing />},
                 {path:'addEdit/:invoiceID', element: <InvoiceAddEdit />}
+              ]
+            },
+            {
+              path: 'reorderInvoices',
+              children : [
+                {path:'listing', element: <ReorderInvoice />},
               ]
             }
         ]

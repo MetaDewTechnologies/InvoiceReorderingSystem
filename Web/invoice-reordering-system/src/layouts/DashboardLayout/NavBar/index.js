@@ -67,7 +67,7 @@ const NavBar = ({ onMobileClose, openMobile }) => {
       screenID:1
     },
     {
-      routePath:"/",
+      routePath:"/app/reorderInvoices/listing",
       screenName:"Reorder Invoices",
       screenID:2
     },

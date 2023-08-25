@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Fragment } from 'react';
+import React, { useState, useEffect, Fragment,useRef } from 'react';
 import PerfectScrollbar from 'react-perfect-scrollbar';
 import {
   Box,
@@ -29,6 +29,8 @@ import { trackPromise } from 'react-promise-tracker';
 // import authService from '../../../utils/permissionAuth';
 // import tokenService from '../../../utils/tokenDecoder';
 import MaterialTable from "material-table";
+import ReactToPrint from 'react-to-print';
+import CreatePDF from './CreatePDF';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -44,6 +46,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function InvoiceAddEdit(props) {
+  const componentRef = useRef();
   const [title, setTitle] = useState("Inprogress Invoices")
   const [isUpdate, setIsUpdate] = useState(false);
   const classes = useStyles();
@@ -64,8 +67,8 @@ export default function InvoiceAddEdit(props) {
     .slice(0, 10),
     description:"",
     comment: "",
-    settlementType: "1",
-    settlement:"",
+    paymentType: "1",
+    amount:"",
     paymentMethod:"0",
     cashier:""
   })
@@ -136,7 +139,7 @@ export default function InvoiceAddEdit(props) {
     setIsUpdate(true);
   }
 
-  async function saveRoute(values) {
+  async function saveInvoice(values) {
     if (isUpdate === true) {
       let updateModel = {
         routeID: atob(invoiceID.toString()),
@@ -160,14 +163,30 @@ export default function InvoiceAddEdit(props) {
         alert.error(response.message);
       }
     }
-
     else {
-      let response = await services.saveRoute(values);
+      let saveModel = {
+        invoiceDetail:{
+          reservationNum:values.reservationNumber,
+          roomNum : values.roomNumber,
+          arrivalDate: values.arrivalDate,
+          departureDate : values.departureDate,
+          customerName : values.customerName,
+          customerEmail : values.customerEmail,
+          address : values.address,
+          city : values.city,
+          country : values.country,
+          isInvoiceGenerated : false,
+          isInvoiceCompleted : false,
+          isReordered : false
+        },
+        invoiceItems:ItemDataList
+      }
+      let response = await services.saveInvoice(saveModel);
 
-      if (response.statusCode === "Success") {
+      if (response.statusCode === "SUCCESS") {
         alert.success(response.message);
         setIsDisableButton(true);
-        navigate('/app/division/listing');
+        // navigate('/app/division/listing');
       }
       else {
         alert.error(response.message);
@@ -214,8 +233,8 @@ export default function InvoiceAddEdit(props) {
       date : data.date != null ?data.date.split('T')[0]:"",
       description : data.description,
       comment : data.comment,
-      settlementType : data.settlementType,
-      settlement : data.settlement,
+      paymentType : data.settlementType,
+      amount : data.settlement,
       paymentMethod : data.paymentMethod,
       cashier : data.cashier
     })
@@ -255,17 +274,18 @@ export default function InvoiceAddEdit(props) {
     )
   }
 
-  function AddFieldData() {
+  function addInvoiceData() {
     let dataModel = {
       date: itemData.date,
       description:itemData.description,
       comment: itemData.comment,
-      settlementType: itemData.settlementType,
-      debit:itemData.settlementType === '1'? itemData.settlement:'',
-      credit:itemData.settlementType === '2'? itemData.settlement:'',
-      settlement: itemData.settlement,
+      paymentType: itemData.paymentType,
+      debit:itemData.paymentType === '1'? itemData.amount:'',
+      credit:itemData.paymentType === '2'? itemData.amount:'',
+      amount: itemData.amount,
       paymentMethod:itemData.paymentMethod,
-      cashier:itemData.cashier
+      cashier:itemData.cashier,
+      isActive: true
     }
     setItemDataList(ItemDataList => [...ItemDataList, dataModel]);
     setItemData({
@@ -274,8 +294,8 @@ export default function InvoiceAddEdit(props) {
       .slice(0, 10),
       description:"",
       comment: "",
-      settlementType: "1",
-      settlement:"",
+      paymentType: "1",
+      amount:"",
       paymentMethod:"1",
       cashier:""
     })
@@ -307,7 +327,7 @@ export default function InvoiceAddEdit(props) {
                 address : Yup.string().required("Address is required")
               })
             }
-            onSubmit={saveRoute}
+            onSubmit={saveInvoice}
             enableReinitialize
           >
             {({
@@ -448,7 +468,6 @@ export default function InvoiceAddEdit(props) {
                               value={invoiceData.customerEmail}
                               variant="outlined"
                               disabled={isDisableButton}
-                              inputProps={{ maxLength: 20 }}
                               size="small"
                             />
                           </Grid>
@@ -514,29 +533,30 @@ export default function InvoiceAddEdit(props) {
                           date: itemData.date,
                           description : itemData.description,
                           comment : itemData.comment,
-                          settlementType : itemData.settlementType,
-                          settlement: itemData.settlement,
+                          paymentType : itemData.paymentType,
+                          amount: itemData.amount,
                           paymentMethod: itemData.paymentMethod,
                           cashier : itemData.cashier
                       }}
                       validationSchema={
                           Yup.object().shape({
                               description : Yup.string().required("Description is required"),
-                              settlement:Yup.string().required("Amount is required").matches(/^[0-9]*(\.[0-9]{0,2})?$/, 'Only allow numbers with atmost two decimal places'),
-                              cashier: Yup.number().required("Cashier is required").min("1",'Cashier is required'),
-                              paymentMethod:itemData.settlementType ==="1"? Yup.number().required("Payment method is required").min("1",'Payment method is required'):null,
+                              amount:Yup.string().required("Amount is required").matches(/^[0-9]*(\.[0-9]{0,2})?$/, 'Only allow numbers with atmost two decimal places'),
+                              cashier: Yup.string().required("Cashier is required"),
+                              paymentMethod:itemData.paymentType ==="1"? Yup.number().required("Payment method is required").min("1",'Payment method is required'):null,
                           })
                       }
                       enableReinitialize
-                      onSubmit={AddFieldData}
+                      onSubmit={addInvoiceData}
                   >
                       {({
                           errors,
                           handleBlur,
                           touched,
                           values,
+                          handleSubmit:AddFieldData
                       }) => (
-                      <Form>
+                      <Form >
                       <CardContent>
                       <Box style={{marginBottom:20}}>
                       <Typography color={"textPrimary"} variant="h5">Add Items</Typography>
@@ -600,7 +620,7 @@ export default function InvoiceAddEdit(props) {
                           </Grid>
                           <Grid item md={6} xs={12}  container alignItems="center">
                           <Grid item xs={3}>
-                            <InputLabel shrink id="settlementType">
+                            <InputLabel shrink id="paymentType">
                               Type 
                             </InputLabel>
                             <TextField select
@@ -609,9 +629,9 @@ export default function InvoiceAddEdit(props) {
                               fullWidth
                               size='small'
                               onBlur={handleBlur}
-                              id="settlementType"
-                              name="settlementType"
-                              value={itemData.settlementType}
+                              id="paymentType"
+                              name="paymentType"
+                              value={itemData.paymentType}
                               variant="outlined"
                               onChange={(e) => handleChange2(e)}
                             >
@@ -620,19 +640,19 @@ export default function InvoiceAddEdit(props) {
                             </TextField>
                           </Grid>
                           <Grid item xs={9}>
-                            <InputLabel shrink id="settlement">
+                            <InputLabel shrink id="amount">
                               Amount *
                             </InputLabel>
                             <TextField
-                              error={Boolean(touched.settlement && errors.settlement)}
+                              error={Boolean(touched.amount && errors.amount)}
                               fullWidth
-                              helperText={touched.settlement && errors.settlement}
+                              helperText={touched.amount && errors.amount}
                               size='small'
-                              name="settlement"
-                              id="settlement"
+                              name="amount"
+                              id="amount"
                               onBlur={handleBlur}
                               onChange={(e) => handleChange2(e)}
-                              value={itemData.settlement}
+                              value={itemData.amount}
                               variant="outlined"
                             />
                           </Grid>
@@ -652,39 +672,36 @@ export default function InvoiceAddEdit(props) {
                               value={itemData.paymentMethod}
                               variant="outlined"
                               id="paymentMethod"
-                              disabled={itemData.settlementType ==='2'}
+                              disabled={itemData.paymentType ==='2'}
                             >
                               <MenuItem value="0">--Select Payment Method--</MenuItem>
                               <MenuItem value="1">Cash</MenuItem>
                               <MenuItem value="2">Card</MenuItem>
                             </TextField>
                           </Grid> 
-                        <Grid item md={6} xs={12}>
-                            <InputLabel shrink id="cashier">
+                          <Grid item md={6} xs={12}>
+                            <InputLabel shrink id="description">
                               Cashier *
                             </InputLabel>
-                            <TextField select
+                            <TextField
                               error={Boolean(touched.cashier && errors.cashier)}
-                              fullWidth
-                              size="small"
                               helperText={touched.cashier && errors.cashier}
+                              fullWidth
                               name="cashier"
                               onBlur={handleBlur}
-                              onChange={(e) => handleChange1(e)}
+                              onChange={(e) => handleChange2(e)}
+                              size="small"
                               value={itemData.cashier}
                               variant="outlined"
-                              id="cashier"
-                            >
-                              <MenuItem value="0">--Select Cashier--</MenuItem>
-                              {generateDropDownMenu()}
-                            </TextField>
-                          </Grid> 
+                            />
+                        </Grid>
                         </Grid>
                         <Box display="flex" justifyContent="flex-end" style={{paddingBottom:10}} >
                           <Button
                             variant="contained"
-                            type="submit"
+                            type="button"
                             style={{color:'#FFFFFF', backgroundColor:"#489EE7"}}
+                            onClick = {AddFieldData}
                           >
                             Add
                           </Button>
@@ -732,10 +749,10 @@ export default function InvoiceAddEdit(props) {
                           type="submit"
                           variant="contained"
                         >
-                          {isUpdate == true ? "Update" : "Save"}
+                          {isUpdate === true ? "Update" : "Save"}
                         </Button>
                       </Box>
-                      {isUpdate == true? (
+                      {isUpdate === true? (
                       <Box display="flex" justifyContent="flex-start" p={2}>
                         <Button
                           style={{color:'#FFFFFF', backgroundColor:"#489EE7"}}
@@ -745,13 +762,23 @@ export default function InvoiceAddEdit(props) {
                           Complete Invoice
                         </Button>
                         &nbsp;
-                        <Button
-                          style={{color:'#FFFFFF', backgroundColor:"#F10909"}}
-                          variant="contained"
-                          // onClick={handlePdfGenerate}
-                        >
-                          PDF
-                        </Button>
+                        <ReactToPrint
+                          documentTitle={"Kiha Beach"}
+                          trigger={() => <Button
+                            style={{color:'#FFFFFF', backgroundColor:"#FF0000"}}
+                            color="primary"
+                            id="btnRecord"
+                            variant="contained"
+                          >
+                            PDF
+                          </Button>}
+                          content={() => componentRef.current}
+                        />
+                        <div hidden={true}>
+                          <CreatePDF ref={componentRef}
+                            // companyData={sales} searchData={selectedSearchValues} total={totalNet.total}
+                          />
+                        </div>
                         &nbsp;
                         <Button
                           style={{color:'#FFFFFF', backgroundColor:"#56E58F"}}

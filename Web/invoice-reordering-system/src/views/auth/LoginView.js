@@ -43,12 +43,12 @@ const LoginView = () => {
 
   async function login(values) {
     let result = await services.login(values);
-    if (!result) {
+    if (result.statusCode==='400') {
       setIsHidden(true);
       setmessageModel("Username or Password is wrong");
       return;
     }
-    sessionStorage.setItem('token', result.data);
+    sessionStorage.setItem('token', result.authenticationResponse);
     navigate('app/manageInvoices/listing');
   }
 
@@ -143,7 +143,7 @@ const LoginView = () => {
                   <Typography color={"textSecondary"}>META DEW TECHNOLOGIES</Typography>
                 </Box>
                 <Box style={{display:'flex',justifyContent:'flex-end'}}>
-                  <Typography color={"textSecondary"}>Customer Support:071 733 6065</Typography>
+                  <Typography color={"textSecondary"}>Customer Support:+94 71 733 6065</Typography>
                 </Box>
               </form>
             )}
