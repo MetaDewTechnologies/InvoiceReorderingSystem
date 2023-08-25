@@ -67,38 +67,68 @@ export const CommonGetAxios = async (url, queryString) => {
     });
 };
 
-export const CommonPost = (url, queryString, body) => {
-    const encryptedResult = AESEncryption(JSON.stringify(body));
-    return new Promise((resolve, reject) => {
-        let request = new XMLHttpRequest();
-        if (queryString != null) {
-            request.open("POST", serviceUrl + url + "?" + AESEncryption(queryString));
-        } else {
-            request.open("POST", serviceUrl + url);
-        }
+// export const CommonPost = (url, queryString, body) => {
+//     const encryptedResult = AESEncryption(JSON.stringify(body));
+//     return new Promise((resolve, reject) => {
+//         let request = new XMLHttpRequest();
+//         if (queryString != null) {
+//             request.open("POST", serviceUrl + url + "?" + AESEncryption(queryString));
+//         } else {
+//             request.open("POST", serviceUrl + url);
+//         }
 
-        request.setRequestHeader("Content-type", "application/json; charset=utf-8");
-        request.setRequestHeader('Access-Control-Allow-Methods', '*');
-        request.setRequestHeader('Accept-Language', 'en-US');
-        request.onload = () => {
-            if (request.response === 'Token Time Exceed') {
-                window.logout.logout();
-            }
-            else {
-                if (request.status >= 200 && request.status < 300) {
-                    resolve(JSON.parse(AESDecryption(request.response)));
-                } else {
-                    reject(request.statusText);
-                }
-            }
-        };
-        request.onerror = () => {
-            reject(request.statusText);
-        };
-        request.send(encryptedResult);
-    });
+//         request.setRequestHeader("Content-type", "application/json; charset=utf-8");
+//         request.setRequestHeader('Access-Control-Allow-Methods', '*');
+//         request.setRequestHeader('Accept-Language', 'en-US');
+//         request.setRequestHeader('Authorization', `Bearer ${bearerToken}`);
+//         request.onload = () => {
+//             if (request.response === 'Token Time Exceed') {
+//                 window.logout.logout();
+//             }
+//             else {
+//                 if (request.status >= 200 && request.status < 300) {
+//                     resolve(JSON.parse(AESDecryption(request.response)));
+//                 } else {
+//                     reject(request.statusText);        
+//                 }
+//             }
+//         };
+//         request.onerror = () => {
+//             reject(request.statusText);
+//         };
+//         request.send(body);
+//     });
+// };
+
+
+export const CommonPost = (url, queryString, body) => {
+const bearerToken = sessionStorage.getItem('token');
+let data = JSON.stringify(body);
+let originURL;
+if (queryString != null) {
+    originURL = serviceUrl + url + "?" + AESEncryption(queryString);
+} else {
+    originURL = serviceUrl + url;
+}
+let config = {
+  method: 'post',
+  maxBodyLength: Infinity,
+  url: originURL,
+  headers: { 
+    'Content-Type': 'application/json', 
+    'Authorization': bearerToken//'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkdWQiLCJpYXQiOjE2OTI5ODA1MDcsImV4cCI6MTY5Mjk4MTk0N30.aNJdq8lRh8ciBLYmT6LTKnbtM5_3BhkKE1BJB0fmzJc'
+  },
+  data : data
 };
 
+axios.request(config)
+.then((response) => {
+  console.log(JSON.stringify(response.data));
+})
+.catch((error) => {
+  console.log(error);
+});
+}
 
 export const CommonPostAxios = async (url, queryString, body) => {
     const encryptedResult = AESEncryption(JSON.stringify(body));
