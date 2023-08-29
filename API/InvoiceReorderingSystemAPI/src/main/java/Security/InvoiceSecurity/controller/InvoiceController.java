@@ -75,6 +75,4 @@ public class InvoiceController {
 
         return new ResponseEntity<>(roomInvoices, HttpStatus.OK);
     }
-
-
 }

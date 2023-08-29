@@ -63,18 +63,13 @@ const NavBar = ({ onMobileClose, openMobile }) => {
   let screenList = [
     {
       routePath:"/app/manageInvoices/listing",
-      screenName:"Manage Invoice",
+      screenName:"Bill Registration / Update",
       screenID:1
     },
     {
       routePath:"/app/reorderInvoices/listing",
       screenName:"Reorder Invoices",
       screenID:2
-    },
-    {
-      routePath:"/",
-      screenName:"Users",
-      screenID:3
     }
   ]
 

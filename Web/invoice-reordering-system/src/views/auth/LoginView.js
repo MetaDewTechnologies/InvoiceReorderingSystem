@@ -48,7 +48,7 @@ const LoginView = () => {
       setmessageModel("Username or Password is wrong");
       return;
     }
-    sessionStorage.setItem('token', result.authenticationResponse);
+    sessionStorage.setItem('token', result.authenticationResponse.token);
     navigate('app/manageInvoices/listing');
   }
 

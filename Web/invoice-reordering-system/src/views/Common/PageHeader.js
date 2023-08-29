@@ -32,6 +32,9 @@ const PageHeader = ({ className, title, onClick, isEdit, ...rest }) => {
         display="flex"
         justifyContent="flex-end"
       >
+        <Box style={{marginRight:'5px',paddingTop:'5px'}}>
+          {rest.customLabel}
+        </Box>
         <Button
           style={{ color:'#FFFFFF', backgroundColor:"#489EE7" }} 
           variant="contained"
