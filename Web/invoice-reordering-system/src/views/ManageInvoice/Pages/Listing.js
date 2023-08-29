@@ -45,7 +45,7 @@ export default function ManageInvoiceListing(props) {
     roomNumber : 23,
     arrivalDate : '2023-02-23',
     departureDate: '2023-02-25',
-    cashier : 'Jhone',
+    payments : '240.50',
     customerName : 'Ryan'
   }]
   const classes = useStyles();
@@ -106,6 +106,7 @@ export default function ManageInvoiceListing(props) {
           <PageHeader
             onClick={handleClick}
             isEdit={true}
+            customLabel = "New Billing"
           />
         </Grid>
       </Grid>
@@ -166,7 +167,7 @@ export default function ManageInvoiceListing(props) {
                       { title: 'Room Num', field: 'roomNumber' },
                       { title: 'Arrival Date', field: 'arrivalDate' },
                       { title: 'Departure Date', field: 'departureDate' },
-                      { title: 'Cashier', field: 'cashier' },
+                      { title: 'Balance Payments', field: 'payments' },
                       { title: 'Customer Name', field: 'customerName' },
                     ]}
                     data={invoiceData}

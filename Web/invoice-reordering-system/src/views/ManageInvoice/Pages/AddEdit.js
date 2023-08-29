@@ -31,6 +31,11 @@ import { trackPromise } from 'react-promise-tracker';
 import MaterialTable from "material-table";
 import ReactToPrint from 'react-to-print';
 import CreatePDF from './CreatePDF';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -44,6 +49,7 @@ const useStyles = makeStyles((theme) => ({
   }
 
 }));
+
 
 export default function InvoiceAddEdit(props) {
   const componentRef = useRef();
@@ -59,7 +65,8 @@ export default function InvoiceAddEdit(props) {
       customerEmail:'',
       address:'',
       city:'',
-      country:''
+      country:'',
+      bookingType:'0'
   });
   const [itemData, setItemData] = useState({
     date: new Date()
@@ -75,10 +82,10 @@ export default function InvoiceAddEdit(props) {
   const [ItemDataList, setItemDataList] = useState([])
   const [isDisableButton, setIsDisableButton] = useState(false)
   const [selectedRow, setSelectedRow] = useState()
-
+  const [isCompleteBilling, setIsCompleteBilling] = useState(false)
+  const [isPrintRequested, setIsPrintRequested] = useState(false)
   const navigate = useNavigate();
   const handleClick = () => {
-
     navigate('/app/manageInvoices/listing/');
   }
 
@@ -99,6 +106,22 @@ export default function InvoiceAddEdit(props) {
     }
   }, []);
 
+  useEffect(()=>{
+    setItemData({
+      ...itemData,
+      paymentMethod:'0'
+    })
+  },[itemData.paymentType])
+  
+  const [open, setOpen] = React.useState(false);
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   // async function getPermissions() {
   //   var permissions = await authService.getPermissionsByScreen(screenCode);
@@ -179,7 +202,7 @@ export default function InvoiceAddEdit(props) {
           isInvoiceCompleted : false,
           isReordered : false
         },
-        invoiceItems:ItemDataList
+        invoiceItems:ItemDataList.length == 0? null:ItemDataList
       }
       let response = await services.saveInvoice(saveModel);
 
@@ -259,6 +282,15 @@ export default function InvoiceAddEdit(props) {
     setItemDataList([...dataDelete]);
   }
 
+  async function handleCompleteBilling(){
+    setIsCompleteBilling(true)
+  }
+
+  async function handlePrintRequest(){
+    handleClickOpen();
+    setIsPrintRequested(true)
+  }
+
   function cardTitle(titleName) {
     return (
       <Grid container spacing={1}>
@@ -317,6 +349,7 @@ export default function InvoiceAddEdit(props) {
               address: invoiceData.address,
               city: invoiceData.city,
               country: invoiceData.country,
+              bookingType: invoiceData.bookingType
             }}
             validationSchema={
               Yup.object().shape({
@@ -324,7 +357,8 @@ export default function InvoiceAddEdit(props) {
                 roomNumber : Yup.string().required("Room Number is required"),
                 customerName: Yup.string().required("Customer Name is required"),
                 customerEmail: Yup.string().required("Customer Email is required").matches(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/, 'Enter a valid email'),
-                address : Yup.string().required("Address is required")
+                address : Yup.string().required("Address is required"),
+                bookingType : Yup.string().required("Booking Type is required").min("1",'Booking Type is required')
               })
             }
             onSubmit={saveInvoice}
@@ -473,7 +507,7 @@ export default function InvoiceAddEdit(props) {
                           </Grid>
                         <Grid item md={6} xs={12}>
                             <InputLabel shrink id="address">
-                              Address
+                              Address *
                             </InputLabel>
                             <TextField
                               error={Boolean(touched.address && errors.address)}
@@ -525,6 +559,27 @@ export default function InvoiceAddEdit(props) {
                               size="small"
                             />
                           </Grid>
+                          <Grid item md={6} xs={12}>
+                            <InputLabel shrink id="bookingType">
+                              Booking Type *
+                            </InputLabel>
+                            <TextField select
+                              error={Boolean(touched.bookingType && errors.bookingType)}
+                              fullWidth
+                              size="small"
+                              helperText={touched.bookingType && errors.bookingType}
+                              name="bookingType"
+                              onBlur={handleBlur}
+                              onChange={(e) => handleChange1(e)}
+                              value={invoiceData.bookingType}
+                              variant="outlined"
+                              id="bookingType"
+                            >
+                              <MenuItem value="0">--Select Booking Type--</MenuItem>
+                              <MenuItem value="1">Online</MenuItem>
+                              <MenuItem value="2">Direct</MenuItem>
+                            </TextField>
+                          </Grid> 
                         </Grid>
                       </CardContent> 
                     <Divider/>
@@ -677,6 +732,7 @@ export default function InvoiceAddEdit(props) {
                               <MenuItem value="0">--Select Payment Method--</MenuItem>
                               <MenuItem value="1">Cash</MenuItem>
                               <MenuItem value="2">Card</MenuItem>
+                              <MenuItem value="3">Bank Transfer</MenuItem>
                             </TextField>
                           </Grid> 
                           <Grid item md={6} xs={12}>
@@ -744,8 +800,8 @@ export default function InvoiceAddEdit(props) {
                         </Box>
                       <Box display="flex" justifyContent="flex-end" p={2}>
                         <Button
-                          style={{color:'#FFFFFF', backgroundColor:"#489EE7"}}
-                          disabled={isSubmitting || isDisableButton}
+                          style={{color:!isCompleteBilling?'#FFFFFF':'', backgroundColor:!isCompleteBilling?"#489EE7":''}}
+                          disabled={isSubmitting || isDisableButton|| isCompleteBilling}
                           type="submit"
                           variant="contained"
                         >
@@ -757,15 +813,26 @@ export default function InvoiceAddEdit(props) {
                         <Button
                           style={{color:'#FFFFFF', backgroundColor:"#489EE7"}}
                           variant="contained"
-                          // onClick={handleCompleteInvoice}
+                          onClick={handleCompleteBilling}
                         >
-                          Complete Invoice
+                          Complete Billing
                         </Button>
                         &nbsp;
-                        <ReactToPrint
+                        <Button
+                          style={{color:isCompleteBilling?'#FFFFFF':'', backgroundColor:isCompleteBilling?"#489EE7":''}}
+                          variant="contained"
+                          onClick={handlePrintRequest}
+                          disabled={!isCompleteBilling}
+                        >
+                          Print Request
+                        </Button>
+                        &nbsp;
+                        {isPrintRequested === true?(
+                          <Box>
+                          <ReactToPrint
                           documentTitle={"Kiha Beach"}
                           trigger={() => <Button
-                            style={{color:'#FFFFFF', backgroundColor:"#FF0000"}}
+                            style={{color:isCompleteBilling?'#FFFFFF':'', backgroundColor:isCompleteBilling?"#FF0000":''}}
                             color="primary"
                             id="btnRecord"
                             variant="contained"
@@ -781,12 +848,14 @@ export default function InvoiceAddEdit(props) {
                         </div>
                         &nbsp;
                         <Button
-                          style={{color:'#FFFFFF', backgroundColor:"#56E58F"}}
+                          style={{color:isCompleteBilling?'#FFFFFF':'', backgroundColor:isCompleteBilling?"#56E58F":''}}
                           variant="contained"
                           // onClick={handleEmailSend}
                         >
                           Email
                         </Button>
+                          </Box>
+                        ):null}   
                       </Box>):null}
                     </PerfectScrollbar>
                   </Card>
@@ -794,6 +863,38 @@ export default function InvoiceAddEdit(props) {
               </form>
             )}
           </Formik>
+          <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
+            <DialogTitle id="form-dialog-title">Permission</DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                To complete this invoice, please enter accountant email address and password here.
+              </DialogContentText>
+              <TextField
+                autoFocus
+                margin="dense"
+                id="UserName"
+                label="Username"
+                type="email"
+                fullWidth
+              />
+              <TextField
+                autoFocus
+                margin="dense"
+                id="password"
+                label="Password"
+                type="password"
+                fullWidth
+              />
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleClose} color="primary">
+                Cancel
+              </Button>
+              <Button onClick={handleClose} color="primary">
+                Submit
+              </Button>
+            </DialogActions>
+          </Dialog>
         </Container>
       </Page>
     </Fragment>

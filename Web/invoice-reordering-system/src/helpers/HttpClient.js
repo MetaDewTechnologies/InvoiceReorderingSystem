@@ -104,6 +104,7 @@ export const CommonGetAxios = async (url, queryString) => {
 export const CommonPost = (url, queryString, body) => {
 const bearerToken = sessionStorage.getItem('token');
 let data = JSON.stringify(body);
+console.log("body", body);
 let originURL;
 if (queryString != null) {
     originURL = serviceUrl + url + "?" + AESEncryption(queryString);
@@ -116,11 +117,11 @@ let config = {
   url: originURL,
   headers: { 
     'Content-Type': 'application/json', 
-    'Authorization': bearerToken//'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkdWQiLCJpYXQiOjE2OTI5ODA1MDcsImV4cCI6MTY5Mjk4MTk0N30.aNJdq8lRh8ciBLYmT6LTKnbtM5_3BhkKE1BJB0fmzJc'
+    'Authorization': `Bearer ${bearerToken}`
   },
   data : data
 };
-
+console.log("config ",config)
 axios.request(config)
 .then((response) => {
   console.log(JSON.stringify(response.data));

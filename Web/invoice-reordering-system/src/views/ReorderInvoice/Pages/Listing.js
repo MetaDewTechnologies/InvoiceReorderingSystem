@@ -57,7 +57,25 @@ export default function ReorderInvoice(props) {
             arrivalDate : '08/15/2023',
             departureDate: '08/18/2023',
             paymentType : 'Cash',
-            status : "invoice generated"
+            status : "Invoice Generated"
+        },
+        {
+            invoiceID:'24',
+            reservationNumber:'204',
+            roomNumber: '20',
+            arrivalDate : '08/15/2023',
+            departureDate: '08/18/2023',
+            paymentType : 'Cash',
+            status : "Process executed - No invoice"
+        },
+        {
+            invoiceID:'25',
+            reservationNumber:'205',
+            roomNumber: '22',
+            arrivalDate : '08/15/2023',
+            departureDate: '08/18/2023',
+            paymentType : 'Card',
+            status : "Reorder process pending"
         },
     ]
   const classes = useStyles();
@@ -248,7 +266,7 @@ export default function ReorderInvoice(props) {
                           { title: 'Arrival Date', align: 'center', field: 'arrivalDate' },
                           { title: 'Departure Date', align: 'center', field: 'departureDate' },
                           { title: 'Payment Type', align: 'center', field: 'paymentType' },
-                          { title: 'Status', align: 'center', field: 'status' }
+                          { title: 'Status', align: 'center', field: 'status'}
                         ]}
                         data={invoices}
                         title="Invoice List"
@@ -259,7 +277,11 @@ export default function ReorderInvoice(props) {
                           addRowPosition: "first",
                           headerStyle: { textAlign: "left", height: '1%' },
                           actionsColumnIndex: -1,
-                          selection: true
+                          selection:true,
+                          selectionProps: rowData => ({
+                            disabled: rowData.status === 'Invoice Generated' || rowData.status ==='Process executed - No invoice',
+                            color: 'primary'
+                          })
                         }}
                         onSelectionChange={(e) => handleSelectionChange(e)}
                       />
