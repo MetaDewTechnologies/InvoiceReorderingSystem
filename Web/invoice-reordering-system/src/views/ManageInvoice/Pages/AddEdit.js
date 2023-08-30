@@ -59,8 +59,8 @@ export default function InvoiceAddEdit(props) {
   const [invoiceData, setInvoiceData] = useState({
       reservationNumber:'',
       roomNumber:'',
-      arrivalDate:new Date(),
-      departureDate:new Date(),
+      arrivalDate:new Date().toISOString().split('T')[0],
+      departureDate:new Date().toISOString().split('T')[0],
       customerName:'',
       customerEmail:'',
       address:'',
@@ -69,12 +69,10 @@ export default function InvoiceAddEdit(props) {
       bookingType:'0'
   });
   const [itemData, setItemData] = useState({
-    date: new Date()
-    .toISOString()
-    .slice(0, 10),
+    date: new Date().toISOString().split('T')[0],
     description:"",
     comment: "",
-    paymentType: "1",
+    paymentType: "Debit",
     amount:"",
     paymentMethod:"0",
     cashier:""
@@ -94,11 +92,11 @@ export default function InvoiceAddEdit(props) {
     isFactoryFilterEnabled: false
   });
   const alert = useAlert();
-  const { invoiceID } = useParams();
+  const { invoiceId } = useParams();
   let decrypted = 0;
 
   useEffect(() => {
-    decrypted = atob(invoiceID.toString());
+    decrypted = atob(invoiceId.toString());
     if (decrypted != 0) {
       trackPromise(
         getInvoiceDetails(decrypted)
@@ -147,15 +145,14 @@ export default function InvoiceAddEdit(props) {
   //   })
   // }
 
-
   // async function getProductsForDropDown() {
   //   const product = await services.getProductsByFactoryID(invoiceData.factoryID);
   //   setProducts(product);
   // }
 
-  async function getInvoiceDetails(invoiceID) {
-    // let response = await services.getRouteDetailsByID(routeID);
-    // let data = response[0];
+  async function getInvoiceDetails(invoiceId) {
+    let response = await services.getInvoiceDetailsByID(invoiceId);
+       // let data = response[0];
     // setTitle("Update Invoice");
     // data.transportRate = data.transportRate.toFixed(2)
     // setInvoiceData(data);
@@ -163,9 +160,20 @@ export default function InvoiceAddEdit(props) {
   }
 
   async function saveInvoice(values) {
+    const updatedItems = [];
+    if(ItemDataList.length>0){
+      for (const item of ItemDataList) {
+        const updatedItem = {
+          ...item,
+          date: new Date(item.date),
+          isActive:true
+        };
+        updatedItems.push(updatedItem);
+      }
+    }
     if (isUpdate === true) {
       let updateModel = {
-        routeID: atob(invoiceID.toString()),
+        routeID: atob(invoiceId.toString()),
         routeCode: values.routeCode,
         routeName: values.routeName,
         routeLocation: values.routeLocation,
@@ -191,8 +199,8 @@ export default function InvoiceAddEdit(props) {
         invoiceDetail:{
           reservationNum:values.reservationNumber,
           roomNum : values.roomNumber,
-          arrivalDate: values.arrivalDate,
-          departureDate : values.departureDate,
+          arrivalDate: new Date(values.arrivalDate),
+          departureDate : new Date(values.departureDate),
           customerName : values.customerName,
           customerEmail : values.customerEmail,
           address : values.address,
@@ -202,14 +210,15 @@ export default function InvoiceAddEdit(props) {
           isInvoiceCompleted : false,
           isReordered : false
         },
-        invoiceItems:ItemDataList.length == 0? null:ItemDataList
+        invoiceItems:updatedItems.length == 0? null:updatedItems
       }
       let response = await services.saveInvoice(saveModel);
 
       if (response.statusCode === "SUCCESS") {
         alert.success(response.message);
         setIsDisableButton(true);
-        // navigate('/app/division/listing');
+        setItemDataList([])
+        navigate('/app/manageInvoices/listing');
       }
       else {
         alert.error(response.message);
@@ -253,7 +262,7 @@ export default function InvoiceAddEdit(props) {
     setItemDataList([...dataDelete])
     setIsUpdate(true)
     setItemData({
-      date : data.date != null ?data.date.split('T')[0]:"",
+      date : data.date,
       description : data.description,
       comment : data.comment,
       paymentType : data.settlementType,
@@ -312,21 +321,19 @@ export default function InvoiceAddEdit(props) {
       description:itemData.description,
       comment: itemData.comment,
       paymentType: itemData.paymentType,
-      debit:itemData.paymentType === '1'? itemData.amount:'',
-      credit:itemData.paymentType === '2'? itemData.amount:'',
-      amount: itemData.amount,
+      debit:itemData.paymentType === 'Debit'? itemData.amount:'',
+      credit:itemData.paymentType === 'Credit'? itemData.amount:'',
+      amount: parseFloat(itemData.amount),
       paymentMethod:itemData.paymentMethod,
       cashier:itemData.cashier,
       isActive: true
     }
     setItemDataList(ItemDataList => [...ItemDataList, dataModel]);
     setItemData({
-      date: new Date()
-      .toISOString()
-      .slice(0, 10),
+      date: new Date().toISOString().split('T')[0],
       description:"",
       comment: "",
-      paymentType: "1",
+      paymentType: "Debit",
       amount:"",
       paymentMethod:"1",
       cashier:""
@@ -431,12 +438,9 @@ export default function InvoiceAddEdit(props) {
                             fullWidth
                             helperText={touched.arrivalDate && errors.arrivalDate}
                             name="arrivalDate"
-                            defaultValue={new Date()
-                              .toISOString()
-                              .slice(0, 10)}
                             type="date"
                             InputLabelProps={{ shrink: true }}
-                            value={itemData.arrivalDate}
+                            value={invoiceData.arrivalDate}
                             onChange={(e) => handleChange1(e)}
                             onBlur={handleBlur}
                             variant="outlined"
@@ -457,12 +461,9 @@ export default function InvoiceAddEdit(props) {
                             fullWidth
                             helperText={touched.departureDate && errors.departureDate}
                             name="departureDate"
-                            defaultValue={new Date()
-                              .toISOString()
-                              .slice(0, 10)}
                             type="date"
                             InputLabelProps={{ shrink: true }}
-                            value={itemData.departureDate}
+                            value={invoiceData.departureDate}
                             onChange={(e) => handleChange1(e)}
                             onBlur={handleBlur}
                             variant="outlined"
@@ -630,9 +631,6 @@ export default function InvoiceAddEdit(props) {
                             fullWidth
                             helperText={touched.date && errors.date}
                             name="date"
-                            defaultValue={new Date()
-                              .toISOString()
-                              .slice(0, 10)}
                             type="date"
                             InputLabelProps={{ shrink: true }}
                             value={itemData.date}
@@ -690,8 +688,8 @@ export default function InvoiceAddEdit(props) {
                               variant="outlined"
                               onChange={(e) => handleChange2(e)}
                             >
-                              <MenuItem value="1">Debit</MenuItem>
-                              <MenuItem value="2">Credit</MenuItem>
+                              <MenuItem value="Debit">Debit</MenuItem>
+                              <MenuItem value="Credit">Credit</MenuItem>
                             </TextField>
                           </Grid>
                           <Grid item xs={9}>
@@ -727,12 +725,12 @@ export default function InvoiceAddEdit(props) {
                               value={itemData.paymentMethod}
                               variant="outlined"
                               id="paymentMethod"
-                              disabled={itemData.paymentType ==='2'}
+                              disabled={itemData.paymentType ==='Credit'}
                             >
                               <MenuItem value="0">--Select Payment Method--</MenuItem>
-                              <MenuItem value="1">Cash</MenuItem>
-                              <MenuItem value="2">Card</MenuItem>
-                              <MenuItem value="3">Bank Transfer</MenuItem>
+                              <MenuItem value="Cash">Cash</MenuItem>
+                              <MenuItem value="Card">Card</MenuItem>
+                              <MenuItem value="Bank Transfer">Bank Transfer</MenuItem>
                             </TextField>
                           </Grid> 
                           <Grid item md={6} xs={12}>
