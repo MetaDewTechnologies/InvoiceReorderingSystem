@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RoomInvoiceResponse {
+    private Integer invoiceId;
     private String reservationNum;
     private String roomNum;
     private LocalDateTime arrivalDate;

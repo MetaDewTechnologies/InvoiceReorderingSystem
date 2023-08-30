@@ -23,6 +23,7 @@ import { trackPromise } from 'react-promise-tracker';
 import MaterialTable from "material-table";
 // import authService from '../../../utils/permissionAuth';
 import { LoadingComponent } from '../../../utils/newLoader';
+import services from '../Services';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -39,15 +40,6 @@ const useStyles = makeStyles((theme) => ({
 
 const screenCode = 'RETAILERREGISTRATION';
 export default function ManageInvoiceListing(props) {
-  const invo = [{
-    invoiceID:2,
-    reservationNumber:2200,
-    roomNumber : 23,
-    arrivalDate : '2023-02-23',
-    departureDate: '2023-02-25',
-    payments : '240.50',
-    customerName : 'Ryan'
-  }]
   const classes = useStyles();
   const [roomNo, setRoomNo] = useState({
     roomNumber:''
@@ -78,12 +70,12 @@ export default function ManageInvoiceListing(props) {
 //   }
 
   async function GetInvoiceDetailsByRoomNumber() {
-    // var result = await services.GetRetailorDetailsByMobileNumber(factoryList.mobilenumber);
-    setInvoiceData(invo)
+    var result = await services.GetInvoiceDetailsByRoomNumber(roomNo.roomNumber);
+    setInvoiceData(result)
   }
 
-  const EditInvoiceDetails = (invoiceID) => {
-    encryptedID = btoa(invoiceID.toString());
+  const EditInvoiceDetails = (invoiceId) => {
+    encryptedID = btoa(invoiceId.toString());
     navigate('/app/manageInvoices/addEdit/' + encryptedID);
   }
 
@@ -163,8 +155,8 @@ export default function ManageInvoiceListing(props) {
                   <MaterialTable
                     title="Invoice"
                     columns={[
-                      { title: 'Reservation Num.', field: 'reservationNumber' },
-                      { title: 'Room Num', field: 'roomNumber' },
+                      { title: 'Reservation Num.', field: 'reservationNum' },
+                      { title: 'Room Num', field: 'roomNum' },
                       { title: 'Arrival Date', field: 'arrivalDate' },
                       { title: 'Departure Date', field: 'departureDate' },
                       { title: 'Balance Payments', field: 'payments' },
@@ -183,7 +175,7 @@ export default function ManageInvoiceListing(props) {
                       {
                         icon: 'mode',
                         tooltip: 'Edit Invoice',
-                        onClick: (event, rowData) => { EditInvoiceDetails(rowData.invoiceID) }
+                        onClick: (event, rowData) => { EditInvoiceDetails(rowData.invoiceId) }
                       },
                     ]}
                   />

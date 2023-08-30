@@ -65,6 +65,7 @@ public class InvoiceController {
         return new ResponseEntity<>(invoiceResponse, HttpStatus.CREATED);
     }
 
+    @CrossOrigin
     @GetMapping("/room-invoices/{roomNum}")
     public ResponseEntity<List<RoomInvoiceResponse>> getRoomInvoicesByRoomNum(@PathVariable String roomNum) {
         List<RoomInvoiceResponse> roomInvoices = invoiceDetailService.getRoomInvoicesByRoomNum(roomNum);

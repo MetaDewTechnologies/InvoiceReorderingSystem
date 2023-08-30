@@ -17,7 +17,7 @@ const routes = isLoggedIn => [
               path: 'manageInvoices',
               children : [
                 {path:'listing', element: <ManageInvoiceListing />},
-                {path:'addEdit/:invoiceID', element: <InvoiceAddEdit />}
+                {path:'addEdit/:invoiceId', element: <InvoiceAddEdit />}
               ]
             },
             {
