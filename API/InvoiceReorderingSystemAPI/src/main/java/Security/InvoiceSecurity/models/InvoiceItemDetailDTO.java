@@ -14,9 +14,17 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Entity
 @Table(name = "invoice_item")
+@SequenceGenerator(
+        name = "invoice_id_sequence",
+        sequenceName = "invoice_id_sequence",
+        allocationSize = 1
+)
 public class InvoiceItemDetailDTO {
     @Id
-    @GeneratedValue
+    @GeneratedValue(
+            strategy = GenerationType.SEQUENCE,
+            generator = "invoice_id_sequence"
+    )
     @Column(name = "item_id")
     private Integer itemId;
 

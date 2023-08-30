@@ -57,28 +57,63 @@ public class InvoiceDetailService {
         InvoiceDetailDTO updatedInvoiceDetail = request.getInvoiceDetail();
         existingInvoiceDetail.setRoomNum(updatedInvoiceDetail.getRoomNum());
         existingInvoiceDetail.setCustomerName(updatedInvoiceDetail.getCustomerName());
+        existingInvoiceDetail.setArrivalDate(updatedInvoiceDetail.getArrivalDate());
+        existingInvoiceDetail.setDepartureDate(updatedInvoiceDetail.getDepartureDate());
         existingInvoiceDetail.setAddress(updatedInvoiceDetail.getAddress());
+        existingInvoiceDetail.setCity(updatedInvoiceDetail.getCity());
+        existingInvoiceDetail.setCountry(updatedInvoiceDetail.getCountry());
+        existingInvoiceDetail.setIsInvoiceCompleted(updatedInvoiceDetail.getIsInvoiceCompleted());
+        existingInvoiceDetail.setIsInvoiceGenerated(updatedInvoiceDetail.getIsInvoiceGenerated());
+        existingInvoiceDetail.setIsReordered(updatedInvoiceDetail.getIsReordered());
+
         // ... Update other properties ...
 
         invoiceDetailRepository.save(existingInvoiceDetail);
 
         // Update InvoiceItemDetailDTOs if provided
+        // Update InvoiceItemDetailDTOs if provided
         List<InvoiceItemDetailDTO> updatedInvoiceItems = request.getInvoiceItems();
         if (updatedInvoiceItems != null) {
             for (InvoiceItemDetailDTO updatedItem : updatedInvoiceItems) {
-                Optional<InvoiceItemDetailDTO> existingItemOptional = invoiceItemDetailRepository.findById(updatedItem.getItemId());
-                existingItemOptional.ifPresent(existingItem -> {
-                    // Update InvoiceItemDetailDTO properties
-                    existingItem.setDescription(updatedItem.getDescription());
-                    existingItem.setAmount(updatedItem.getAmount());
-                    // ... Update other properties ...
+                if (updatedItem.getItemId() == null) {
+                    // New item, create and save it
+                    InvoiceItemDetailDTO newItem = new InvoiceItemDetailDTO();
+                    newItem.setDate(updatedItem.getDate());
+                    newItem.setDescription(updatedItem.getDescription());
+                    newItem.setComment(updatedItem.getComment());
+                    newItem.setPaymentType(updatedItem.getPaymentType());
+                    newItem.setAmount(updatedItem.getAmount());
+                    newItem.setPaymentMethod(updatedItem.getPaymentMethod());
+                    newItem.setCashier(updatedItem.getCashier());
+                    newItem.setIsActive(updatedItem.getIsActive());
+                    newItem.setInvoiceDetail(existingInvoiceDetail);
 
-                    invoiceItemDetailRepository.save(existingItem);
-                });
+                    // ... Set other properties ...
+
+                    invoiceItemDetailRepository.save(newItem);
+                } else {
+                    Optional<InvoiceItemDetailDTO> existingItemOptional = invoiceItemDetailRepository.findById(updatedItem.getItemId());
+                    existingItemOptional.ifPresent(existingItem -> {
+                        // Update existing item properties
+                        existingItem.setDate(updatedItem.getDate());
+                        existingItem.setDescription(updatedItem.getDescription());
+                        existingItem.setComment(updatedItem.getComment());
+                        existingItem.setPaymentType(updatedItem.getPaymentType());
+                        existingItem.setAmount(updatedItem.getAmount());
+                        existingItem.setPaymentMethod(updatedItem.getPaymentMethod());
+                        existingItem.setCashier(updatedItem.getCashier());
+                        existingItem.setIsActive(updatedItem.getIsActive());
+
+                        // ... Update other properties ...
+
+                        invoiceItemDetailRepository.save(existingItem);
+                    });
+                }
+                }
             }
+
+            return new InvoiceWithItemsResponse(existingInvoiceDetail, updatedInvoiceItems);
         }
 
-        return new InvoiceWithItemsResponse(existingInvoiceDetail, updatedInvoiceItems);
-    }
 
 }

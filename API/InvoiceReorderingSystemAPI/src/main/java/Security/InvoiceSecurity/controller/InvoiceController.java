@@ -58,7 +58,7 @@ public class InvoiceController {
             }
         }
         InvoiceResponse invoiceResponse=new InvoiceResponse();
-        invoiceResponse.setMessage("Successfully Insert");
+        invoiceResponse.setMessage("Successfully Inserted");
         invoiceResponse.setStatusCode("SUCCESS");
 
 
@@ -102,8 +102,8 @@ public class InvoiceController {
             return new ResponseEntity<>(updatedInvoiceResponse,HttpStatus.NOT_FOUND);
         }
 
-        updatedInvoiceResponse.setStatusCode("SUCCESSFUL");
-        updatedInvoiceResponse.setMessage("Not updated.No such Invoice ID");
+        updatedInvoiceResponse.setStatusCode("SUCCESS");
+        updatedInvoiceResponse.setMessage("Updated Successfully.");
 
         return new ResponseEntity<>(updatedInvoiceResponse, HttpStatus.OK);
     }
