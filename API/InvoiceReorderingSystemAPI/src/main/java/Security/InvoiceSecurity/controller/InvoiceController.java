@@ -77,4 +77,37 @@ public class InvoiceController {
     }
 
 
+    @GetMapping("/{invoiceId}")
+    public ResponseEntity<InvoiceWithItemsResponse> getInvoiceWithItemsById(@PathVariable Integer invoiceId) {
+        InvoiceWithItemsResponse invoiceWithItems = invoiceDetailService.getInvoiceWithItemsById(invoiceId);
+
+        if (invoiceWithItems == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        return new ResponseEntity<>(invoiceWithItems, HttpStatus.OK);
+    }
+
+
+
+    @PutMapping("/update/{invoiceId}")
+    public ResponseEntity<InvoiceResponse> updateInvoice(@PathVariable Integer invoiceId, @RequestBody InvoiceWithItemsRequest request) {
+        InvoiceWithItemsResponse updatedInvoice = invoiceDetailService.updateInvoice(invoiceId, request);
+
+        InvoiceResponse updatedInvoiceResponse = new InvoiceResponse();
+
+        if (updatedInvoice == null) {
+            updatedInvoiceResponse.setStatusCode("ERROR");
+            updatedInvoiceResponse.setMessage("Not updated.No such Invoice ID");
+            return new ResponseEntity<>(updatedInvoiceResponse,HttpStatus.NOT_FOUND);
+        }
+
+        updatedInvoiceResponse.setStatusCode("SUCCESSFUL");
+        updatedInvoiceResponse.setMessage("Not updated.No such Invoice ID");
+
+        return new ResponseEntity<>(updatedInvoiceResponse, HttpStatus.OK);
+    }
+
+
+
 }
