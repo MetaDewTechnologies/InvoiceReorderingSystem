@@ -14,9 +14,17 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Entity
 @Table(name = "invoice_item")
+@SequenceGenerator(
+        name = "invoice_id_sequence",
+        sequenceName = "invoice_id_sequence",
+        allocationSize = 1
+)
 public class InvoiceItemDetailDTO {
     @Id
-    @GeneratedValue
+    @GeneratedValue(
+            strategy = GenerationType.SEQUENCE,
+            generator = "invoice_id_sequence"
+    )
     @Column(name = "item_id")
     private Integer itemId;
 
@@ -40,10 +48,26 @@ public class InvoiceItemDetailDTO {
     @NonNull
     private String cashier;
 
-    @NonNull
-    private boolean isActive;
+    private Boolean isActive;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "invoice_id")
     private InvoiceDetailDTO invoiceDetail; // This establishes the relationship
+
+
+    // Override the toString() method without referencing invoiceDetail
+    @Override
+    public String toString() {
+        return "InvoiceItemDetailDTO{" +
+                "itemId=" + itemId +
+                ", date=" + date +
+                ", description='" + description + '\'' +
+                ", comment='" + comment + '\'' +
+                ", paymentType='" + paymentType + '\'' +
+                ", amount=" + amount +
+                ", paymentMethod='" + paymentMethod + '\'' +
+                ", cashier='" + cashier + '\'' +
+                ", isActive=" + isActive +
+                '}';
+    }
 }

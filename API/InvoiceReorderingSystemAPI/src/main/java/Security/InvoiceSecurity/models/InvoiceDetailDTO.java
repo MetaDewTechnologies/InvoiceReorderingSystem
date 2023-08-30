@@ -1,5 +1,6 @@
 package Security.InvoiceSecurity.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,9 +14,17 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @Table(name="invoice_details")
+@SequenceGenerator(
+        name = "invoice_id_sequence",
+        sequenceName = "invoice_id_sequence",
+        allocationSize = 1
+)
 public class InvoiceDetailDTO {
     @Id
-    @GeneratedValue
+    @GeneratedValue(
+            strategy = GenerationType.SEQUENCE,
+            generator = "invoice_id_sequence"
+    )
     @Column(
             name="invoice_id"
     )
@@ -58,22 +67,28 @@ public class InvoiceDetailDTO {
 
     private String city;
     private String country;
+
+    @Column(
+            name="bookingType",
+            nullable = false
+    )
+    private String bookingType;
     @Column(
             name="is_invoice_generated",
             nullable = false
     )
-    private boolean isInvoiceGenerated;
+    private Boolean isInvoiceGenerated;
     @Column(
             name="is_invoice_completed",
             nullable = false
     )
-    private boolean isInvoiceCompleted;
+    private Boolean isInvoiceCompleted;
     @Column(
             name="is_reordered",
             nullable = false
     )
-    private boolean isReordered;
-
+    private Boolean isReordered;
+    @JsonIgnore
     @OneToMany(mappedBy = "invoiceDetail", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<InvoiceItemDetailDTO> invoiceItems;
 

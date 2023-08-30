@@ -1,14 +1,14 @@
 package Security.InvoiceSecurity.models;
 
-import jakarta.annotation.Nullable;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 @Data
-public class InvoiceCreationRequest {
-
+@NoArgsConstructor
+@AllArgsConstructor
+public class InvoiceWithItemsRequest {
     private InvoiceDetailDTO invoiceDetail;
-    @Nullable
     private List<InvoiceItemDetailDTO> invoiceItems;
 }
