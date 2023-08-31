@@ -143,7 +143,7 @@ export const CommonPostAxios = async (url, queryString, body) => {
     };
 
     if (queryString != null) {
-        originURL = serviceUrl + url + "?" + AESEncryption(queryString);
+        originURL = serviceUrl + url + "/" + queryString;
     } else {
         originURL = serviceUrl + url;
     }

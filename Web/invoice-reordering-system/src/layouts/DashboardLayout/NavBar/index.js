@@ -59,20 +59,23 @@ const useStyles = makeStyles(() => ({
 const NavBar = ({ onMobileClose, openMobile }) => {
   const classes = useStyles();
   const location = useLocation();
-
+  const role = sessionStorage.getItem('role')
   let screenList = [
     {
       routePath:"/app/manageInvoices/listing",
       screenName:"Bill Registration / Update",
       screenID:1
-    },
-    {
-      routePath:"/app/reorderInvoices/listing",
-      screenName:"Reorder Invoices",
-      screenID:2
     }
   ]
-
+  if (role == 'ACCOUNTANT'){
+    screenList.push(
+      {
+        routePath:"/app/reorderInvoices/listing",
+        screenName:"Reorder Invoices",
+        screenID:2
+      }
+    )
+  }
   useEffect(() => {
     if (openMobile && onMobileClose) {
       onMobileClose();

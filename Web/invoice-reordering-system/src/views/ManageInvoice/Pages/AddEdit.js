@@ -57,8 +57,8 @@ export default function InvoiceAddEdit(props) {
   const [isUpdate, setIsUpdate] = useState(false);
   const classes = useStyles();
   const [invoiceData, setInvoiceData] = useState({
-      reservationNumber:'',
-      roomNumber:'',
+      reservationNum:'',
+      roomNum:'',
       arrivalDate:new Date().toISOString().split('T')[0],
       departureDate:new Date().toISOString().split('T')[0],
       customerName:'',
@@ -152,11 +152,37 @@ export default function InvoiceAddEdit(props) {
 
   async function getInvoiceDetails(invoiceId) {
     let response = await services.getInvoiceDetailsByID(invoiceId);
-       // let data = response[0];
-    // setTitle("Update Invoice");
-    // data.transportRate = data.transportRate.toFixed(2)
-    // setInvoiceData(data);
-    setIsUpdate(true);
+    setTitle("Update Invoice");
+    const invoiceDetails = response.invoiceDetail
+    setInvoiceData({
+      ...invoiceData,
+      reservationNum:invoiceDetails.reservationNum,
+      roomNum:invoiceDetails.roomNum,
+      departureDate:invoiceDetails.departureDate.split('T')[0],
+      customerName:invoiceDetails.customerName,
+      customerEmail:invoiceDetails.customerEmail,
+      address:invoiceDetails.address,
+      city:invoiceDetails.city,
+      country:invoiceDetails.country,
+      bookingType : invoiceDetails.bookingType == "Online" ? "1":"2",
+      arrivalDate : invoiceDetails.arrivalDate.split('T')[0]
+    });
+    const itemData = response.invoiceItems
+    const updatedItems = [];
+    if(itemData.length>0){
+      for (const item of itemData) {
+        const updatedItem = {
+          ...item,
+          date: item.date.split('T')[0],
+          debit: item.paymentType === "Debit" ? item.amount:'',
+          credit : item.paymentType === "Credit" ? item.amount:'',
+          paymentMethod : item.paymentMethod,
+        };
+        updatedItems.push(updatedItem);
+      }
+    }
+    setItemDataList(updatedItems)
+    setIsUpdate(true)
   }
 
   async function saveInvoice(values) {
@@ -173,32 +199,10 @@ export default function InvoiceAddEdit(props) {
     }
     if (isUpdate === true) {
       let updateModel = {
-        routeID: atob(invoiceId.toString()),
-        routeCode: values.routeCode,
-        routeName: values.routeName,
-        routeLocation: values.routeLocation,
-        transportRate: values.transportRate,
-        targetCrop: values.targetCrop,
-        productID: values.productID,
-        isActive: values.isActive,
-        factoryID: values.factoryID,
-        groupID: values.groupID
-      }
-      let response = await services.updateRoute(updateModel);
-      if (response.statusCode === "Success") {
-        alert.success(response.message);
-        setIsDisableButton(true);
-        navigate('/app/division/listing');
-      }
-      else {
-        alert.error(response.message);
-      }
-    }
-    else {
-      let saveModel = {
         invoiceDetail:{
-          reservationNum:values.reservationNumber,
-          roomNum : values.roomNumber,
+          invoiceId : parseInt(invoiceId),
+          reservationNum:values.reservationNum,
+          roomNum : values.roomNum,
           arrivalDate: new Date(values.arrivalDate),
           departureDate : new Date(values.departureDate),
           customerName : values.customerName,
@@ -208,7 +212,37 @@ export default function InvoiceAddEdit(props) {
           country : values.country,
           isInvoiceGenerated : false,
           isInvoiceCompleted : false,
-          isReordered : false
+          isReordered : false,
+          bookingType : values.bookingType == "1"? "Online":"Direct"
+        },
+        invoiceItems:updatedItems.length == 0? null:updatedItems
+      }
+      let response = await services.updateInvoice(updateModel, atob(invoiceId.toString()));
+      if (response.statusCode === "SUCCESS") {
+        alert.success(response.message);
+        setIsDisableButton(true);
+        navigate('/app/manageInvoices/listing');
+      }
+      else {
+        alert.error(response.message);
+      }
+    }
+    else {
+      let saveModel = {
+        invoiceDetail:{
+          reservationNum:values.reservationNum,
+          roomNum : values.roomNum,
+          arrivalDate: new Date(values.arrivalDate),
+          departureDate : new Date(values.departureDate),
+          customerName : values.customerName,
+          customerEmail : values.customerEmail,
+          address : values.address,
+          city : values.city,
+          country : values.country,
+          isInvoiceGenerated : false,
+          isInvoiceCompleted : false,
+          isReordered : false,
+          bookingType : values.bookingType == "1"? "Online":"Direct"
         },
         invoiceItems:updatedItems.length == 0? null:updatedItems
       }
@@ -265,8 +299,8 @@ export default function InvoiceAddEdit(props) {
       date : data.date,
       description : data.description,
       comment : data.comment,
-      paymentType : data.settlementType,
-      amount : data.settlement,
+      paymentType : data.paymentType,
+      amount : data.amount,
       paymentMethod : data.paymentMethod,
       cashier : data.cashier
     })
@@ -347,8 +381,8 @@ export default function InvoiceAddEdit(props) {
         <Container maxWidth={false}>
           <Formik
             initialValues={{
-              reservationNumber: invoiceData.reservationNumber,
-              roomNumber: invoiceData.roomNumber,
+              reservationNum: invoiceData.reservationNum,
+              roomNum: invoiceData.roomNum,
               arrivalDate: invoiceData.arrivalDate,
               departureDate: invoiceData.departureDate,
               customerName: invoiceData.customerName,
@@ -360,12 +394,12 @@ export default function InvoiceAddEdit(props) {
             }}
             validationSchema={
               Yup.object().shape({
-                reservationNumber : Yup.string().required('Reservation Number is required'),
-                roomNumber : Yup.string().required("Room Number is required"),
+                reservationNum : Yup.string().required('Reservation Number is required'),
+                roomNum : Yup.string().required("Room Number is required"),
                 customerName: Yup.string().required("Customer Name is required"),
                 customerEmail: Yup.string().required("Customer Email is required").matches(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/, 'Enter a valid email'),
                 address : Yup.string().required("Address is required"),
-                bookingType : Yup.string().required("Booking Type is required").min("1",'Booking Type is required')
+                bookingType : Yup.number().required("Booking Type is required").min("1",'Booking Type is required')
               })
             }
             onSubmit={saveInvoice}
@@ -392,34 +426,34 @@ export default function InvoiceAddEdit(props) {
                       <CardContent>
                         <Grid container spacing={3}>
                         <Grid item md={6} xs={12}>
-                            <InputLabel shrink id="reservationNumber">
+                            <InputLabel shrink id="reservationNum">
                               Reservation Number *
                             </InputLabel>
                             <TextField
-                              error={Boolean(touched.reservationNumber && errors.reservationNumber)}
+                              error={Boolean(touched.reservationNum && errors.reservationNum)}
                               fullWidth
-                              helperText={touched.reservationNumber && errors.reservationNumber}
-                              name="reservationNumber"
+                              helperText={touched.reservationNum && errors.reservationNum}
+                              name="reservationNum"
                               onBlur={handleBlur}
                               onChange={(e) => handleChange1(e)}
-                              value={invoiceData.reservationNumber}
+                              value={invoiceData.reservationNum}
                               variant="outlined"
-                              disabled={isDisableButton}
+                              disabled={isUpdate}
                               size="small"
                             />
                           </Grid>
                         <Grid item md={6} xs={12}>
-                            <InputLabel shrink id="roomNumber">
+                            <InputLabel shrink id="roomNum">
                               Room Number *
                             </InputLabel>
                             <TextField
-                              error={Boolean(touched.roomNumber && errors.roomNumber)}
+                              error={Boolean(touched.roomNum && errors.roomNum)}
                               fullWidth
-                              helperText={touched.roomNumber && errors.roomNumber}
-                              name="roomNumber"
+                              helperText={touched.roomNum && errors.roomNum}
+                              name="roomNum"
                               onBlur={handleBlur}
                               onChange={(e) => handleChange1(e)}
-                              value={invoiceData.roomNumber}
+                              value={invoiceData.roomNum}
                               variant="outlined"
                               disabled={isDisableButton}
                               size="small"

@@ -77,6 +77,7 @@ public class InvoiceController {
         return new ResponseEntity<>(roomInvoices, HttpStatus.OK);
     }
 
+    @CrossOrigin
     @GetMapping("/{invoiceId}")
     public ResponseEntity<InvoiceWithItemsResponse> getInvoiceWithItemsById(@PathVariable Integer invoiceId) {
         InvoiceWithItemsResponse invoiceWithItems = invoiceDetailService.getInvoiceWithItemsById(invoiceId);
@@ -89,8 +90,8 @@ public class InvoiceController {
     }
 
 
-
-    @PutMapping("/update/{invoiceId}")
+    @CrossOrigin
+    @PostMapping("/update/{invoiceId}")
     public ResponseEntity<InvoiceResponse> updateInvoice(@PathVariable Integer invoiceId, @RequestBody InvoiceWithItemsRequest request) {
         InvoiceWithItemsResponse updatedInvoice = invoiceDetailService.updateInvoice(invoiceId, request);
 

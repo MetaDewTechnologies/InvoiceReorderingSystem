@@ -3,16 +3,21 @@ import { CommonPost,CommonGetAxios,CommonPostAxios } from '../../helpers/HttpCli
 export default {
     saveInvoice,
     getInvoiceDetailsByID,
-    GetInvoiceDetailsByRoomNumber
+    GetInvoiceDetailsByRoomNumber,
+    updateInvoice
 };
 
 async function saveInvoice(data) {
     const response = await CommonPostAxios('/api/v1/create-with-items', null, data);
     return response;
 }
+async function updateInvoice(data,invoiceId) {
+    const response = await CommonPostAxios('/api/v1/update', invoiceId, data);
+    return response;
+}
 
 async function getInvoiceDetailsByID(invoiceId){
-    const response = await CommonGetAxios('/api/v1/search',invoiceId)
+    const response = await CommonGetAxios('/api/v1',invoiceId)
     return response;
 }
 
