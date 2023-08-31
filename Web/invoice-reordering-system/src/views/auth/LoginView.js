@@ -49,6 +49,7 @@ const LoginView = () => {
       return;
     }
     sessionStorage.setItem('token', result.authenticationResponse.token);
+    sessionStorage.setItem('role', result.authenticationResponse.role);
     navigate('app/manageInvoices/listing');
   }
 

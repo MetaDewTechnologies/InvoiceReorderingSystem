@@ -70,6 +70,7 @@ export default function ManageInvoiceListing(props) {
 //   }
 
   async function GetInvoiceDetailsByRoomNumber() {
+    setInvoiceData([])
     var result = await services.GetInvoiceDetailsByRoomNumber(roomNo.roomNumber);
     setInvoiceData(result)
   }

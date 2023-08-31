@@ -6,7 +6,7 @@ import DashboardLayout from './layouts/DashboardLayout'
 import InvoiceAddEdit from './views/ManageInvoice/Pages/AddEdit';
 import ReorderInvoice from './views/ReorderInvoice/Pages/Listing'
 
-const routes = isLoggedIn => [
+const routes = (isLoggedIn, role )=> [
     {
         path: 'app',
         element: isLoggedIn ? <DashboardLayout />
@@ -23,7 +23,7 @@ const routes = isLoggedIn => [
             {
               path: 'reorderInvoices',
               children : [
-                {path:'listing', element: <ReorderInvoice />},
+                {path:'listing', element:role == 'ACCOUNTANT' ? <ReorderInvoice />:''},
               ]
             }
         ]
@@ -38,7 +38,7 @@ const routes = isLoggedIn => [
         //     element: <LottieLoadingComponent />
         //   },
         //   { path: '404', element: <NotFoundView /> },
-        //   { path: '/', element: <Navigate to="/newLoader" /> },
+          // { path: '/', element: <Navigate to="/newLoader" /> },
         //   { path: '*', element: <Navigate to="/404" /> }
         //   {path:'manageInvoiceListing', element:<Navigate to= "/manageInvoiceListing"/>}
         ]
