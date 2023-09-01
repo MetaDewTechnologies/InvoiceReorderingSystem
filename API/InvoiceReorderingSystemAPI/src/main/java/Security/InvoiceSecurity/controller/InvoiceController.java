@@ -1,8 +1,11 @@
 package Security.InvoiceSecurity.controller;
 
+import Security.InvoiceSecurity.auth.AuthenticationRequest;
+import Security.InvoiceSecurity.auth.AuthenticationService;
 import Security.InvoiceSecurity.models.*;
 import Security.InvoiceSecurity.service.InvoiceDetailService;
 import Security.InvoiceSecurity.service.InvoiceItemDetailService;
+import Security.InvoiceSecurity.service.TestService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +21,8 @@ import java.util.List;
 public class InvoiceController {
     private final InvoiceDetailService invoiceDetailService;
     private final InvoiceItemDetailService invoiceItemDetailService;
+
+    private final TestService testservice;
 
 
     @GetMapping("/search/{reservationNum}")
@@ -108,4 +113,52 @@ public class InvoiceController {
 
         return new ResponseEntity<>(updatedInvoiceResponse, HttpStatus.OK);
     }
+
+    @PostMapping ("/complete-invoice/{invoiceId}")
+    public ResponseEntity<?> markInvoiceAsCompleted(@PathVariable Integer invoiceId) {
+        boolean success = invoiceDetailService.markInvoiceCompleted(invoiceId);
+
+        if (success) {
+            InvoiceResponse invoiceResponse=new InvoiceResponse();
+            invoiceResponse.setMessage("Successfully Completed");
+            invoiceResponse.setStatusCode("SUCCESS");
+            return ResponseEntity.ok(invoiceResponse);
+        } else {
+            InvoiceResponse invoiceResponse=new InvoiceResponse();
+            invoiceResponse.setMessage("Uncompleted");
+            invoiceResponse.setStatusCode("ERROR");
+            return ResponseEntity.ok(invoiceResponse);
+        }
+    }
+
+
+
+    // InvoiceController.java
+    @PostMapping("/reorder-invoice/{invoiceId}")
+    public ResponseEntity<Integer> reorderInvoice(@PathVariable Integer invoiceId) {
+        Integer reorderedInvoiceId = invoiceDetailService.markInvoiceGeneratedCompletedReordered(invoiceId);
+
+        if (reorderedInvoiceId != null) {
+            // Return the reorderedInvoiceId
+            return ResponseEntity.ok(reorderedInvoiceId);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+
+    @PostMapping("/special-authenticate")
+    public ResponseEntity<SpecialInvoiceAuthenticationResponse> specialAuthenticate(
+            @RequestBody AuthenticationRequest request
+    ) {
+        SpecialInvoiceAuthenticationResponse response = testservice.specialAuthenticate(request);
+
+        if ("SUCCESS".equals(response.getSuccessCode())) {
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        }
+    }
+
+
 }
