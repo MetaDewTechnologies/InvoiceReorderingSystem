@@ -53,7 +53,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function InvoiceAddEdit(props) {
   const componentRef = useRef();
-  const [title, setTitle] = useState("Inprogress Invoices")
+  const [title, setTitle] = useState("Add Bill")
   const [isUpdate, setIsUpdate] = useState(false);
   const classes = useStyles();
   const [invoiceData, setInvoiceData] = useState({
@@ -73,7 +73,7 @@ export default function InvoiceAddEdit(props) {
     description:"",
     comment: "",
     paymentType: "Debit",
-    amount:"",
+    amount:"0",
     paymentMethod:"0",
     cashier:""
   })
@@ -82,6 +82,9 @@ export default function InvoiceAddEdit(props) {
   const [selectedRow, setSelectedRow] = useState()
   const [isCompleteBilling, setIsCompleteBilling] = useState(false)
   const [isPrintRequested, setIsPrintRequested] = useState(false)
+  const [userName, setUserName] = useState('')
+  const [password, setPassword] = useState('')
+
   const navigate = useNavigate();
   const handleClick = () => {
     navigate('/app/manageInvoices/listing/');
@@ -150,9 +153,17 @@ export default function InvoiceAddEdit(props) {
   //   setProducts(product);
   // }
 
+  async function handlePermission (){
+    const data={
+      userName,
+      password
+    }
+    let response = await services.handlePermission(data);
+
+  }
   async function getInvoiceDetails(invoiceId) {
     let response = await services.getInvoiceDetailsByID(invoiceId);
-    setTitle("Update Invoice");
+    setTitle("Update Bill");
     const invoiceDetails = response.invoiceDetail
     setInvoiceData({
       ...invoiceData,
@@ -326,6 +337,10 @@ export default function InvoiceAddEdit(props) {
   }
 
   async function handleCompleteBilling(){
+    const data ={
+      isCompleteBill : true
+    }
+    const result = await services.handleCompleteBilling(invoiceId,data);
     setIsCompleteBilling(true)
   }
 
@@ -554,7 +569,7 @@ export default function InvoiceAddEdit(props) {
                               value={invoiceData.address}
                               variant="outlined"
                               disabled={isDisableButton}
-                              inputProps={{ maxLength: 20 }}
+                              inputProps={{ maxLength: 200 }}
                               size="small"
                             />
                           </Grid>
@@ -572,7 +587,7 @@ export default function InvoiceAddEdit(props) {
                               value={invoiceData.city}
                               variant="outlined"
                               disabled={isDisableButton}
-                              inputProps={{ maxLength: 20 }}
+                              inputProps={{ maxLength: 200 }}
                               size="small"
                             />
                           </Grid>
@@ -590,7 +605,7 @@ export default function InvoiceAddEdit(props) {
                               value={invoiceData.country}
                               variant="outlined"
                               disabled={isDisableButton}
-                              inputProps={{ maxLength: 20 }}
+                              inputProps={{ maxLength: 200 }}
                               size="small"
                             />
                           </Grid>
@@ -908,6 +923,8 @@ export default function InvoiceAddEdit(props) {
                 label="Username"
                 type="email"
                 fullWidth
+                required
+                onChange = {e => setUserName(e.target.value)}
               />
               <TextField
                 autoFocus
@@ -916,13 +933,15 @@ export default function InvoiceAddEdit(props) {
                 label="Password"
                 type="password"
                 fullWidth
+                required
+                onChange = {e => setPassword(e.target.value)}
               />
             </DialogContent>
             <DialogActions>
               <Button onClick={handleClose} color="primary">
                 Cancel
               </Button>
-              <Button onClick={handleClose} color="primary">
+              <Button onClick={handlePermission, handleClose} color="primary">
                 Submit
               </Button>
             </DialogActions>

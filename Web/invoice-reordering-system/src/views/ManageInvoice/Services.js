@@ -4,7 +4,9 @@ export default {
     saveInvoice,
     getInvoiceDetailsByID,
     GetInvoiceDetailsByRoomNumber,
-    updateInvoice
+    updateInvoice,
+    handleCompleteBilling,
+    handlePermission
 };
 
 async function saveInvoice(data) {
@@ -24,4 +26,14 @@ async function getInvoiceDetailsByID(invoiceId){
 async function GetInvoiceDetailsByRoomNumber(roomNum){
     const response = await CommonGetAxios('/api/v1/room-invoices', roomNum);
     return response
+}
+
+async function handleCompleteBilling(invoiceId,data){
+    const response = await CommonPostAxios('',invoiceId, data);
+    return response;
+}
+
+async function handlePermission(data){
+    const response = await CommonPostAxios('',null,data);
+    return response;
 }
