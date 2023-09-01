@@ -92,7 +92,9 @@ public class InvoiceDetailDTO {
     @OneToMany(mappedBy = "invoiceDetail", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<InvoiceItemDetailDTO> invoiceItems;
 
-
+    @OneToOne(mappedBy = "invoiceDetailnew", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = false)
+    //@JoinColumn(name = "invoice_id", referencedColumnName = "invoiceId")
+    private ReorderedInvoiceDetailDTO reorderedInvoiceDetail;
 
 
 }

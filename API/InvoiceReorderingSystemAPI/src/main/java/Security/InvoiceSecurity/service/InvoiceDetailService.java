@@ -3,6 +3,7 @@ package Security.InvoiceSecurity.service;
 import Security.InvoiceSecurity.models.*;
 import Security.InvoiceSecurity.repository.InvoiceDetailRepository;
 import Security.InvoiceSecurity.repository.InvoiceItemDetailRepository;
+import Security.InvoiceSecurity.repository.ReorderedInvoiceDetailRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +16,7 @@ public class InvoiceDetailService {
 
     private final InvoiceDetailRepository invoiceDetailRepository;
     private final InvoiceItemDetailRepository invoiceItemDetailRepository;
+    private final ReorderedInvoiceDetailRepository reorderedInvoiceDetailRepository;
 
     public InvoiceDetailDTO saveInvoiceDetail(InvoiceDetailDTO invoiceDetail) {
         Integer invoiceId = invoiceDetail.getInvoiceId();
@@ -115,5 +117,42 @@ public class InvoiceDetailService {
             return new InvoiceWithItemsResponse(existingInvoiceDetail, updatedInvoiceItems);
         }
 
+
+    public boolean markInvoiceCompleted(Integer invoiceId) {
+        Optional<InvoiceDetailDTO> invoiceDetailOptional = invoiceDetailRepository.findById(invoiceId);
+
+        if (invoiceDetailOptional.isPresent()) {
+            InvoiceDetailDTO invoiceDetail = invoiceDetailOptional.get();
+            invoiceDetail.setIsInvoiceCompleted(true);
+            invoiceDetailRepository.save(invoiceDetail);
+            return true;
+        }
+
+        return false;
+    }
+
+    public Integer markInvoiceGeneratedCompletedReordered(Integer invoiceId) {
+        Optional<InvoiceDetailDTO> invoiceDetailOptional = invoiceDetailRepository.findById(invoiceId);
+
+        if (invoiceDetailOptional.isPresent()) {
+            InvoiceDetailDTO invoiceDetail = invoiceDetailOptional.get();
+            invoiceDetail.setIsInvoiceGenerated(true);
+            invoiceDetail.setIsInvoiceCompleted(true);
+            invoiceDetail.setIsReordered(true);
+
+            // Update the existing InvoiceDetailDTO
+            invoiceDetailRepository.save(invoiceDetail);
+
+            // Create a new ReorderedInvoiceDetailDTO
+            ReorderedInvoiceDetailDTO reorderedInvoiceDetail = new ReorderedInvoiceDetailDTO();
+            reorderedInvoiceDetail.setInvoiceDetailnew(invoiceDetail);
+            // Save the reordered invoiceDetail and get the reorderedInvoiceId
+            reorderedInvoiceDetailRepository.save(reorderedInvoiceDetail);
+          //  return reorderedInvoiceDetail.getReorderedInvoiceId();
+            return 1;
+        }
+
+        return null;
+    }
 
 }
