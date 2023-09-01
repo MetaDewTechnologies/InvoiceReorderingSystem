@@ -1,6 +1,7 @@
 package Security.InvoiceSecurity.auth;
 
 import Security.InvoiceSecurity.config.JwtService;
+import Security.InvoiceSecurity.models.SpecialInvoiceAuthenticationResponse;
 import Security.InvoiceSecurity.user.Role;
 import Security.InvoiceSecurity.user.User;
 import Security.InvoiceSecurity.user.UserRepository;
@@ -11,6 +12,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -76,4 +79,6 @@ public class AuthenticationService {
                    .build();
        }
     }
+
+
 }
