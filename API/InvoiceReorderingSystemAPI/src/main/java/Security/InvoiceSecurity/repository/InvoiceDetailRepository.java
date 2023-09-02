@@ -22,4 +22,12 @@ public interface InvoiceDetailRepository extends JpaRepository<InvoiceDetailDTO,
     @Query("SELECT i FROM InvoiceDetailDTO i LEFT JOIN FETCH i.invoiceItems WHERE i.invoiceId = :invoiceId")
     InvoiceDetailDTO findInvoiceDetailWithItemsById(@Param("invoiceId") Integer invoiceId);
 
+
+//    @Query("SELECT COUNT(i) = COUNT(CASE WHEN i.isInvoiceCompleted = true THEN 1 ELSE NULL END) " +
+//            "FROM InvoiceDetailDTO i WHERE i.roomNum = :roomNum")
+//    boolean areAllInvoicesCompletedForRoom(@Param("roomNum") String roomNum);
+
+    @Query("SELECT COUNT(i) = COUNT(*) FROM InvoiceDetailDTO i WHERE i.roomNum = :roomNum AND i.isInvoiceCompleted = true")
+    boolean areAllInvoicesCompletedForRoom(@Param("roomNum") String roomNum);
+
 }

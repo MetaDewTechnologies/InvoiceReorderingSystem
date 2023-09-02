@@ -20,10 +20,19 @@ public class InvoiceDetailService {
 
     public InvoiceDetailDTO saveInvoiceDetail(InvoiceDetailDTO invoiceDetail) {
         Integer invoiceId = invoiceDetail.getInvoiceId();
+        String roomNum = invoiceDetail.getRoomNum();
+        boolean exist = invoiceDetailRepository.areAllInvoicesCompletedForRoom(roomNum);
+
         if (invoiceId != null && invoiceDetailRepository.existsById(invoiceId)) {
+            //invoiceDetail.equals(null);
             return invoiceDetail; // Return existing entity
         }
-        return invoiceDetailRepository.save(invoiceDetail);
+        if(exist){
+            return invoiceDetail;
+        }
+        else {
+            return invoiceDetailRepository.save(invoiceDetail);
+        }
     }
 
 //    public InvoiceDetailDTO getInvoiceDetailById(Integer invoiceId) {
@@ -143,16 +152,25 @@ public class InvoiceDetailService {
             // Update the existing InvoiceDetailDTO
             invoiceDetailRepository.save(invoiceDetail);
 
+            // Check if the invoiceId already exists in reordered_invoice_details
+            if (reorderedInvoiceDetailRepository.existsByInvoiceDetailnew(invoiceDetail)) {
+                return null; // InvoiceId already exists in reordered_invoice_details
+            }
+
             // Create a new ReorderedInvoiceDetailDTO
             ReorderedInvoiceDetailDTO reorderedInvoiceDetail = new ReorderedInvoiceDetailDTO();
             reorderedInvoiceDetail.setInvoiceDetailnew(invoiceDetail);
+
             // Save the reordered invoiceDetail and get the reorderedInvoiceId
             reorderedInvoiceDetailRepository.save(reorderedInvoiceDetail);
-          //  return reorderedInvoiceDetail.getReorderedInvoiceId();
-            return 1;
+            return reorderedInvoiceDetail.getReorderedInvoiceId();
         }
 
         return null;
+    }
+
+    public boolean areAllInvoicesCompletedForRoom(String roomNum) {
+        return invoiceDetailRepository.areAllInvoicesCompletedForRoom(roomNum);
     }
 
 }
