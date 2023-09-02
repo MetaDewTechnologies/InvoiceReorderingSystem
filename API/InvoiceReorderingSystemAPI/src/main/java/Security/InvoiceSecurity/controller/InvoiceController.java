@@ -114,6 +114,7 @@ public class InvoiceController {
         return new ResponseEntity<>(updatedInvoiceResponse, HttpStatus.OK);
     }
 
+    @CrossOrigin
     @PostMapping ("/complete-invoice/{invoiceId}")
     public ResponseEntity<?> markInvoiceAsCompleted(@PathVariable Integer invoiceId) {
         boolean success = invoiceDetailService.markInvoiceCompleted(invoiceId);
@@ -134,6 +135,7 @@ public class InvoiceController {
 
 
     // InvoiceController.java
+    @CrossOrigin
     @PostMapping("/reorder-invoice/{invoiceId}")
     public ResponseEntity<Integer> reorderInvoice(@PathVariable Integer invoiceId) {
         Integer reorderedInvoiceId = invoiceDetailService.markInvoiceGeneratedCompletedReordered(invoiceId);
@@ -146,7 +148,7 @@ public class InvoiceController {
         }
     }
 
-
+    @CrossOrigin
     @PostMapping("/special-authenticate")
     public ResponseEntity<SpecialInvoiceAuthenticationResponse> specialAuthenticate(
             @RequestBody AuthenticationRequest request
@@ -156,7 +158,7 @@ public class InvoiceController {
         if ("SUCCESS".equals(response.getSuccessCode())) {
             return ResponseEntity.ok(response);
         } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+            return ResponseEntity.status(HttpStatus.OK).body(response);
         }
     }
 

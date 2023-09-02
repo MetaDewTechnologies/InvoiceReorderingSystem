@@ -69,6 +69,7 @@ export default function InvoiceAddEdit(props) {
       bookingType:'0'
   });
   const [itemData, setItemData] = useState({
+    itemId:null,
     date: new Date().toISOString().split('T')[0],
     description:"",
     comment: "",
@@ -84,6 +85,9 @@ export default function InvoiceAddEdit(props) {
   const [isPrintRequested, setIsPrintRequested] = useState(false)
   const [userName, setUserName] = useState('')
   const [password, setPassword] = useState('')
+  const [removeData, setRemoveData] = useState('')
+  const [printRequest, setPrintRequest] = useState(false)
+  const [removeRequest, setRemoveRequest] = useState(false)
 
   const navigate = useNavigate();
   const handleClick = () => {
@@ -155,11 +159,41 @@ export default function InvoiceAddEdit(props) {
 
   async function handlePermission (){
     const data={
-      userName,
-      password
+      username:userName,
+      password:password
     }
     let response = await services.handlePermission(data);
-
+    if (response.successCode === "SUCCESS" && (response.role ==="ADMIN"||response.role ==="ACCOUNTANT")) {
+      if(printRequest){
+        handleClose();
+        setIsPrintRequested(true)
+        alert.success("Permission Granted"); 
+      }
+      if(removeRequest){
+      const dataDelete = [...ItemDataList];
+      const index = removeData.tableData.id;
+      var deletedValue =dataDelete.splice(index, 1)[0]
+      // if(dataDelete.length ==0 ){
+      //   var response = await services.deleteInvoiceItem(deletedValue.ItemID)
+      //   if (response.statusCode == "Success") {
+      //     alert.success(response.message);}
+      //   setDeleteGTN(false);
+      //   navigate('/app/GoodTransferNote/listing');
+      // }
+      // if(deletedValue.agentGTNDetailID){
+      //   var response = await services.deleteAgentGTNItem(deletedValue.agentGTNDetailID)
+      //   if (response.statusCode == "Success") {
+      //     alert.success(response.message);}
+      // }
+      setItemDataList([...dataDelete]);
+      }
+      handleClose();
+      alert.success("Permission Granted"); 
+    }
+    else {
+      handleClose();
+      alert.error("Permission denied!");
+    }
   }
   async function getInvoiceDetails(invoiceId) {
     let response = await services.getInvoiceDetailsByID(invoiceId);
@@ -211,7 +245,7 @@ export default function InvoiceAddEdit(props) {
     if (isUpdate === true) {
       let updateModel = {
         invoiceDetail:{
-          invoiceId : parseInt(invoiceId),
+          invoiceId : parseInt(atob(invoiceId.toString())),
           reservationNum:values.reservationNum,
           roomNum : values.roomNum,
           arrivalDate: new Date(values.arrivalDate),
@@ -307,6 +341,7 @@ export default function InvoiceAddEdit(props) {
     setItemDataList([...dataDelete])
     setIsUpdate(true)
     setItemData({
+      itemId : data.itemId,
       date : data.date,
       description : data.description,
       comment : data.comment,
@@ -318,35 +353,32 @@ export default function InvoiceAddEdit(props) {
   }
 
   async function handleClickRemove(data) {
-    const dataDelete = [...ItemDataList];
-    const index = data.tableData.id;
-    var deletedValue =dataDelete.splice(index, 1)[0]
-    // if(dataDelete.length ==0 ){
-    //   var response = await services.deleteInvoiceItem(deletedValue.ItemID)
-    //   if (response.statusCode == "Success") {
-    //     alert.success(response.message);}
-    //   setDeleteGTN(false);
-    //   navigate('/app/GoodTransferNote/listing');
-    // }
-    // if(deletedValue.agentGTNDetailID){
-    //   var response = await services.deleteAgentGTNItem(deletedValue.agentGTNDetailID)
-    //   if (response.statusCode == "Success") {
-    //     alert.success(response.message);}
-    // }
-    setItemDataList([...dataDelete]);
+    setRemoveData(data);
+    if(data.itemId){
+      setRemoveRequest(true)
+      handleClickOpen()
+    }else{
+      const dataDelete = [...ItemDataList];
+      const index = data.tableData.id;
+      var deletedValue =dataDelete.splice(index, 1)[0]
+      setItemDataList([...dataDelete]);
+    }   
   }
 
   async function handleCompleteBilling(){
-    const data ={
-      isCompleteBill : true
+    const response = await services.handleCompleteBilling(atob(invoiceId.toString()));
+    if (response.statusCode === "SUCCESS") {
+      alert.success(response.message);
+      setIsCompleteBilling(true)
     }
-    const result = await services.handleCompleteBilling(invoiceId,data);
-    setIsCompleteBilling(true)
+    else {
+      alert.error(response.message);
+    }
   }
 
   async function handlePrintRequest(){
+    setPrintRequest(true)
     handleClickOpen();
-    setIsPrintRequested(true)
   }
 
   function cardTitle(titleName) {
@@ -366,6 +398,7 @@ export default function InvoiceAddEdit(props) {
 
   function addInvoiceData() {
     let dataModel = {
+      itemId: itemData.itemId,
       date: itemData.date,
       description:itemData.description,
       comment: itemData.comment,
@@ -890,7 +923,7 @@ export default function InvoiceAddEdit(props) {
                         />
                         <div hidden={true}>
                           <CreatePDF ref={componentRef}
-                            // companyData={sales} searchData={selectedSearchValues} total={totalNet.total}
+                            invoiceData={invoiceData} itemData={ItemDataList} 
                           />
                         </div>
                         &nbsp;
@@ -941,7 +974,7 @@ export default function InvoiceAddEdit(props) {
               <Button onClick={handleClose} color="primary">
                 Cancel
               </Button>
-              <Button onClick={handlePermission, handleClose} color="primary">
+              <Button onClick={handlePermission} color="primary">
                 Submit
               </Button>
             </DialogActions>
