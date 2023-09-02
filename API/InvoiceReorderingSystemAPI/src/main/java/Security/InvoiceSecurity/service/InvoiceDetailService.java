@@ -7,6 +7,7 @@ import Security.InvoiceSecurity.repository.ReorderedInvoiceDetailRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,18 +22,15 @@ public class InvoiceDetailService {
     public InvoiceDetailDTO saveInvoiceDetail(InvoiceDetailDTO invoiceDetail) {
         Integer invoiceId = invoiceDetail.getInvoiceId();
         String roomNum = invoiceDetail.getRoomNum();
-        boolean exist = invoiceDetailRepository.areAllInvoicesCompletedForRoom(roomNum);
+        //boolean exist = invoiceDetailRepository.areAllInvoicesCompletedForRoom(roomNum);
 
         if (invoiceId != null && invoiceDetailRepository.existsById(invoiceId)) {
             //invoiceDetail.equals(null);
             return invoiceDetail; // Return existing entity
         }
-        if(exist){
-            return invoiceDetail;
-        }
-        else {
+
             return invoiceDetailRepository.save(invoiceDetail);
-        }
+
     }
 
 //    public InvoiceDetailDTO getInvoiceDetailById(Integer invoiceId) {
@@ -148,6 +146,7 @@ public class InvoiceDetailService {
             invoiceDetail.setIsInvoiceGenerated(true);
             invoiceDetail.setIsInvoiceCompleted(true);
             invoiceDetail.setIsReordered(true);
+            invoiceDetail.setInvoiceGeneratedDate(LocalDateTime.now());
 
             // Update the existing InvoiceDetailDTO
             invoiceDetailRepository.save(invoiceDetail);
@@ -169,7 +168,7 @@ public class InvoiceDetailService {
         return null;
     }
 
-    public boolean areAllInvoicesCompletedForRoom(String roomNum) {
+    public Integer areAllInvoicesCompletedForRoom(String roomNum) {
         return invoiceDetailRepository.areAllInvoicesCompletedForRoom(roomNum);
     }
 
