@@ -49,11 +49,16 @@ public class InvoiceController {
     public ResponseEntity<InvoiceResponse> createInvoiceWithItems(@RequestBody InvoiceCreationRequest request) {
         InvoiceDetailDTO invoiceDetail = request.getInvoiceDetail();
         List<InvoiceItemDetailDTO> invoiceItems = request.getInvoiceItems();
+        String roomNum = invoiceDetail.getRoomNum();
+        Boolean exist = invoiceDetailService.areAllInvoicesCompletedForRoom(roomNum);
 
         InvoiceDetailDTO savedInvoiceDetail = invoiceDetailService.saveInvoiceDetail(invoiceDetail);
 
         if (invoiceDetail == null) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            InvoiceResponse invoiceResponse=new InvoiceResponse();
+            invoiceResponse.setMessage("Not Inserted");
+            invoiceResponse.setStatusCode("ERROR");
+            return new ResponseEntity<>(invoiceResponse ,HttpStatus.BAD_REQUEST);
         }
 
         if (invoiceItems != null) {
@@ -135,14 +140,15 @@ public class InvoiceController {
 
     // InvoiceController.java
     @PostMapping("/reorder-invoice/{invoiceId}")
-    public ResponseEntity<Integer> reorderInvoice(@PathVariable Integer invoiceId) {
+    public ResponseEntity<?> reorderInvoice(@PathVariable Integer invoiceId) {
         Integer reorderedInvoiceId = invoiceDetailService.markInvoiceGeneratedCompletedReordered(invoiceId);
 
         if (reorderedInvoiceId != null) {
             // Return the reorderedInvoiceId
             return ResponseEntity.ok(reorderedInvoiceId);
         } else {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Invoice is already reordered.");
         }
     }
 
@@ -159,6 +165,19 @@ public class InvoiceController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
     }
+
+    @PostMapping("/deactivate-item/{itemId}")
+    public ResponseEntity<String> deactivateItem(@PathVariable Integer itemId) {
+        boolean success = invoiceItemDetailService.deactivateItem(itemId);
+
+        if (success) {
+            return ResponseEntity.ok("Item deleted successfully.");
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Item already deleted or not exist");
+        }
+    }
+
 
 
 }
