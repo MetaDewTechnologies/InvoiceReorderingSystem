@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,7 +54,7 @@ public class InvoiceController {
         Integer exist = invoiceDetailService.areAllInvoicesCompletedForRoom(roomNum);
         if(exist > 0){
             InvoiceResponse invoiceResponse=new InvoiceResponse();
-            invoiceResponse.setMessage("Not Inserted");
+            invoiceResponse.setMessage("This room not available");
             invoiceResponse.setStatusCode("ERROR");
             return new ResponseEntity<>(invoiceResponse ,HttpStatus.OK);
         }
@@ -188,11 +189,38 @@ public class InvoiceController {
             return ResponseEntity.ok(invoiceResponse);
 
         } else {
-            InvoiceResponse invoiceResponse=new InvoiceResponse();
-            invoiceResponse.setMessage("Item not exist");
-            invoiceResponse.setStatusCode("ERROR");
-            return ResponseEntity.ok(invoiceResponse);
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body("Item already deleted or not exist");
         }
+    }
+
+    @PostMapping("/completed-invoices")
+    public ResponseEntity<List<InvoiceDetailDTO>> getCompletedInvoicesBetweenDates(
+            @RequestBody DateRange dateRange) {
+
+        LocalDateTime arrivalDate = dateRange.getArrivalDate();
+        LocalDateTime departureDate = dateRange.getDepartureDate();
+
+
+
+        if (dateRange.getArrivalDate() == null || dateRange.getDepartureDate() == null) {
+            // Handle missing or invalid date values
+            return ResponseEntity.badRequest().build();
+        }
+
+        List<InvoiceDetailDTO> completedInvoices = invoiceDetailService.getCompletedInvoicesBetweenDates(
+
+                arrivalDate,
+                departureDate
+        );
+
+        if (completedInvoices.isEmpty()) {
+            return ResponseEntity.ok(completedInvoices);
+        }
+        for(InvoiceDetailDTO invoiceDetail : completedInvoices){
+            invoiceDetail.setReorderedInvoiceDetail(null);
+        }
+        return ResponseEntity.ok(completedInvoices);
     }
 
 
