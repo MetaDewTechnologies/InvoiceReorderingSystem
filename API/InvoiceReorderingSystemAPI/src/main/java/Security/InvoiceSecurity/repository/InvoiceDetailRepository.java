@@ -33,7 +33,7 @@ public interface InvoiceDetailRepository extends JpaRepository<InvoiceDetailDTO,
 
 
     // Add a custom query to fetch reordered invoices within a date range with isInvoiceCompleted as true
-    @Query("SELECT i FROM InvoiceDetailDTO i WHERE i.isInvoiceCompleted = true AND " +
+    @Query("SELECT i FROM InvoiceDetailDTO i LEFT JOIN FETCH i.invoiceItems WHERE i.isInvoiceCompleted = true AND " +
             "i.arrivalDate >= :arrivalDate AND i.departureDate <= :departureDate")
     List<InvoiceDetailDTO> findCompletedInvoicesBetweenDates(
             @Param("arrivalDate") LocalDateTime arrivalDate,

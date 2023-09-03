@@ -193,7 +193,7 @@ public class InvoiceController {
     }
 
     @PostMapping("/completed-invoices")
-    public ResponseEntity<List<InvoiceDetailDTO>> getCompletedInvoicesBetweenDates(
+    public ResponseEntity<List<InvoiceWithItemsResponse>> getCompletedInvoicesBetweenDates(
             @RequestBody DateRange dateRange) {
 
         LocalDateTime arrivalDate = dateRange.getArrivalDate();
@@ -206,7 +206,7 @@ public class InvoiceController {
             return ResponseEntity.badRequest().build();
         }
 
-        List<InvoiceDetailDTO> completedInvoices = invoiceDetailService.getCompletedInvoicesBetweenDates(
+        List<InvoiceWithItemsResponse> completedInvoices = invoiceDetailService.getCompletedInvoicesBetweenDates(
 
                 arrivalDate,
                 departureDate
@@ -215,8 +215,10 @@ public class InvoiceController {
         if (completedInvoices.isEmpty()) {
             return ResponseEntity.ok(completedInvoices);
         }
-        for(InvoiceDetailDTO invoiceDetail : completedInvoices){
-            invoiceDetail.setReorderedInvoiceDetail(null);
+
+        for(InvoiceWithItemsResponse invoiceWithItemsResponse: completedInvoices){
+            invoiceWithItemsResponse.getInvoiceDetail().setReorderedInvoiceDetail(null);
+            //invoiceDetail.setReorderedInvoiceDetail(null);
         }
         return ResponseEntity.ok(completedInvoices);
     }
