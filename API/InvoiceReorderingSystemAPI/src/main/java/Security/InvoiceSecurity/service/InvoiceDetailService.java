@@ -172,4 +172,9 @@ public class InvoiceDetailService {
         return invoiceDetailRepository.areAllInvoicesCompletedForRoom(roomNum);
     }
 
+    public List<InvoiceDetailDTO> getCompletedInvoicesBetweenDates(LocalDateTime arrivalDate,LocalDateTime depatureDate){
+
+        return invoiceDetailRepository.findCompletedInvoicesBetweenDates(arrivalDate,depatureDate);
+    }
+
 }

@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,4 +31,12 @@ public interface InvoiceDetailRepository extends JpaRepository<InvoiceDetailDTO,
     @Query("SELECT COUNT(*) FROM InvoiceDetailDTO i WHERE i.roomNum = :roomNum AND i.isInvoiceCompleted = false")
     Integer areAllInvoicesCompletedForRoom(@Param("roomNum") String roomNum);
 
+
+    // Add a custom query to fetch reordered invoices within a date range with isInvoiceCompleted as true
+    @Query("SELECT i FROM InvoiceDetailDTO i WHERE i.isInvoiceCompleted = true AND " +
+            "i.arrivalDate >= :arrivalDate AND i.departureDate <= :departureDate")
+    List<InvoiceDetailDTO> findCompletedInvoicesBetweenDates(
+            @Param("arrivalDate") LocalDateTime arrivalDate,
+            @Param("departureDate") LocalDateTime departureDate
+    );
 }
