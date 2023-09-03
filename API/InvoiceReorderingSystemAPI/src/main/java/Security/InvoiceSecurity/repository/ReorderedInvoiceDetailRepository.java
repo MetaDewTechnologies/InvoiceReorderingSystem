@@ -11,5 +11,7 @@ import java.util.Optional;
 @Repository
 public interface ReorderedInvoiceDetailRepository extends JpaRepository<ReorderedInvoiceDetailDTO, Integer> {
     boolean existsByInvoiceDetailnew(InvoiceDetailDTO invoiceDetail);
+
+    boolean existsByInvoiceDetailnew_InvoiceId(Integer invoiceId);
 }
 

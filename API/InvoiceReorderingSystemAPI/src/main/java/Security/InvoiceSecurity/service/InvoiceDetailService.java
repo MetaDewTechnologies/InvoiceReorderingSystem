@@ -177,4 +177,35 @@ public class InvoiceDetailService {
         return invoiceDetailRepository.findCompletedInvoicesBetweenDates(arrivalDate,depatureDate);
     }
 
+    public boolean reorderInvoices(ReorderInvoiceRequest request) {
+        List<Integer> invoiceIds = request.getInvoiceIds();
+
+        for (Integer invoiceId : invoiceIds) {
+            Optional<InvoiceDetailDTO> invoiceDetailOptional = invoiceDetailRepository.findById(invoiceId);
+
+            if (invoiceDetailOptional.isPresent()) {
+                InvoiceDetailDTO invoiceDetail = invoiceDetailOptional.get();
+
+                if (!invoiceDetail.getIsReordered()) {
+                    // Mark the invoice as reordered
+                    invoiceDetail.setIsReordered(true);
+                    invoiceDetailRepository.save(invoiceDetail);
+
+                    // Create a new ReorderedInvoiceDetailDTO
+                    ReorderedInvoiceDetailDTO reorderedInvoiceDetail = new ReorderedInvoiceDetailDTO();
+                    if(reorderedInvoiceDetailRepository.existsByInvoiceDetailnew_InvoiceId(invoiceId)){
+                        return false;
+                    }else {
+                        reorderedInvoiceDetail.setInvoiceDetailnew(invoiceDetail);
+
+                        // Save the reordered invoiceDetail
+                        reorderedInvoiceDetailRepository.save(reorderedInvoiceDetail);
+                    }
+                }
+            }else{
+                return false;
+            }
+        }
+        return true;
+    }
 }
