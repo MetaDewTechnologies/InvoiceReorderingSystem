@@ -112,6 +112,11 @@ public class InvoiceController {
     @CrossOrigin
     @PostMapping("/update/{invoiceId}")
     public ResponseEntity<InvoiceResponse> updateInvoice(@PathVariable Integer invoiceId, @RequestBody InvoiceWithItemsRequest request) {
+       String roomNum = request.getInvoiceDetail().getRoomNum();
+        InvoiceWithItemsResponse invoiceWithItems = invoiceDetailService.getInvoiceWithItemsById(invoiceId);
+        String prevRoomNum = invoiceWithItems.getInvoiceDetail().getRoomNum();
+
+
         InvoiceWithItemsResponse updatedInvoice = invoiceDetailService.updateInvoice(invoiceId, request);
 
         InvoiceResponse updatedInvoiceResponse = new InvoiceResponse();
@@ -224,6 +229,21 @@ public class InvoiceController {
         return ResponseEntity.ok(completedInvoices);
     }
 
+    @PostMapping("/reorder-invoices")
+    public ResponseEntity<?> reorderInvoices(@RequestBody ReorderInvoiceRequest request) {
 
+        boolean success = invoiceDetailService.reorderInvoices(request);
+        if(success) {
+            InvoiceResponse invoiceResponse = new InvoiceResponse();
+            invoiceResponse.setMessage("Reordered Successfully");
+            invoiceResponse.setStatusCode("SUCCESS");
+            return ResponseEntity.ok(invoiceResponse);
+        }else{
+            InvoiceResponse invoiceResponse = new InvoiceResponse();
+            invoiceResponse.setMessage("Cannot Reorder");
+            invoiceResponse.setStatusCode("ERROR");
+            return ResponseEntity.ok(invoiceResponse);
+        }
+    }
 
 }
