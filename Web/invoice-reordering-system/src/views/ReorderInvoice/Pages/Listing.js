@@ -48,36 +48,6 @@ const useStyles = makeStyles(theme => ({
 }));
 
 export default function ReorderInvoice(props) {
-
-    const dummyData = [
-        {
-            invoiceID:'23',
-            reservationNumber:'203',
-            roomNumber: '200',
-            arrivalDate : '08/15/2023',
-            departureDate: '08/18/2023',
-            paymentType : 'Cash',
-            status : "Invoice Generated"
-        },
-        {
-            invoiceID:'24',
-            reservationNumber:'204',
-            roomNumber: '20',
-            arrivalDate : '08/15/2023',
-            departureDate: '08/18/2023',
-            paymentType : 'Cash',
-            status : "Process executed - No invoice"
-        },
-        {
-            invoiceID:'25',
-            reservationNumber:'205',
-            roomNumber: '22',
-            arrivalDate : '08/15/2023',
-            departureDate: '08/18/2023',
-            paymentType : 'Card',
-            status : "Reorder process pending"
-        },
-    ]
   const classes = useStyles();
   const [invoiceList, setInvoiceList] = useState({
     fromdate: '',
@@ -145,14 +115,36 @@ export default function ReorderInvoice(props) {
 
   async function SearchData() {
     let model = {
-      fromdate: new Date(formik.values.fromdate),
-      todate: new Date(formik.values.todate)
+      arrivalDate: new Date(formik.values.fromdate),
+      departureDate: new Date(formik.values.todate)
     };
-    var res = await services.getInvoicesByDateRange(model);
-    setInvoices(dummyData);
+    var response = await services.getInvoicesByDateRange(model);
+    const modifiedInvoices = response.map((invoice) => {
+      if (invoice.isInvoiceGenerated === true) {
+        return { ...invoice, status: 'Invoice Generated' };
+      }
+      else if(invoice.isReordered === true && invoice.isInvoiceGenerated === false){
+        return {...invoice, status:'Process Executed - Without Invoice'}
+      }
+      else if(invoice.isReordered === false){
+        return {...invoice, status:'Reorder Process Pending'}
+      }
+       else {
+        return invoice;
+      }
+    });
+    const modifiedDates = modifiedInvoices.map((item)=>{
+      return { ...item, 
+                arrivalDate: item.arrivalDate.split('T')[0],
+                departureDate: item.departureDate.split('T')[0]}
+    })
+    setInvoices(modifiedDates);
     setIsViewTable(false);
   }
-
+  async function handleReordering(){
+    const arrayOfInvoiceIds = selectedRows.map((obj) => obj.invoiceId);
+    const response = await services.reorderingInvoices(arrayOfInvoiceIds)
+  }
   const clearFields = () => {
     formik.resetForm();
   };
@@ -245,8 +237,8 @@ export default function ReorderInvoice(props) {
                         hidden={isViewTable}
                         title="Multiple Actions Preview"
                         columns={[
-                          { title: 'Reservation No.', align: 'left', field: 'reservationNumber' },
-                          { title: 'Room No.', align: 'center', field: 'roomNumber' },
+                          { title: 'Reservation No.', align: 'left', field: 'reservationNum' },
+                          { title: 'Room No.', align: 'center', field: 'roomNum' },
                           { title: 'Arrival Date', align: 'center', field: 'arrivalDate' },
                           { title: 'Departure Date', align: 'center', field: 'departureDate' },
                           { title: 'Payment Type', align: 'center', field: 'paymentType' },
@@ -263,7 +255,7 @@ export default function ReorderInvoice(props) {
                           actionsColumnIndex: -1,
                           selection:true,
                           selectionProps: rowData => ({
-                            disabled: rowData.status === 'Invoice Generated' || rowData.status ==='Process executed - No invoice',
+                            disabled: rowData.isReordered ===  true || rowData.isInvoiceGenerated === true,
                             color: 'primary'
                           })
                         }}
@@ -274,7 +266,7 @@ export default function ReorderInvoice(props) {
                     <Button
                     style={{color:selectedRows.length>0?'#FFFFFF':'', backgroundColor:selectedRows.length>0?"#489EE7":''}}
                     variant="contained"
-                    // onClick={() => AddFieldData()}
+                    onClick={() => handleReordering()}
                     disabled={selectedRows.length==0}
                     >
                     Reorder

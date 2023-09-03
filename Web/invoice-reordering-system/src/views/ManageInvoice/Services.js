@@ -7,7 +7,8 @@ export default {
     updateInvoice,
     handleCompleteBilling,
     handlePermission,
-    deleteInvoiceItem
+    deleteInvoiceItem,
+    handleCreateInvoice
 };
 
 async function saveInvoice(data) {
@@ -42,4 +43,8 @@ async function handlePermission(data){
 async function deleteInvoiceItem(itemId){
     const response = await CommonPostAxios('/api/v1/deactivate-item',itemId,null);
     return response;
+}
+
+async function handleCreateInvoice(invoiceId){
+    const response = await CommonPostAxios('/api/v1/reorder-invoice',invoiceId,null)
 }

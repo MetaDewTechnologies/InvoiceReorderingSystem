@@ -1,11 +1,15 @@
 import { CommonPost,CommonGetAxios,CommonPostAxios } from '../../helpers/HttpClient';
 
 export default{
-    getInvoicesByDateRange
+    getInvoicesByDateRange,
+    reorderingInvoices
 }
 
 async function getInvoicesByDateRange(data){
-    console.log("dta", data);
-    const response = await CommonPostAxios('', null, data);
+    const response = await CommonPostAxios('/api/v1/completed-invoices', null, data);
     return response;
+}
+
+async function reorderingInvoices(data){
+    const response = await CommonPostAxios('',null,data)
 }

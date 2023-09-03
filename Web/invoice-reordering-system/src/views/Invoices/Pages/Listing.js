@@ -47,35 +47,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 export default function Invoices(props) {
-    const dummyData = [
-        {
-            invoiceID:'23',
-            reservationNum:'203',
-            roomNum: '200',
-            arrivalDate : '08/15/2023',
-            departureDate: '08/18/2023',
-            paymentType : 'Cash',
-            status : "Invoice Generated"
-        },
-        {
-            invoiceID:'24',
-            reservationNum:'204',
-            roomNum: '20',
-            arrivalDate : '08/15/2023',
-            departureDate: '08/18/2023',
-            paymentType : 'Cash',
-            status : "Process executed - No invoice"
-        },
-        {
-            invoiceID:'25',
-            reservationNum:'205',
-            roomNum: '22',
-            arrivalDate : '08/15/2023',
-            departureDate: '08/18/2023',
-            paymentType : 'Card',
-            status : "Reorder process pending"
-        },
-    ]
+
   const classes = useStyles();
   const [invoiceList, setInvoiceList] = useState({
     fromdate: '',
@@ -143,11 +115,30 @@ export default function Invoices(props) {
 
   async function SearchData() {
     let model = {
-      fromdate: formik.values.fromdate,
-      todate: formik.values.todate
+      arrivalDate: new Date(formik.values.fromdate),
+      departureDate: new Date(formik.values.todate)
     };
-    // var res = await services.getInvoicesByDateRange(model);
-    setInvoices(dummyData);
+    var response = await services.getInvoicesByDateRange(model);
+    const modifiedInvoices = response.map((invoice) => {
+      if (invoice.isInvoiceGenerated === true) {
+        return { ...invoice, status: 'Invoice Generated' };
+      }
+      else if(invoice.isReordered === true && invoice.isInvoiceGenerated === false){
+        return {...invoice, status:'Process Executed - Without Invoice'}
+      }
+      else if(invoice.isReordered === false){
+        return {...invoice, status:'Reorder Process Pending'}
+      }
+       else {
+        return invoice;
+      }
+    });
+    const modifiedDates = modifiedInvoices.map((item)=>{
+      return { ...item, 
+                arrivalDate: item.arrivalDate.split('T')[0],
+                departureDate: item.departureDate.split('T')[0]}
+    })
+    setInvoices(modifiedDates);
     setIsViewTable(false);
   }
 
@@ -160,6 +151,7 @@ export default function Invoices(props) {
     setInvoices([]);
     setTotalNet({ total: 0 });
   };
+
   return (
     <Page className={classes.root} title="Invoices">
       <LoadingComponent />
@@ -253,12 +245,11 @@ export default function Invoices(props) {
                           { title: 'Room No.', align: 'center', field: 'roomNum' },
                           { title: 'Arrival Date', align: 'center', field: 'arrivalDate' },
                           { title: 'Departure Date', align: 'center', field: 'departureDate' },
-                          { title: 'Payment Type', align: 'center', field: 'paymentType' },
+                          { title: 'Customer Name', align: 'center', field: 'customerName' },
                           { title: 'Status', align: 'center', field: 'status'},
                           { title: 'Print',
                             align: 'center',
-                            field: 'action',
-                            render: (rowData)=>rowData &&(
+                            render: (rowData)=>(
                             <Box>
                             <ReactToPrint
                             documentTitle={"Kiha Beach"}

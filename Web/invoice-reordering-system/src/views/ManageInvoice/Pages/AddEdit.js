@@ -370,6 +370,11 @@ export default function InvoiceAddEdit(props) {
     }
   }
 
+  async function handleCreateInvoice(){
+    console.log("click pdf");
+    const response = await services.handleCreateInvoice(atob(invoiceId.toString()))
+  }
+
   async function handlePrintRequest(){
     setPrintRequest(true)
     handleClickOpen();
@@ -895,7 +900,7 @@ export default function InvoiceAddEdit(props) {
                         <Button
                           style={{color:isCompleteBilling?'#FFFFFF':'', backgroundColor:isCompleteBilling?"#489EE7":''}}
                           variant="contained"
-                          onClick={handlePrintRequest}
+                          onClick={()=>{handlePrintRequest();handleCreateInvoice();}}
                           disabled={!isCompleteBilling}
                         >
                           Print Request

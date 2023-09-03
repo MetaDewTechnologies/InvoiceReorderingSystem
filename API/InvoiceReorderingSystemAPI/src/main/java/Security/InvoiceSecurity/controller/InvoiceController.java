@@ -194,6 +194,7 @@ public class InvoiceController {
         }
     }
 
+    @CrossOrigin
     @PostMapping("/completed-invoices")
     public ResponseEntity<List<InvoiceDetailDTO>> getCompletedInvoicesBetweenDates(
             @RequestBody DateRange dateRange) {
