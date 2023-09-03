@@ -6,7 +6,8 @@ export default {
     GetInvoiceDetailsByRoomNumber,
     updateInvoice,
     handleCompleteBilling,
-    handlePermission
+    handlePermission,
+    deleteInvoiceItem
 };
 
 async function saveInvoice(data) {
@@ -35,5 +36,10 @@ async function handleCompleteBilling(invoiceId){
 
 async function handlePermission(data){
     const response = await CommonPostAxios('/api/v1/special-authenticate',null,data);
+    return response;
+}
+
+async function deleteInvoiceItem(itemId){
+    const response = await CommonPostAxios('/api/v1/deactivate-item',itemId,null);
     return response;
 }

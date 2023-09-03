@@ -67,12 +67,12 @@ const NavBar = ({ onMobileClose, openMobile }) => {
       screenID:1
     },
     {
-      routePath:"/app/manageInvoices/invoices",
+      routePath:"/app/invoices/listing",
       screenName:"Invoices",
       screenID:2
     }
   ]
-  if (role == 'ACCOUNTANT'){
+  if (role == 'ACCOUNTANT' || role == 'ADMIN' ){
     screenList.push(
       {
         routePath:"/app/reorderInvoices/listing",

@@ -173,22 +173,16 @@ export default function InvoiceAddEdit(props) {
       const dataDelete = [...ItemDataList];
       const index = removeData.tableData.id;
       var deletedValue =dataDelete.splice(index, 1)[0]
-      // if(dataDelete.length ==0 ){
-      //   var response = await services.deleteInvoiceItem(deletedValue.ItemID)
-      //   if (response.statusCode == "Success") {
-      //     alert.success(response.message);}
-      //   setDeleteGTN(false);
-      //   navigate('/app/GoodTransferNote/listing');
-      // }
-      // if(deletedValue.agentGTNDetailID){
-      //   var response = await services.deleteAgentGTNItem(deletedValue.agentGTNDetailID)
-      //   if (response.statusCode == "Success") {
-      //     alert.success(response.message);}
-      // }
-      setItemDataList([...dataDelete]);
-      }
+        var result = await services.deleteInvoiceItem(deletedValue.itemId)
+        if (result.statusCode == "SUCCESS") {
+          alert.success(result.message);}
+          else{
+            alert.success(result.message);
+          }
+          setItemDataList([...dataDelete]);
+      alert.success("Permission Granted");
       handleClose();
-      alert.success("Permission Granted"); 
+      } 
     }
     else {
       handleClose();

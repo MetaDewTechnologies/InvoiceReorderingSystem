@@ -168,15 +168,22 @@ public class InvoiceController {
         }
     }
 
+    @CrossOrigin
     @PostMapping("/deactivate-item/{itemId}")
-    public ResponseEntity<String> deactivateItem(@PathVariable Integer itemId) {
+    public ResponseEntity<?> deactivateItem(@PathVariable Integer itemId) {
         boolean success = invoiceItemDetailService.deactivateItem(itemId);
 
         if (success) {
-            return ResponseEntity.ok("Item deleted successfully.");
+            InvoiceResponse invoiceResponse=new InvoiceResponse();
+            invoiceResponse.setMessage("Successfully Deleted");
+            invoiceResponse.setStatusCode("SUCCESS");
+            return ResponseEntity.ok(invoiceResponse);
+
         } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Item already deleted or not exist");
+            InvoiceResponse invoiceResponse=new InvoiceResponse();
+            invoiceResponse.setMessage("Item not exist");
+            invoiceResponse.setStatusCode("ERROR");
+            return ResponseEntity.ok(invoiceResponse);
         }
     }
 

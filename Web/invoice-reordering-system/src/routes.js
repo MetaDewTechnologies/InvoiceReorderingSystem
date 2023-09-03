@@ -5,6 +5,7 @@ import ManageInvoiceListing from './views/ManageInvoice/Pages/Listing';
 import DashboardLayout from './layouts/DashboardLayout'
 import InvoiceAddEdit from './views/ManageInvoice/Pages/AddEdit';
 import ReorderInvoice from './views/ReorderInvoice/Pages/Listing'
+import Invoices from './views/Invoices/Pages/Listing';
 
 const routes = (isLoggedIn, role )=> [
     {
@@ -23,7 +24,13 @@ const routes = (isLoggedIn, role )=> [
             {
               path: 'reorderInvoices',
               children : [
-                {path:'listing', element:role == 'ACCOUNTANT' ? <ReorderInvoice />:''},
+                {path:'listing', element:role == 'ACCOUNTANT'||'ADMIN' ? <ReorderInvoice />:''},
+              ]
+            },
+            {
+              path: 'invoices',
+              children : [
+                {path:'listing', element:<Invoices />},
               ]
             }
         ]
