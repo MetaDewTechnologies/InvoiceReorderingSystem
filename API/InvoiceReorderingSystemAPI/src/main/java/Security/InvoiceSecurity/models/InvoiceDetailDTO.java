@@ -88,6 +88,11 @@ public class InvoiceDetailDTO {
             nullable = false
     )
     private Boolean isReordered;
+    @Column(
+            name="invoice_generated_date"
+
+    )
+    private LocalDateTime invoiceGeneratedDate;
     @JsonIgnore
     @OneToMany(mappedBy = "invoiceDetail", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<InvoiceItemDetailDTO> invoiceItems;

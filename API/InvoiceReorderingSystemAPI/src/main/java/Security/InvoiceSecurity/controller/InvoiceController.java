@@ -50,29 +50,37 @@ public class InvoiceController {
         InvoiceDetailDTO invoiceDetail = request.getInvoiceDetail();
         List<InvoiceItemDetailDTO> invoiceItems = request.getInvoiceItems();
         String roomNum = invoiceDetail.getRoomNum();
-        Boolean exist = invoiceDetailService.areAllInvoicesCompletedForRoom(roomNum);
-
-        InvoiceDetailDTO savedInvoiceDetail = invoiceDetailService.saveInvoiceDetail(invoiceDetail);
-
-        if (invoiceDetail == null) {
+        Integer exist = invoiceDetailService.areAllInvoicesCompletedForRoom(roomNum);
+        if(exist > 0){
             InvoiceResponse invoiceResponse=new InvoiceResponse();
             invoiceResponse.setMessage("Not Inserted");
             invoiceResponse.setStatusCode("ERROR");
             return new ResponseEntity<>(invoiceResponse ,HttpStatus.BAD_REQUEST);
         }
+        else{
+            InvoiceDetailDTO savedInvoiceDetail = invoiceDetailService.saveInvoiceDetail(invoiceDetail);
 
-        if (invoiceItems != null) {
-            for (InvoiceItemDetailDTO item : invoiceItems) {
-                item.setInvoiceDetail(savedInvoiceDetail);
-                invoiceItemDetailService.saveInvoiceItemDetail(item);
+            if (invoiceDetail == null) {
+                InvoiceResponse invoiceResponse=new InvoiceResponse();
+                invoiceResponse.setMessage("Not Inserted");
+                invoiceResponse.setStatusCode("ERROR");
+                return new ResponseEntity<>(invoiceResponse ,HttpStatus.BAD_REQUEST);
             }
+
+            if (invoiceItems != null) {
+                for (InvoiceItemDetailDTO item : invoiceItems) {
+                    item.setInvoiceDetail(savedInvoiceDetail);
+                    invoiceItemDetailService.saveInvoiceItemDetail(item);
+                }
+            }
+            InvoiceResponse invoiceResponse=new InvoiceResponse();
+            invoiceResponse.setMessage("Successfully Inserted");
+            invoiceResponse.setStatusCode("SUCCESS");
+
+
+            return new ResponseEntity<>(invoiceResponse, HttpStatus.CREATED);
         }
-        InvoiceResponse invoiceResponse=new InvoiceResponse();
-        invoiceResponse.setMessage("Successfully Inserted");
-        invoiceResponse.setStatusCode("SUCCESS");
 
-
-        return new ResponseEntity<>(invoiceResponse, HttpStatus.CREATED);
     }
 
     @CrossOrigin
@@ -149,7 +157,7 @@ public class InvoiceController {
             // Return the reorderedInvoiceId
             return ResponseEntity.ok(reorderedInvoiceId);
         } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            return ResponseEntity.status(HttpStatus.OK)
                     .body("Invoice is already reordered.");
         }
     }
