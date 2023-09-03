@@ -171,7 +171,7 @@ export default function ManageInvoiceListing(props) {
                       { title: 'Room Num', field: 'roomNum' },
                       { title: 'Arrival Date', field: 'arrivalDate' },
                       { title: 'Departure Date', field: 'departureDate' },
-                      { title: 'Balance Payments', field: 'payments' },
+                      // { title: 'Balance Payments', field: 'payments' },
                       { title: 'Customer Name', field: 'customerName' },
                     ]}
                     data={invoiceData}

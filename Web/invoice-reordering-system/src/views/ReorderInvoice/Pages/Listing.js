@@ -120,16 +120,6 @@ export default function ReorderInvoice(props) {
     setInvoices([])
   }, [formik.values.fromdate || formik.values.todate]);
 
-  async function getPermission() {
-    // var permissions = await authService.getPermissionsByScreen(screenCode);
-    // var isAuthorized = permissions.find(
-    //   p => p.permissionCode == 'VIEWINPUTCOMPANYWISESALESREPORT'
-    // );
-    // if (isAuthorized === undefined) {
-    //   navigate('/404');
-    // }
-  }
-
   const handleSelectionChange = (rows) => {
     setSelectedRows(rows);
   };
@@ -155,22 +145,16 @@ export default function ReorderInvoice(props) {
 
   async function SearchData() {
     let model = {
-      fromdate: formik.values.fromdate,
-      todate: formik.values.todate
+      fromdate: new Date(formik.values.fromdate),
+      todate: new Date(formik.values.todate)
     };
-    // var res = await services.getInvoicesByDateRange(model);
+    var res = await services.getInvoicesByDateRange(model);
     setInvoices(dummyData);
     setIsViewTable(false);
   }
 
   const clearFields = () => {
-
     formik.resetForm();
-    setInvoiceList({
-      ...invoiceList
-    })
-    setInvoices([]);
-    setTotalNet({ total: 0 });
   };
   return (
     <Page className={classes.root} title="Reorder Invoices">

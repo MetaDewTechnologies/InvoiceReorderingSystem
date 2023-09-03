@@ -55,7 +55,7 @@ public class InvoiceController {
             InvoiceResponse invoiceResponse=new InvoiceResponse();
             invoiceResponse.setMessage("Not Inserted");
             invoiceResponse.setStatusCode("ERROR");
-            return new ResponseEntity<>(invoiceResponse ,HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(invoiceResponse ,HttpStatus.OK);
         }
         else{
             InvoiceDetailDTO savedInvoiceDetail = invoiceDetailService.saveInvoiceDetail(invoiceDetail);
@@ -64,7 +64,7 @@ public class InvoiceController {
                 InvoiceResponse invoiceResponse=new InvoiceResponse();
                 invoiceResponse.setMessage("Not Inserted");
                 invoiceResponse.setStatusCode("ERROR");
-                return new ResponseEntity<>(invoiceResponse ,HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>(invoiceResponse ,HttpStatus.OK);
             }
 
             if (invoiceItems != null) {
