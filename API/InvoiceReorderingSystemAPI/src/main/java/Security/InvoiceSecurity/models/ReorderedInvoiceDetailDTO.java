@@ -12,9 +12,17 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Entity
 @Table(name = "reordered_invoice_details")
+@SequenceGenerator(
+        name = "reorder_invoice_id_sequence",
+        sequenceName = "reorder_invoice_id_sequence",
+        allocationSize = 1
+)
 public class ReorderedInvoiceDetailDTO {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "reordered_invoice_id_sequence")
+    @GeneratedValue(
+            strategy = GenerationType.SEQUENCE,
+            generator = "reorder_invoice_id_sequence"
+    )
     @Column(name = "reordered_invoice_id")
     private Integer reorderedInvoiceId;
 
