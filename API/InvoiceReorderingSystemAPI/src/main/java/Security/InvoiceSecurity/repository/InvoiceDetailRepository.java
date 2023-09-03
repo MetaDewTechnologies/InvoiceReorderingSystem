@@ -27,7 +27,7 @@ public interface InvoiceDetailRepository extends JpaRepository<InvoiceDetailDTO,
 //            "FROM InvoiceDetailDTO i WHERE i.roomNum = :roomNum")
 //    boolean areAllInvoicesCompletedForRoom(@Param("roomNum") String roomNum);
 
-    @Query("SELECT COUNT(i) = COUNT(*) FROM InvoiceDetailDTO i WHERE i.roomNum = :roomNum AND i.isInvoiceCompleted = true")
-    boolean areAllInvoicesCompletedForRoom(@Param("roomNum") String roomNum);
+    @Query("SELECT COUNT(*) FROM InvoiceDetailDTO i WHERE i.roomNum = :roomNum AND i.isInvoiceCompleted = false")
+    Integer areAllInvoicesCompletedForRoom(@Param("roomNum") String roomNum);
 
 }
