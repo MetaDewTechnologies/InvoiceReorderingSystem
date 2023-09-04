@@ -229,6 +229,7 @@ public class InvoiceController {
         return ResponseEntity.ok(completedInvoices);
     }
 
+    @CrossOrigin
     @PostMapping("/reorder-invoices")
     public ResponseEntity<?> reorderInvoices(@RequestBody ReorderInvoiceRequest request) {
 

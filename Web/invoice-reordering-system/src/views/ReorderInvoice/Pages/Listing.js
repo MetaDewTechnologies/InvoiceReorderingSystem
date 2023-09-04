@@ -26,6 +26,8 @@ import { Autocomplete } from '@material-ui/lab';
 // import authService from '../../../../utils/permissionAuth';
 import Chip from '@material-ui/core/Chip';
 import LineWeightIcon from '@material-ui/icons/LineWeight';
+import { useAlert } from "react-alert";
+
 const useStyles = makeStyles(theme => ({
   root: {
     backgroundColor: theme.palette.background.dark,
@@ -48,6 +50,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 export default function ReorderInvoice(props) {
+  const alert = useAlert();
   const classes = useStyles();
   const [invoiceList, setInvoiceList] = useState({
     fromdate: '',
@@ -121,10 +124,10 @@ export default function ReorderInvoice(props) {
     var response = await services.getInvoicesByDateRange(model);
     const modifiedInvoices = response.map((invoice) => {
       if (invoice.isInvoiceGenerated === true) {
-        return { ...invoice, status: 'Invoice Generated' };
+        return { ...invoice, status: 'Invoice Printed' };
       }
       else if(invoice.isReordered === true && invoice.isInvoiceGenerated === false){
-        return {...invoice, status:'Process Executed - Without Invoice'}
+        return {...invoice, status:'Process Executed - To Be Printed'}
       }
       else if(invoice.isReordered === false){
         return {...invoice, status:'Reorder Process Pending'}
@@ -143,7 +146,16 @@ export default function ReorderInvoice(props) {
   }
   async function handleReordering(){
     const arrayOfInvoiceIds = selectedRows.map((obj) => obj.invoiceId);
-    const response = await services.reorderingInvoices(arrayOfInvoiceIds)
+    const model ={
+      invoiceIds:arrayOfInvoiceIds
+    }
+    const response = await services.reorderingInvoices(model)
+    if(response.statusCode==='SUCCESS'){
+      alert.success(response.message);
+    }else{
+      alert.success("Error in reordering");
+    }
+    clearFields();
   }
   const clearFields = () => {
     formik.resetForm();

@@ -11,5 +11,6 @@ async function getInvoicesByDateRange(data){
 }
 
 async function reorderingInvoices(data){
-    const response = await CommonPostAxios('',null,data)
+    const response = await CommonPostAxios('/api/v1/reorder-invoices',null,data)
+    return response;
 }

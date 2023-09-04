@@ -24,6 +24,7 @@ import * as Yup from 'yup';
 import { LoadingComponent } from '../../../utils/newLoader';
 import CreatePDF from '../../ManageInvoice/Pages/CreatePDF';
 import ReactToPrint from 'react-to-print';
+import { useReactToPrint } from 'react-to-print';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -57,7 +58,7 @@ export default function Invoices(props) {
   const componentRef = useRef();
   const [isViewTable, setIsViewTable] = useState(true);
   const [invoices, setInvoices] = useState([]);
-  const [selectedRows, setSelectedRows] = useState([]);
+  const [selectedRows, setSelectedRows] = useState('');
 
   const ProductSaveSchema = Yup.object().shape({
     fromdate: Yup.date().required('From Date is required'),
@@ -90,10 +91,6 @@ export default function Invoices(props) {
     setInvoices([])
   }, [formik.values.fromdate || formik.values.todate]);
 
-  const handleSelectionChange = (rows) => {
-    setSelectedRows(rows);
-  };
-
   function handleChange(e) {
     const target = e.target;
     const value = target.value;
@@ -121,10 +118,10 @@ export default function Invoices(props) {
     var response = await services.getInvoicesByDateRange(model);
     const modifiedInvoices = response.map((invoice) => {
       if (invoice.isInvoiceGenerated === true) {
-        return { ...invoice, status: 'Invoice Generated' };
+        return { ...invoice, status: 'Printed' };
       }
       else if(invoice.isReordered === true && invoice.isInvoiceGenerated === false){
-        return {...invoice, status:'Process Executed - Without Invoice'}
+        return {...invoice, status:'To Be Printed'}
       }
       else if(invoice.isReordered === false){
         return {...invoice, status:'Reorder Process Pending'}
@@ -151,7 +148,17 @@ export default function Invoices(props) {
     setInvoices([]);
     setTotalNet({ total: 0 });
   };
+ const customHandlePrint =(row) =>{
+    setSelectedRows(row);
+ }
 
+ useEffect(() => {
+  handlePrint();
+}, [selectedRows]);
+
+  const handlePrint = useReactToPrint({
+    content: () => componentRef.current,
+  });
   return (
     <Page className={classes.root} title="Invoices">
       <LoadingComponent />
@@ -247,27 +254,6 @@ export default function Invoices(props) {
                           { title: 'Departure Date', align: 'center', field: 'departureDate' },
                           { title: 'Customer Name', align: 'center', field: 'customerName' },
                           { title: 'Status', align: 'center', field: 'status'},
-                          { title: 'Print',
-                            align: 'center',
-                            render: (rowData)=>(
-                            <Box>
-                            <ReactToPrint
-                            documentTitle={"Kiha Beach"}
-                            trigger={() => <Button
-                              color="primary"
-                              id="btnRecord"
-                              variant="contained"
-                            >
-                              PDF
-                            </Button>}
-                            content={() => componentRef.current}
-                          />
-                          <div hidden={true}>
-                            <CreatePDF ref={componentRef}
-                              invoiceData={rowData} itemData={[]} 
-                            />
-                          </div>
-                          </Box>)}
                         ]}
                         data={invoices}
                         title="Invoice List"
@@ -279,9 +265,23 @@ export default function Invoices(props) {
                           headerStyle: { textAlign: "left", height: '1%' },
                           actionsColumnIndex: -1,
                         }}
+                        actions={[
+                          {
+                            icon: 'print',
+                            tooltip: 'Print Invoice',
+                            onClick: (event, rowData) => { customHandlePrint(rowData) }
+                          },
+                        ]}
                       />
                     </Box>
                     </Box>
+                    {selectedRows !==""?
+                    <div hidden={true}>
+                    <CreatePDF ref={componentRef}
+                      invoiceData={selectedRows!=="" ?selectedRows:''} itemData={[]} 
+                    />
+                  </div>:''
+                    }                   
                 </CardContent>
                 </PerfectScrollbar>
               </Card>
