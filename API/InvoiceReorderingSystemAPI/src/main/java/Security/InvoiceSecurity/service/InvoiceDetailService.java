@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -172,9 +173,21 @@ public class InvoiceDetailService {
         return invoiceDetailRepository.areAllInvoicesCompletedForRoom(roomNum);
     }
 
-    public List<InvoiceDetailDTO> getCompletedInvoicesBetweenDates(LocalDateTime arrivalDate,LocalDateTime depatureDate){
+    public List<InvoiceWithItemsResponse> getCompletedInvoicesBetweenDates(LocalDateTime arrivalDate,LocalDateTime departureDate){
+        List<InvoiceDetailDTO> invoiceDetailDTOList = invoiceDetailRepository.findCompletedInvoicesBetweenDates(arrivalDate, departureDate);
+        List<InvoiceWithItemsResponse> responseList = new ArrayList<>();
 
-        return invoiceDetailRepository.findCompletedInvoicesBetweenDates(arrivalDate,depatureDate);
+        for (InvoiceDetailDTO invoiceDetail : invoiceDetailDTOList) {
+            Integer id = invoiceDetail.getInvoiceId();
+            List<InvoiceItemDetailDTO> invoiceItemDetailDTOList = invoiceItemDetailRepository.findByInvoiceDetail_InvoiceId(id);
+
+            // Create an InvoiceWithItemsResponse object and add it to the responseList
+            InvoiceWithItemsResponse response = new InvoiceWithItemsResponse(invoiceDetail, invoiceItemDetailDTOList);
+            responseList.add(response);
+        }
+
+        return responseList;
+
     }
 
     public boolean reorderInvoices(ReorderInvoiceRequest request) {
