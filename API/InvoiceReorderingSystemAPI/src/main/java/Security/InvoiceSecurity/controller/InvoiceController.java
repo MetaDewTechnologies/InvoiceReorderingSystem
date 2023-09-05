@@ -112,21 +112,42 @@ public class InvoiceController {
     @CrossOrigin
     @PostMapping("/update/{invoiceId}")
     public ResponseEntity<InvoiceResponse> updateInvoice(@PathVariable Integer invoiceId, @RequestBody InvoiceWithItemsRequest request) {
-       String roomNum = request.getInvoiceDetail().getRoomNum();
+
         InvoiceWithItemsResponse invoiceWithItems = invoiceDetailService.getInvoiceWithItemsById(invoiceId);
-        String prevRoomNum = invoiceWithItems.getInvoiceDetail().getRoomNum();
-
-
-        InvoiceWithItemsResponse updatedInvoice = invoiceDetailService.updateInvoice(invoiceId, request);
-
-        InvoiceResponse updatedInvoiceResponse = new InvoiceResponse();
-
-        if (updatedInvoice == null) {
+        if (invoiceWithItems == null) {
+            InvoiceResponse updatedInvoiceResponse = new InvoiceResponse();
             updatedInvoiceResponse.setStatusCode("ERROR");
             updatedInvoiceResponse.setMessage("Not updated.No such Invoice ID");
             return new ResponseEntity<>(updatedInvoiceResponse,HttpStatus.NOT_FOUND);
         }
+        String roomNum = request.getInvoiceDetail().getRoomNum();
+        String prevRoomNum = invoiceWithItems.getInvoiceDetail().getRoomNum();
 
+        if (prevRoomNum.equals(roomNum)) {
+            InvoiceWithItemsResponse updatedInvoice = invoiceDetailService.updateInvoice(invoiceId, request);
+
+            InvoiceResponse updatedInvoiceResponse = new InvoiceResponse();
+            if (updatedInvoice == null) {
+                updatedInvoiceResponse.setStatusCode("ERROR");
+                updatedInvoiceResponse.setMessage("Not updated.No such Invoice ID");
+                return new ResponseEntity<>(updatedInvoiceResponse,HttpStatus.NOT_FOUND);
+            }
+            updatedInvoiceResponse.setStatusCode("SUCCESS");
+            updatedInvoiceResponse.setMessage("Updated Successfully.");
+
+            return new ResponseEntity<>(updatedInvoiceResponse, HttpStatus.OK);
+
+//
+        }
+        Integer exist = invoiceDetailService.areAllInvoicesCompletedForRoom(roomNum);
+        if(exist > 0){
+            InvoiceResponse invoiceResponse=new InvoiceResponse();
+            invoiceResponse.setMessage("This room not available");
+            invoiceResponse.setStatusCode("ERROR");
+            return new ResponseEntity<>(invoiceResponse ,HttpStatus.BAD_REQUEST);
+        }
+       // InvoiceWithItemsResponse updatedInvoice = invoiceDetailService.updateInvoice(invoiceId, request);
+        InvoiceResponse updatedInvoiceResponse = new InvoiceResponse();
         updatedInvoiceResponse.setStatusCode("SUCCESS");
         updatedInvoiceResponse.setMessage("Updated Successfully.");
 
@@ -161,8 +182,7 @@ public class InvoiceController {
             // Return the reorderedInvoiceId
             return ResponseEntity.ok(reorderedInvoiceId);
         } else {
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body("Invoice is already reordered.");
+            return ResponseEntity.ok(invoiceId);
         }
     }
 
