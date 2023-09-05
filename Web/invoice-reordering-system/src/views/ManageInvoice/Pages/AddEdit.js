@@ -89,7 +89,7 @@ export default function InvoiceAddEdit(props) {
   const [printRequest, setPrintRequest] = useState(false)
   const [removeRequest, setRemoveRequest] = useState(false)
   const [disableIsComplete, setDisableIsComplete] = useState(false)
-  const [invoiceID, setInvoiceID] = useState()
+  const [invoiceID, setInvoiceID] = useState('')
   const navigate = useNavigate();
   const handleClick = () => {
     navigate('/app/manageInvoices/listing/');
@@ -892,7 +892,7 @@ export default function InvoiceAddEdit(props) {
                         />
                         <div hidden={true}>
                           <CreatePDF ref={componentRef}
-                            invoiceData={invoiceData} itemData={ItemDataList} 
+                            invoiceData={invoiceData} itemData={ItemDataList} invoiceID={invoiceID} 
                           />
                         </div>
                         &nbsp;

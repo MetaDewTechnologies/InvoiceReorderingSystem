@@ -116,7 +116,6 @@ export default function Invoices(props) {
       departureDate: new Date(formik.values.todate)
     };
     var response = await services.getInvoicesByDateRange(model);
-    console.log("response",response);
     const modifiedInvoices = response.map((invoice) => {
       if (invoice.invoiceDetail.isInvoiceGenerated === true) {
         return { ...invoice, status: 'Printed' };
@@ -162,7 +161,6 @@ export default function Invoices(props) {
   };
  async function customHandlePrint(row){
     const response = await services.handleCreateInvoice(row.invoiceId)
-    console.log(response);
     setSelectedRows(row);
  }
 
