@@ -88,16 +88,13 @@ export default function InvoiceAddEdit(props) {
   const [removeData, setRemoveData] = useState('')
   const [printRequest, setPrintRequest] = useState(false)
   const [removeRequest, setRemoveRequest] = useState(false)
-
+  const [disableIsComplete, setDisableIsComplete] = useState(false)
+  const [invoiceID, setInvoiceID] = useState()
   const navigate = useNavigate();
   const handleClick = () => {
     navigate('/app/manageInvoices/listing/');
   }
 
-  const [permissionList, setPermissions] = useState({
-    isGroupFilterEnabled: false,
-    isFactoryFilterEnabled: false
-  });
   const alert = useAlert();
   const { invoiceId } = useParams();
   let decrypted = 0;
@@ -127,35 +124,6 @@ export default function InvoiceAddEdit(props) {
   const handleClose = () => {
     setOpen(false);
   };
-
-  // async function getPermissions() {
-  //   var permissions = await authService.getPermissionsByScreen(screenCode);
-  //   var isAuthorized = permissions.find(p => p.permissionCode == 'ADDEDITROUTE');
-
-  //   if (isAuthorized === undefined) {
-  //     navigate('/404');
-  //   }
-
-  //   var isGroupFilterEnabled = permissions.find(p => p.permissionCode == 'GROUPDROPDOWN');
-  //   var isFactoryFilterEnabled = permissions.find(p => p.permissionCode == 'FACTORYDROPDOWN');
-
-  //   setPermissions({
-  //     ...permissionList,
-  //     isGroupFilterEnabled: isGroupFilterEnabled !== undefined,
-  //     isFactoryFilterEnabled: isFactoryFilterEnabled !== undefined,
-  //   });
-
-  //   setRoute({
-  //     ...route,
-  //     groupID: parseInt(tokenService.getGroupIDFromToken()),
-  //     factoryID: parseInt(tokenService.getFactoryIDFromToken())
-  //   })
-  // }
-
-  // async function getProductsForDropDown() {
-  //   const product = await services.getProductsByFactoryID(invoiceData.factoryID);
-  //   setProducts(product);
-  // }
 
   async function handlePermission (){
     const data={
@@ -364,6 +332,7 @@ export default function InvoiceAddEdit(props) {
     if (response.statusCode === "SUCCESS") {
       alert.success(response.message);
       setIsCompleteBilling(true)
+      setDisableIsComplete(true)
     }
     else {
       alert.error(response.message);
@@ -371,8 +340,8 @@ export default function InvoiceAddEdit(props) {
   }
 
   async function handleCreateInvoice(){
-    console.log("click pdf");
     const response = await services.handleCreateInvoice(atob(invoiceId.toString()))
+    setInvoiceID(response)
   }
 
   async function handlePrintRequest(){
@@ -890,9 +859,10 @@ export default function InvoiceAddEdit(props) {
                       {isUpdate === true? (
                       <Box display="flex" justifyContent="flex-start" p={2}>
                         <Button
-                          style={{color:'#FFFFFF', backgroundColor:"#489EE7"}}
+                          style={{color:disableIsComplete?'':'#FFFFFF', backgroundColor:disableIsComplete?'':"#489EE7"}}
                           variant="contained"
                           onClick={handleCompleteBilling}
+                          disabled={disableIsComplete}
                         >
                           Complete Billing
                         </Button>

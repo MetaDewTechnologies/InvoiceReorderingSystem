@@ -65,11 +65,6 @@ const NavBar = ({ onMobileClose, openMobile }) => {
       routePath:"/app/manageInvoices/listing",
       screenName:"Bill Registration / Update",
       screenID:1
-    },
-    {
-      routePath:"/app/invoices/listing",
-      screenName:"Invoices",
-      screenID:2
     }
   ]
   if (role == 'ACCOUNTANT' || role == 'ADMIN' ){
@@ -78,6 +73,11 @@ const NavBar = ({ onMobileClose, openMobile }) => {
         routePath:"/app/reorderInvoices/listing",
         screenName:"Reorder Invoices",
         screenID:3
+      },
+      {
+        routePath:"/app/invoices/listing",
+        screenName:"Invoices",
+        screenID:2
       }
     )
   }

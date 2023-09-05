@@ -30,7 +30,7 @@ const routes = (isLoggedIn, role )=> [
             {
               path: 'invoices',
               children : [
-                {path:'listing', element:<Invoices />},
+                {path:'listing', element:role == 'ACCOUNTANT'||'ADMIN' ? <Invoices />:''},
               ]
             }
         ]

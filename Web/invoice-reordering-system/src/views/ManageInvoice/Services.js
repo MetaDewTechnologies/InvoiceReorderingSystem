@@ -47,4 +47,5 @@ async function deleteInvoiceItem(itemId){
 
 async function handleCreateInvoice(invoiceId){
     const response = await CommonPostAxios('/api/v1/reorder-invoice',invoiceId,null)
+    return response
 }

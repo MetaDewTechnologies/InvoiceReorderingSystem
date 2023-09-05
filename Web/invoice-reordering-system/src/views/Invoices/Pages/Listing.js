@@ -116,14 +116,15 @@ export default function Invoices(props) {
       departureDate: new Date(formik.values.todate)
     };
     var response = await services.getInvoicesByDateRange(model);
+    console.log("response",response);
     const modifiedInvoices = response.map((invoice) => {
-      if (invoice.isInvoiceGenerated === true) {
+      if (invoice.invoiceDetail.isInvoiceGenerated === true) {
         return { ...invoice, status: 'Printed' };
       }
-      else if(invoice.isReordered === true && invoice.isInvoiceGenerated === false){
+      else if(invoice.invoiceDetail.isReordered === true && invoice.invoiceDetail.isInvoiceGenerated === false){
         return {...invoice, status:'To Be Printed'}
       }
-      else if(invoice.isReordered === false){
+      else if(invoice.invoiceDetail.isReordered === false){
         return {...invoice, status:'Reorder Process Pending'}
       }
        else {
@@ -132,8 +133,19 @@ export default function Invoices(props) {
     });
     const modifiedDates = modifiedInvoices.map((item)=>{
       return { ...item, 
-                arrivalDate: item.arrivalDate.split('T')[0],
-                departureDate: item.departureDate.split('T')[0]}
+                invoiceId: item.invoiceDetail.invoiceId,
+                reservationNum: item.invoiceDetail.reservationNum,
+                roomNum: item.invoiceDetail.roomNum,
+                customerName: item.invoiceDetail.customerName,
+                arrivalDate: item.invoiceDetail.arrivalDate.split('T')[0],
+                departureDate: item.invoiceDetail.departureDate.split('T')[0],
+                invoiceItems : item.invoiceItems.map((item)=>{
+                  return{
+                    ...item,
+                    debit: item.paymentType === "Debit" ? item.amount:'',
+                    credit : item.paymentType === "Credit" ? item.amount:'',
+                  }
+                })}
     })
     setInvoices(modifiedDates);
     setIsViewTable(false);
@@ -148,12 +160,16 @@ export default function Invoices(props) {
     setInvoices([]);
     setTotalNet({ total: 0 });
   };
- const customHandlePrint =(row) =>{
+ async function customHandlePrint(row){
+    const response = await services.handleCreateInvoice(row.invoiceId)
+    console.log(response);
     setSelectedRows(row);
  }
 
  useEffect(() => {
-  handlePrint();
+   if(selectedRows !=""){
+    handlePrint();
+   }
 }, [selectedRows]);
 
   const handlePrint = useReactToPrint({
@@ -269,16 +285,16 @@ export default function Invoices(props) {
                           {
                             icon: 'print',
                             tooltip: 'Print Invoice',
-                            onClick: (event, rowData) => { customHandlePrint(rowData) }
+                            onClick: (event, rowData) => { customHandlePrint (rowData) }
                           },
                         ]}
                       />
                     </Box>
                     </Box>
-                    {selectedRows !==""?
+                    {selectedRows.invoiceDetail !==""?
                     <div hidden={true}>
                     <CreatePDF ref={componentRef}
-                      invoiceData={selectedRows!=="" ?selectedRows:''} itemData={[]} 
+                      invoiceData={selectedRows!=="" ?selectedRows:''} itemData={selectedRows.invoiceItems?selectedRows.invoiceItems:[]} 
                     />
                   </div>:''
                     }                   

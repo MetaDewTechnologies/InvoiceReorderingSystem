@@ -42,7 +42,7 @@ export default class ComponentToPrint extends React.Component {
                 <div className="col" align={'left'} style={{ paddingBottom: '10px' }}><b>Cashier: </b> {""}</div>
                 <div className="col" align={'left'} style={{ paddingBottom: '10px' }}><b>Invoice Date: </b> {new Date().toISOString().split('T')[0]}</div>
                 <h3 style={{ paddingBottom: '10px' }}><left>{invoiceData.customerName}</left></h3>
-                <h3><left>COPY OF INVOICE:</left></h3>
+                <h3><left>COPY OF INVOICE: {invoiceData.invoiceId}</left></h3>
                 <div>&nbsp;</div>
                 </div>
                 </Grid>

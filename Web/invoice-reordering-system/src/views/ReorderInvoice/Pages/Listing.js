@@ -122,14 +122,15 @@ export default function ReorderInvoice(props) {
       departureDate: new Date(formik.values.todate)
     };
     var response = await services.getInvoicesByDateRange(model);
+    console.log("res ", response);
     const modifiedInvoices = response.map((invoice) => {
-      if (invoice.isInvoiceGenerated === true) {
+      if (invoice.invoiceDetail.isInvoiceGenerated === true) {
         return { ...invoice, status: 'Invoice Printed' };
       }
-      else if(invoice.isReordered === true && invoice.isInvoiceGenerated === false){
+      else if(invoice.invoiceDetail.isReordered === true && invoice.invoiceDetail.isInvoiceGenerated === false){
         return {...invoice, status:'Process Executed - To Be Printed'}
       }
-      else if(invoice.isReordered === false){
+      else if(invoice.invoiceDetail.isReordered === false){
         return {...invoice, status:'Reorder Process Pending'}
       }
        else {
@@ -138,8 +139,11 @@ export default function ReorderInvoice(props) {
     });
     const modifiedDates = modifiedInvoices.map((item)=>{
       return { ...item, 
-                arrivalDate: item.arrivalDate.split('T')[0],
-                departureDate: item.departureDate.split('T')[0]}
+                invoiceId: item.invoiceDetail.invoiceId,
+                reservationNum: item.invoiceDetail.reservationNum,
+                roomNum: item.invoiceDetail.roomNum,
+                arrivalDate: item.invoiceDetail.arrivalDate.split('T')[0],
+                departureDate: item.invoiceDetail.departureDate.split('T')[0]}
     })
     setInvoices(modifiedDates);
     setIsViewTable(false);
@@ -267,7 +271,7 @@ export default function ReorderInvoice(props) {
                           actionsColumnIndex: -1,
                           selection:true,
                           selectionProps: rowData => ({
-                            disabled: rowData.isReordered ===  true || rowData.isInvoiceGenerated === true,
+                            disabled: rowData.invoiceDetail.isReordered ===  true || rowData.invoiceDetail.isInvoiceGenerated === true,
                             color: 'primary'
                           })
                         }}
