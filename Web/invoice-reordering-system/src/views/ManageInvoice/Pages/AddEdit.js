@@ -53,7 +53,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function InvoiceAddEdit(props) {
   const componentRef = useRef();
-  const [title, setTitle] = useState("Inprogress Invoices")
+  const [title, setTitle] = useState("Add Bill")
   const [isUpdate, setIsUpdate] = useState(false);
   const classes = useStyles();
   const [invoiceData, setInvoiceData] = useState({
@@ -69,11 +69,12 @@ export default function InvoiceAddEdit(props) {
       bookingType:'0'
   });
   const [itemData, setItemData] = useState({
+    itemId:null,
     date: new Date().toISOString().split('T')[0],
     description:"",
     comment: "",
     paymentType: "Debit",
-    amount:"",
+    amount:"0",
     paymentMethod:"0",
     cashier:""
   })
@@ -82,15 +83,18 @@ export default function InvoiceAddEdit(props) {
   const [selectedRow, setSelectedRow] = useState()
   const [isCompleteBilling, setIsCompleteBilling] = useState(false)
   const [isPrintRequested, setIsPrintRequested] = useState(false)
+  const [userName, setUserName] = useState('')
+  const [password, setPassword] = useState('')
+  const [removeData, setRemoveData] = useState('')
+  const [printRequest, setPrintRequest] = useState(false)
+  const [removeRequest, setRemoveRequest] = useState(false)
+  const [disableIsComplete, setDisableIsComplete] = useState(false)
+  const [invoiceID, setInvoiceID] = useState('')
   const navigate = useNavigate();
   const handleClick = () => {
     navigate('/app/manageInvoices/listing/');
   }
 
-  const [permissionList, setPermissions] = useState({
-    isGroupFilterEnabled: false,
-    isFactoryFilterEnabled: false
-  });
   const alert = useAlert();
   const { invoiceId } = useParams();
   let decrypted = 0;
@@ -121,38 +125,41 @@ export default function InvoiceAddEdit(props) {
     setOpen(false);
   };
 
-  // async function getPermissions() {
-  //   var permissions = await authService.getPermissionsByScreen(screenCode);
-  //   var isAuthorized = permissions.find(p => p.permissionCode == 'ADDEDITROUTE');
-
-  //   if (isAuthorized === undefined) {
-  //     navigate('/404');
-  //   }
-
-  //   var isGroupFilterEnabled = permissions.find(p => p.permissionCode == 'GROUPDROPDOWN');
-  //   var isFactoryFilterEnabled = permissions.find(p => p.permissionCode == 'FACTORYDROPDOWN');
-
-  //   setPermissions({
-  //     ...permissionList,
-  //     isGroupFilterEnabled: isGroupFilterEnabled !== undefined,
-  //     isFactoryFilterEnabled: isFactoryFilterEnabled !== undefined,
-  //   });
-
-  //   setRoute({
-  //     ...route,
-  //     groupID: parseInt(tokenService.getGroupIDFromToken()),
-  //     factoryID: parseInt(tokenService.getFactoryIDFromToken())
-  //   })
-  // }
-
-  // async function getProductsForDropDown() {
-  //   const product = await services.getProductsByFactoryID(invoiceData.factoryID);
-  //   setProducts(product);
-  // }
-
+  async function handlePermission (){
+    const data={
+      username:userName,
+      password:password
+    }
+    let response = await services.handlePermission(data);
+    if (response.successCode === "SUCCESS" && (response.role ==="ADMIN"||response.role ==="ACCOUNTANT")) {
+      if(printRequest){
+        handleClose();
+        setIsPrintRequested(true)
+        alert.success("Permission Granted"); 
+      }
+      if(removeRequest){
+      const dataDelete = [...ItemDataList];
+      const index = removeData.tableData.id;
+      var deletedValue =dataDelete.splice(index, 1)[0]
+        var result = await services.deleteInvoiceItem(deletedValue.itemId)
+        if (result.statusCode == "SUCCESS") {
+          alert.success(result.message);}
+          else{
+            alert.success(result.message);
+          }
+          setItemDataList([...dataDelete]);
+      alert.success("Permission Granted");
+      handleClose();
+      } 
+    }
+    else {
+      handleClose();
+      alert.error("Permission denied!");
+    }
+  }
   async function getInvoiceDetails(invoiceId) {
     let response = await services.getInvoiceDetailsByID(invoiceId);
-    setTitle("Update Invoice");
+    setTitle("Update Bill");
     const invoiceDetails = response.invoiceDetail
     setInvoiceData({
       ...invoiceData,
@@ -200,7 +207,7 @@ export default function InvoiceAddEdit(props) {
     if (isUpdate === true) {
       let updateModel = {
         invoiceDetail:{
-          invoiceId : parseInt(invoiceId),
+          invoiceId : parseInt(atob(invoiceId.toString())),
           reservationNum:values.reservationNum,
           roomNum : values.roomNum,
           arrivalDate: new Date(values.arrivalDate),
@@ -296,6 +303,7 @@ export default function InvoiceAddEdit(props) {
     setItemDataList([...dataDelete])
     setIsUpdate(true)
     setItemData({
+      itemId : data.itemId,
       date : data.date,
       description : data.description,
       comment : data.comment,
@@ -307,31 +315,38 @@ export default function InvoiceAddEdit(props) {
   }
 
   async function handleClickRemove(data) {
-    const dataDelete = [...ItemDataList];
-    const index = data.tableData.id;
-    var deletedValue =dataDelete.splice(index, 1)[0]
-    // if(dataDelete.length ==0 ){
-    //   var response = await services.deleteInvoiceItem(deletedValue.ItemID)
-    //   if (response.statusCode == "Success") {
-    //     alert.success(response.message);}
-    //   setDeleteGTN(false);
-    //   navigate('/app/GoodTransferNote/listing');
-    // }
-    // if(deletedValue.agentGTNDetailID){
-    //   var response = await services.deleteAgentGTNItem(deletedValue.agentGTNDetailID)
-    //   if (response.statusCode == "Success") {
-    //     alert.success(response.message);}
-    // }
-    setItemDataList([...dataDelete]);
+    setRemoveData(data);
+    if(data.itemId){
+      setRemoveRequest(true)
+      handleClickOpen()
+    }else{
+      const dataDelete = [...ItemDataList];
+      const index = data.tableData.id;
+      var deletedValue =dataDelete.splice(index, 1)[0]
+      setItemDataList([...dataDelete]);
+    }   
   }
 
   async function handleCompleteBilling(){
-    setIsCompleteBilling(true)
+    const response = await services.handleCompleteBilling(atob(invoiceId.toString()));
+    if (response.statusCode === "SUCCESS") {
+      alert.success(response.message);
+      setIsCompleteBilling(true)
+      setDisableIsComplete(true)
+    }
+    else {
+      alert.error(response.message);
+    }
+  }
+
+  async function handleCreateInvoice(){
+    const response = await services.handleCreateInvoice(atob(invoiceId.toString()))
+    setInvoiceID(response)
   }
 
   async function handlePrintRequest(){
+    setPrintRequest(true)
     handleClickOpen();
-    setIsPrintRequested(true)
   }
 
   function cardTitle(titleName) {
@@ -351,6 +366,7 @@ export default function InvoiceAddEdit(props) {
 
   function addInvoiceData() {
     let dataModel = {
+      itemId: itemData.itemId,
       date: itemData.date,
       description:itemData.description,
       comment: itemData.comment,
@@ -554,7 +570,7 @@ export default function InvoiceAddEdit(props) {
                               value={invoiceData.address}
                               variant="outlined"
                               disabled={isDisableButton}
-                              inputProps={{ maxLength: 20 }}
+                              inputProps={{ maxLength: 200 }}
                               size="small"
                             />
                           </Grid>
@@ -572,7 +588,7 @@ export default function InvoiceAddEdit(props) {
                               value={invoiceData.city}
                               variant="outlined"
                               disabled={isDisableButton}
-                              inputProps={{ maxLength: 20 }}
+                              inputProps={{ maxLength: 200 }}
                               size="small"
                             />
                           </Grid>
@@ -590,7 +606,7 @@ export default function InvoiceAddEdit(props) {
                               value={invoiceData.country}
                               variant="outlined"
                               disabled={isDisableButton}
-                              inputProps={{ maxLength: 20 }}
+                              inputProps={{ maxLength: 200 }}
                               size="small"
                             />
                           </Grid>
@@ -843,9 +859,10 @@ export default function InvoiceAddEdit(props) {
                       {isUpdate === true? (
                       <Box display="flex" justifyContent="flex-start" p={2}>
                         <Button
-                          style={{color:'#FFFFFF', backgroundColor:"#489EE7"}}
+                          style={{color:disableIsComplete?'':'#FFFFFF', backgroundColor:disableIsComplete?'':"#489EE7"}}
                           variant="contained"
                           onClick={handleCompleteBilling}
+                          disabled={disableIsComplete}
                         >
                           Complete Billing
                         </Button>
@@ -853,7 +870,7 @@ export default function InvoiceAddEdit(props) {
                         <Button
                           style={{color:isCompleteBilling?'#FFFFFF':'', backgroundColor:isCompleteBilling?"#489EE7":''}}
                           variant="contained"
-                          onClick={handlePrintRequest}
+                          onClick={()=>{handlePrintRequest();handleCreateInvoice();}}
                           disabled={!isCompleteBilling}
                         >
                           Print Request
@@ -875,7 +892,7 @@ export default function InvoiceAddEdit(props) {
                         />
                         <div hidden={true}>
                           <CreatePDF ref={componentRef}
-                            // companyData={sales} searchData={selectedSearchValues} total={totalNet.total}
+                            invoiceData={invoiceData} itemData={ItemDataList} invoiceID={invoiceID} 
                           />
                         </div>
                         &nbsp;
@@ -908,6 +925,8 @@ export default function InvoiceAddEdit(props) {
                 label="Username"
                 type="email"
                 fullWidth
+                required
+                onChange = {e => setUserName(e.target.value)}
               />
               <TextField
                 autoFocus
@@ -916,13 +935,15 @@ export default function InvoiceAddEdit(props) {
                 label="Password"
                 type="password"
                 fullWidth
+                required
+                onChange = {e => setPassword(e.target.value)}
               />
             </DialogContent>
             <DialogActions>
               <Button onClick={handleClose} color="primary">
                 Cancel
               </Button>
-              <Button onClick={handleClose} color="primary">
+              <Button onClick={handlePermission} color="primary">
                 Submit
               </Button>
             </DialogActions>

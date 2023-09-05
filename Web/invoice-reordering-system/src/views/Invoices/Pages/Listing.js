@@ -22,11 +22,9 @@ import MaterialTable from 'material-table';
 import { useFormik, Form, FormikProvider, Formik } from 'formik';
 import * as Yup from 'yup';
 import { LoadingComponent } from '../../../utils/newLoader';
-import { Autocomplete } from '@material-ui/lab';
-// import authService from '../../../../utils/permissionAuth';
-import Chip from '@material-ui/core/Chip';
-import LineWeightIcon from '@material-ui/icons/LineWeight';
-import { useAlert } from "react-alert";
+import CreatePDF from '../../ManageInvoice/Pages/CreatePDF';
+import ReactToPrint from 'react-to-print';
+import { useReactToPrint } from 'react-to-print';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -37,7 +35,7 @@ const useStyles = makeStyles(theme => ({
   },
   avatar: {
     marginRight: theme.spacing(2)
-  },
+  }, 
   colorCancel: {
     backgroundColor: 'red'
   },
@@ -49,8 +47,8 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default function ReorderInvoice(props) {
-  const alert = useAlert();
+export default function Invoices(props) {
+
   const classes = useStyles();
   const [invoiceList, setInvoiceList] = useState({
     fromdate: '',
@@ -60,7 +58,7 @@ export default function ReorderInvoice(props) {
   const componentRef = useRef();
   const [isViewTable, setIsViewTable] = useState(true);
   const [invoices, setInvoices] = useState([]);
-  const [selectedRows, setSelectedRows] = useState([]);
+  const [selectedRows, setSelectedRows] = useState('');
 
   const ProductSaveSchema = Yup.object().shape({
     fromdate: Yup.date().required('From Date is required'),
@@ -93,10 +91,6 @@ export default function ReorderInvoice(props) {
     setInvoices([])
   }, [formik.values.fromdate || formik.values.todate]);
 
-  const handleSelectionChange = (rows) => {
-    setSelectedRows(rows);
-  };
-
   function handleChange(e) {
     const target = e.target;
     const value = target.value;
@@ -122,13 +116,12 @@ export default function ReorderInvoice(props) {
       departureDate: new Date(formik.values.todate)
     };
     var response = await services.getInvoicesByDateRange(model);
-    console.log("res ", response);
     const modifiedInvoices = response.map((invoice) => {
       if (invoice.invoiceDetail.isInvoiceGenerated === true) {
-        return { ...invoice, status: 'Invoice Printed' };
+        return { ...invoice, status: 'Printed' };
       }
       else if(invoice.invoiceDetail.isReordered === true && invoice.invoiceDetail.isInvoiceGenerated === false){
-        return {...invoice, status:'Process Executed - To Be Printed'}
+        return {...invoice, status:'To Be Printed'}
       }
       else if(invoice.invoiceDetail.isReordered === false){
         return {...invoice, status:'Reorder Process Pending'}
@@ -142,30 +135,46 @@ export default function ReorderInvoice(props) {
                 invoiceId: item.invoiceDetail.invoiceId,
                 reservationNum: item.invoiceDetail.reservationNum,
                 roomNum: item.invoiceDetail.roomNum,
+                customerName: item.invoiceDetail.customerName,
                 arrivalDate: item.invoiceDetail.arrivalDate.split('T')[0],
-                departureDate: item.invoiceDetail.departureDate.split('T')[0]}
+                departureDate: item.invoiceDetail.departureDate.split('T')[0],
+                invoiceItems : item.invoiceItems.map((item)=>{
+                  return{
+                    ...item,
+                    debit: item.paymentType === "Debit" ? item.amount:'',
+                    credit : item.paymentType === "Credit" ? item.amount:'',
+                  }
+                })}
     })
     setInvoices(modifiedDates);
     setIsViewTable(false);
   }
-  async function handleReordering(){
-    const arrayOfInvoiceIds = selectedRows.map((obj) => obj.invoiceId);
-    const model ={
-      invoiceIds:arrayOfInvoiceIds
-    }
-    const response = await services.reorderingInvoices(model)
-    if(response.statusCode==='SUCCESS'){
-      alert.success(response.message);
-    }else{
-      alert.success("Error in reordering");
-    }
-    clearFields();
-  }
+
   const clearFields = () => {
+
     formik.resetForm();
+    setInvoiceList({
+      ...invoiceList
+    })
+    setInvoices([]);
+    setTotalNet({ total: 0 });
   };
+ async function customHandlePrint(row){
+    const response = await services.handleCreateInvoice(row.invoiceId)
+    setSelectedRows(row);
+ }
+
+ useEffect(() => {
+   if(selectedRows !=""){
+    handlePrint();
+   }
+}, [selectedRows]);
+
+  const handlePrint = useReactToPrint({
+    content: () => componentRef.current,
+  });
   return (
-    <Page className={classes.root} title="Reorder Invoices">
+    <Page className={classes.root} title="Invoices">
       <LoadingComponent />
       <Container maxWidth={false}>
         <FormikProvider value={formik}>
@@ -177,7 +186,7 @@ export default function ReorderInvoice(props) {
           >
             <Box mt={0}>
               <Card>
-                <CardHeader title={cardTitle('Reorder Invoices')} />
+                <CardHeader title={cardTitle('Invoices')} />
                 <PerfectScrollbar>
                   <Divider />
                   <CardContent style={{ marginBottom: '2rem' }}>
@@ -257,8 +266,8 @@ export default function ReorderInvoice(props) {
                           { title: 'Room No.', align: 'center', field: 'roomNum' },
                           { title: 'Arrival Date', align: 'center', field: 'arrivalDate' },
                           { title: 'Departure Date', align: 'center', field: 'departureDate' },
-                          { title: 'Payment Type', align: 'center', field: 'paymentType' },
-                          { title: 'Status', align: 'center', field: 'status'}
+                          { title: 'Customer Name', align: 'center', field: 'customerName' },
+                          { title: 'Status', align: 'center', field: 'status'},
                         ]}
                         data={invoices}
                         title="Invoice List"
@@ -269,26 +278,24 @@ export default function ReorderInvoice(props) {
                           addRowPosition: "first",
                           headerStyle: { textAlign: "left", height: '1%' },
                           actionsColumnIndex: -1,
-                          selection:true,
-                          selectionProps: rowData => ({
-                            disabled: rowData.invoiceDetail.isReordered ===  true || rowData.invoiceDetail.isInvoiceGenerated === true,
-                            color: 'primary'
-                          })
                         }}
-                        onSelectionChange={(e) => handleSelectionChange(e)}
+                        actions={[
+                          {
+                            icon: 'print',
+                            tooltip: 'Print Invoice',
+                            onClick: (event, rowData) => { customHandlePrint (rowData) }
+                          },
+                        ]}
                       />
                     </Box>
-                  <Box display="flex" justifyContent="flex-end" p={2}>
-                    <Button
-                    style={{color:selectedRows.length>0?'#FFFFFF':'', backgroundColor:selectedRows.length>0?"#489EE7":''}}
-                    variant="contained"
-                    onClick={() => handleReordering()}
-                    disabled={selectedRows.length==0}
-                    >
-                    Reorder
-                    </Button>
-                </Box>
-                </Box>
+                    </Box>
+                    {selectedRows.invoiceDetail !==""?
+                    <div hidden={true}>
+                    <CreatePDF ref={componentRef}
+                      invoiceData={selectedRows!=="" ?selectedRows:''} itemData={selectedRows.invoiceItems?selectedRows.invoiceItems:[]} 
+                    />
+                  </div>:''
+                    }                   
                 </CardContent>
                 </PerfectScrollbar>
               </Card>

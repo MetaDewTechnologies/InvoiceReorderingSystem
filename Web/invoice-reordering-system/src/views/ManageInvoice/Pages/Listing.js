@@ -72,7 +72,18 @@ export default function ManageInvoiceListing(props) {
   async function GetInvoiceDetailsByRoomNumber() {
     setInvoiceData([])
     var result = await services.GetInvoiceDetailsByRoomNumber(roomNo.roomNumber);
-    setInvoiceData(result)
+    const updatedItems = [];
+    if(result.length>0){
+      for (const item of result) {
+        const updatedItem = {
+          ...item,
+          arrivalDate: item.arrivalDate.split('T')[0],
+          departureDate : item.departureDate.split('T')[0]
+        };
+        updatedItems.push(updatedItem);
+      }
+    }
+    setInvoiceData(updatedItems)
   }
 
   const EditInvoiceDetails = (invoiceId) => {
@@ -109,14 +120,14 @@ export default function ManageInvoiceListing(props) {
   return (
     <Page
       className={classes.root}
-      title="View Invoices"
+      title="View Bills"
     >
         <LoadingComponent />
       <Container maxWidth={false}>
         <Box mt={0}>
           <Card>
             <CardHeader
-              title={cardTitle("View Invoices")}
+              title={cardTitle("View Bills")}
             />
             <PerfectScrollbar>
               <Divider />
@@ -160,7 +171,7 @@ export default function ManageInvoiceListing(props) {
                       { title: 'Room Num', field: 'roomNum' },
                       { title: 'Arrival Date', field: 'arrivalDate' },
                       { title: 'Departure Date', field: 'departureDate' },
-                      { title: 'Balance Payments', field: 'payments' },
+                      // { title: 'Balance Payments', field: 'payments' },
                       { title: 'Customer Name', field: 'customerName' },
                     ]}
                     data={invoiceData}

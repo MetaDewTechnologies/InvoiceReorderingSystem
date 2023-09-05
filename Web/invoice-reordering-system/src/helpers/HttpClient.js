@@ -132,7 +132,7 @@ export const CommonPost = (url, queryString, body) => {
 //     }
 
 export const CommonPostAxios = async (url, queryString, body) => {
-    const encryptedResult = AESEncryption(JSON.stringify(body));
+    // const encryptedResult = AESEncryption(JSON.stringify(body));
     let originURL;
     const options = {
         headers: {

@@ -18,7 +18,7 @@ import { CommonGet } from '../../../helpers/HttpClient';
 import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import PersonIcon from '@material-ui/icons/Person';
+import DescriptionIcon from '@material-ui/icons/Reorder';
 import ReorderIcon from '@material-ui/icons/Reorder';
 import ReceiptIcon from '@material-ui/icons/Receipt';
 
@@ -67,11 +67,16 @@ const NavBar = ({ onMobileClose, openMobile }) => {
       screenID:1
     }
   ]
-  if (role == 'ACCOUNTANT'){
+  if (role == 'ACCOUNTANT' || role == 'ADMIN' ){
     screenList.push(
       {
         routePath:"/app/reorderInvoices/listing",
         screenName:"Reorder Invoices",
+        screenID:3
+      },
+      {
+        routePath:"/app/invoices/listing",
+        screenName:"Invoices",
         screenID:2
       }
     )
@@ -99,7 +104,7 @@ const NavBar = ({ onMobileClose, openMobile }) => {
                     button
                     style={{ paddingLeft: "10%"}} >
                     <ListItemIcon >
-                      {item.screenID === 1? <ReceiptIcon style={{color:'#FFFFFF'}}/>:item.screenID===2?<ReorderIcon style={{color:'#FFFFFF'}}/>:<PersonIcon style={{color:'#FFFFFF'}}/>}
+                      {item.screenID === 1? <ReceiptIcon style={{color:'#FFFFFF'}}/>:item.screenID===2?<ReceiptIcon style={{color:'#FFFFFF'}}/>:<ReorderIcon style={{color:'#FFFFFF'}}/>}
 
                     </ListItemIcon>
                     <ListItemText style={{ fontSize: 12, color:"#FFFFFF" }}

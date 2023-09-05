@@ -56,7 +56,7 @@ public class InvoiceController {
             InvoiceResponse invoiceResponse=new InvoiceResponse();
             invoiceResponse.setMessage("This room not available");
             invoiceResponse.setStatusCode("ERROR");
-            return new ResponseEntity<>(invoiceResponse ,HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(invoiceResponse ,HttpStatus.OK);
         }
         else{
             InvoiceDetailDTO savedInvoiceDetail = invoiceDetailService.saveInvoiceDetail(invoiceDetail);
@@ -65,7 +65,7 @@ public class InvoiceController {
                 InvoiceResponse invoiceResponse=new InvoiceResponse();
                 invoiceResponse.setMessage("Not Inserted");
                 invoiceResponse.setStatusCode("ERROR");
-                return new ResponseEntity<>(invoiceResponse ,HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>(invoiceResponse ,HttpStatus.OK);
             }
 
             if (invoiceItems != null) {
@@ -154,6 +154,7 @@ public class InvoiceController {
         return new ResponseEntity<>(updatedInvoiceResponse, HttpStatus.OK);
     }
 
+    @CrossOrigin
     @PostMapping ("/complete-invoice/{invoiceId}")
     public ResponseEntity<?> markInvoiceAsCompleted(@PathVariable Integer invoiceId) {
         boolean success = invoiceDetailService.markInvoiceCompleted(invoiceId);
@@ -174,6 +175,7 @@ public class InvoiceController {
 
 
     // InvoiceController.java
+    @CrossOrigin
     @PostMapping("/reorder-invoice/{invoiceId}")
     public ResponseEntity<?> reorderInvoice(@PathVariable Integer invoiceId) {
         Integer reorderedInvoiceId = invoiceDetailService.markInvoiceGeneratedCompletedReordered(invoiceId);
@@ -186,7 +188,7 @@ public class InvoiceController {
         }
     }
 
-
+    @CrossOrigin
     @PostMapping("/special-authenticate")
     public ResponseEntity<SpecialInvoiceAuthenticationResponse> specialAuthenticate(
             @RequestBody AuthenticationRequest request
@@ -200,18 +202,24 @@ public class InvoiceController {
         }
     }
 
+    @CrossOrigin
     @PostMapping("/deactivate-item/{itemId}")
-    public ResponseEntity<String> deactivateItem(@PathVariable Integer itemId) {
+    public ResponseEntity<?> deactivateItem(@PathVariable Integer itemId) {
         boolean success = invoiceItemDetailService.deactivateItem(itemId);
 
         if (success) {
-            return ResponseEntity.ok("Item deleted successfully.");
+            InvoiceResponse invoiceResponse=new InvoiceResponse();
+            invoiceResponse.setMessage("Successfully Deleted");
+            invoiceResponse.setStatusCode("SUCCESS");
+            return ResponseEntity.ok(invoiceResponse);
+
         } else {
             return ResponseEntity.status(HttpStatus.OK)
                     .body("Item already deleted or not exist");
         }
     }
 
+    @CrossOrigin
     @PostMapping("/completed-invoices")
     public ResponseEntity<List<InvoiceWithItemsResponse>> getCompletedInvoicesBetweenDates(
             @RequestBody DateRange dateRange) {
@@ -243,6 +251,7 @@ public class InvoiceController {
         return ResponseEntity.ok(completedInvoices);
     }
 
+    @CrossOrigin
     @PostMapping("/reorder-invoices")
     public ResponseEntity<?> reorderInvoices(@RequestBody ReorderInvoiceRequest request) {
 
