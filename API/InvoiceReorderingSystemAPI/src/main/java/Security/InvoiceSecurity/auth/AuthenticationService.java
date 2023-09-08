@@ -65,7 +65,8 @@ public class AuthenticationService {
            var jwtToken = jwtService.generateToken(user);
            AuthenticationResponse authResponse = AuthenticationResponse.builder()
                    .token(jwtToken)
-                   .role(user.getRole())  // Assuming the 'getRole()' method exists in the User class
+                   .role(user.getRole())// Assuming the 'getRole()' method exists in the User class
+                   .userName(user.getUsername())
                    .build();
            return LoginResponse.builder()
                    .statusCode("200")

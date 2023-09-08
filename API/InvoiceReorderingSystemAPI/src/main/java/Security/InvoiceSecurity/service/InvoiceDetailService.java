@@ -7,6 +7,7 @@ import Security.InvoiceSecurity.repository.ReorderedInvoiceDetailRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -126,12 +127,26 @@ public class InvoiceDetailService {
         }
 
 
-    public boolean markInvoiceCompleted(Integer invoiceId) {
+    public boolean markInvoiceCompleted(Integer invoiceId,String cashierName) {
         Optional<InvoiceDetailDTO> invoiceDetailOptional = invoiceDetailRepository.findById(invoiceId);
 
         if (invoiceDetailOptional.isPresent()) {
             InvoiceDetailDTO invoiceDetail = invoiceDetailOptional.get();
             invoiceDetail.setIsInvoiceCompleted(true);
+            invoiceDetail.setCashierName(cashierName);
+            invoiceDetailRepository.save(invoiceDetail);
+            return true;
+        }
+
+        return false;
+    }
+
+    public boolean greenTaxInserting(Integer invoiceId, BigDecimal greenTax){
+        Optional<InvoiceDetailDTO> invoiceDetailOptional = invoiceDetailRepository.findById(invoiceId);
+
+        if (invoiceDetailOptional.isPresent()) {
+            InvoiceDetailDTO invoiceDetail = invoiceDetailOptional.get();
+            invoiceDetail.setGreenTax(greenTax);
             invoiceDetailRepository.save(invoiceDetail);
             return true;
         }
@@ -180,7 +195,7 @@ public class InvoiceDetailService {
         for (InvoiceDetailDTO invoiceDetail : invoiceDetailDTOList) {
             Integer id = invoiceDetail.getInvoiceId();
             List<InvoiceItemDetailDTO> invoiceItemDetailDTOList = invoiceItemDetailRepository.findByInvoiceDetail_InvoiceId(id);
-
+            Integer reorderId = reorderedInvoiceDetailRepository.reorderInvoiceId(id);
             // Create an InvoiceWithItemsResponse object and add it to the responseList
             InvoiceWithItemsResponse response = new InvoiceWithItemsResponse(invoiceDetail, invoiceItemDetailDTOList);
             responseList.add(response);

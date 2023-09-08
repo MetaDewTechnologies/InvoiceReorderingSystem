@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -93,13 +94,15 @@ public class InvoiceDetailDTO {
 
     )
     private LocalDateTime invoiceGeneratedDate;
+    private String cashierName;
+    private BigDecimal greenTax;
     @JsonIgnore
     @OneToMany(mappedBy = "invoiceDetail", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<InvoiceItemDetailDTO> invoiceItems;
 
-    @OneToOne(mappedBy = "invoiceDetailnew", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = false)
-    //@JoinColumn(name = "invoice_id", referencedColumnName = "invoiceId")
-    private ReorderedInvoiceDetailDTO reorderedInvoiceDetail;
+@OneToOne(mappedBy = "invoiceDetailnew", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = false)
+//@JoinColumn(name = "invoice_id", referencedColumnName = "invoiceId")
+private ReorderedInvoiceDetailDTO reorderedInvoiceDetail;
 
 
 }
