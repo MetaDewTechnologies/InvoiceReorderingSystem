@@ -8,22 +8,37 @@ export default class ComponentToPrint extends React.Component {
     const invoiceID = this.props.invoiceID;
     const invoiceData = this.props.invoiceData;
     const itemData = this.props.itemData;
+    const greenTax = this.props.greenTax;
     var totalDebit = 0;
     let totalCredit = 0;
-
-    const taxData = [
-      {
-        taxDetail : 'Service Charge',
-        taxes : '137.46',
-        net : '1374.62',
-        gross : '1512.08'
-      }
-    ]
 
     itemData.forEach(data => {
       totalDebit += data.debit; 
       totalCredit += data.credit; 
     });
+    const totalPayments = totalCredit
+    const serviceCharge = (totalPayments * 10)/100
+    const governmentTax = ((totalPayments+serviceCharge) * 16)/100
+    const taxData = [
+      {
+        taxDetail : 'Service Charge',
+        taxes : serviceCharge,
+        net : totalPayments,
+        gross : totalPayments+serviceCharge
+      },
+      {
+        taxDetail : 'Green Tax',
+        taxes : greenTax,
+        net : '0',
+        gross : greenTax
+      },
+      {
+        taxDetail : 'Government Service Tax',
+        taxes : governmentTax,
+        net : '0',
+        gross : governmentTax
+      }
+    ]
     return (
       <div style={{marginLeft:'100px',marginRight:'75px', marginTop:'50px', fontFamily:'sans-serif'}}>
         <div>&nbsp;</div>
@@ -41,8 +56,8 @@ export default class ComponentToPrint extends React.Component {
                 <div className="col" align={'left'} style={{ paddingBottom: '10px' }}><b>Departure Date: </b> {invoiceData.departureDate}</div>
                 <div className="col" align={'left'} style={{ paddingBottom: '10px' }}><b>Cashier: </b> {""}</div>
                 <div className="col" align={'left'} style={{ paddingBottom: '10px' }}><b>Invoice Date: </b> {new Date().toISOString().split('T')[0]}</div>
-                <h3 style={{ paddingBottom: '10px' }}><left>{invoiceData.customerName}</left></h3>
-                <h3><left>COPY OF INVOICE: {invoiceData.invoiceId}{invoiceID}</left></h3>
+                <h4 style={{ paddingBottom: '10px' }}><left>{invoiceData.customerName}</left></h4>
+                <h4><left>COPY OF INVOICE: {invoiceData.invoiceId}{invoiceID}</left></h4>
                 <div>&nbsp;</div>
                 </div>
                 </Grid>

@@ -51,6 +51,7 @@ const LoginView = () => {
     console.log("result ",result);
     sessionStorage.setItem('token', result.authenticationResponse.token);
     sessionStorage.setItem('role', result.authenticationResponse.role);
+    sessionStorage.setItem('userName', result.authenticationResponse.userName);
     navigate('app/manageInvoices/listing');
   }
 
