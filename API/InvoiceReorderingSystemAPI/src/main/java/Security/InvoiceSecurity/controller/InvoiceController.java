@@ -155,8 +155,9 @@ public class InvoiceController {
     }
 
     @PostMapping ("/complete-invoice/{invoiceId}")
-    public ResponseEntity<?> markInvoiceAsCompleted(@PathVariable Integer invoiceId) {
-        boolean success = invoiceDetailService.markInvoiceCompleted(invoiceId);
+    public ResponseEntity<?> markInvoiceAsCompleted(@PathVariable Integer invoiceId , @RequestBody CompleteInvoiceRequest request) {
+
+        boolean success = invoiceDetailService.markInvoiceCompleted(invoiceId,request.getCashierName());
 
         if (success) {
             InvoiceResponse invoiceResponse=new InvoiceResponse();
@@ -236,10 +237,10 @@ public class InvoiceController {
             return ResponseEntity.ok(completedInvoices);
         }
 
-        for(InvoiceWithItemsResponse invoiceWithItemsResponse: completedInvoices){
-            invoiceWithItemsResponse.getInvoiceDetail().setReorderedInvoiceDetail(null);
-            //invoiceDetail.setReorderedInvoiceDetail(null);
-        }
+for(InvoiceWithItemsResponse invoiceWithItemsResponse: completedInvoices){
+invoiceWithItemsResponse.getInvoiceDetail().setReorderedInvoiceDetail(null);
+//invoiceDetail.setReorderedInvoiceDetail(null);
+}
         return ResponseEntity.ok(completedInvoices);
     }
 

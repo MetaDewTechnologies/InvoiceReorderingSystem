@@ -126,12 +126,13 @@ public class InvoiceDetailService {
         }
 
 
-    public boolean markInvoiceCompleted(Integer invoiceId) {
+    public boolean markInvoiceCompleted(Integer invoiceId,String cashierName) {
         Optional<InvoiceDetailDTO> invoiceDetailOptional = invoiceDetailRepository.findById(invoiceId);
 
         if (invoiceDetailOptional.isPresent()) {
             InvoiceDetailDTO invoiceDetail = invoiceDetailOptional.get();
             invoiceDetail.setIsInvoiceCompleted(true);
+            invoiceDetail.setCashierName(cashierName);
             invoiceDetailRepository.save(invoiceDetail);
             return true;
         }
@@ -177,15 +178,20 @@ public class InvoiceDetailService {
         List<InvoiceDetailDTO> invoiceDetailDTOList = invoiceDetailRepository.findCompletedInvoicesBetweenDates(arrivalDate, departureDate);
         List<InvoiceWithItemsResponse> responseList = new ArrayList<>();
 
+        List<InvoiceWithCompletedItemResponse> invoiceWithCompletedItemResponseList = new ArrayList<>();
         for (InvoiceDetailDTO invoiceDetail : invoiceDetailDTOList) {
             Integer id = invoiceDetail.getInvoiceId();
+            Integer reorderInvoiceId = reorderedInvoiceDetailRepository.reorderInvoiceId(id);
             List<InvoiceItemDetailDTO> invoiceItemDetailDTOList = invoiceItemDetailRepository.findByInvoiceDetail_InvoiceId(id);
 
             // Create an InvoiceWithItemsResponse object and add it to the responseList
             InvoiceWithItemsResponse response = new InvoiceWithItemsResponse(invoiceDetail, invoiceItemDetailDTOList);
+            InvoiceWithCompletedItemResponse response1 = new InvoiceWithCompletedItemResponse(invoiceDetail,invoiceItemDetailDTOList,reorderInvoiceId);
             responseList.add(response);
-        }
+           invoiceWithCompletedItemResponseList.add(response1);
 
+        }
+      
         return responseList;
 
     }

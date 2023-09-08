@@ -93,6 +93,7 @@ public class InvoiceDetailDTO {
 
     )
     private LocalDateTime invoiceGeneratedDate;
+    private String cashierName;
     @JsonIgnore
     @OneToMany(mappedBy = "invoiceDetail", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<InvoiceItemDetailDTO> invoiceItems;
