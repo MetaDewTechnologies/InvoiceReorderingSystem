@@ -237,10 +237,10 @@ public class InvoiceController {
             return ResponseEntity.ok(completedInvoices);
         }
 
-for(InvoiceWithItemsResponse invoiceWithItemsResponse: completedInvoices){
-invoiceWithItemsResponse.getInvoiceDetail().setReorderedInvoiceDetail(null);
-//invoiceDetail.setReorderedInvoiceDetail(null);
-}
+        for(InvoiceWithItemsResponse invoiceWithItemsResponse: completedInvoices){
+            invoiceWithItemsResponse.getInvoiceDetail().setReorderedInvoiceDetail(null);
+            //invoiceDetail.setReorderedInvoiceDetail(null);
+        }
         return ResponseEntity.ok(completedInvoices);
     }
 
