@@ -28,7 +28,7 @@ public class ReorderedInvoiceDetailDTO {
 
 
     @OneToOne(fetch = FetchType.LAZY)
-    //@JoinColumn(name = "invoice_id", referencedColumnName = "invoiceId", unique = true)
+   // @JoinColumn(name = "invoice_id", referencedColumnName = "invoiceId", unique = true)
     private InvoiceDetailDTO invoiceDetailnew;
 
 

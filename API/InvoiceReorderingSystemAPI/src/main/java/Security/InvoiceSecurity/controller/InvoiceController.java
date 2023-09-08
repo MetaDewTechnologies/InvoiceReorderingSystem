@@ -156,8 +156,9 @@ public class InvoiceController {
 
     @CrossOrigin
     @PostMapping ("/complete-invoice/{invoiceId}")
-    public ResponseEntity<?> markInvoiceAsCompleted(@PathVariable Integer invoiceId) {
-        boolean success = invoiceDetailService.markInvoiceCompleted(invoiceId);
+    public ResponseEntity<?> markInvoiceAsCompleted(@PathVariable Integer invoiceId , @RequestBody CompleteInvoiceRequest request) {
+
+        boolean success = invoiceDetailService.markInvoiceCompleted(invoiceId,request.getCashierName());
 
         if (success) {
             InvoiceResponse invoiceResponse=new InvoiceResponse();
@@ -244,10 +245,10 @@ public class InvoiceController {
             return ResponseEntity.ok(completedInvoices);
         }
 
-        for(InvoiceWithItemsResponse invoiceWithItemsResponse: completedInvoices){
-            invoiceWithItemsResponse.getInvoiceDetail().setReorderedInvoiceDetail(null);
-            //invoiceDetail.setReorderedInvoiceDetail(null);
-        }
+for(InvoiceWithItemsResponse invoiceWithItemsResponse: completedInvoices){
+invoiceWithItemsResponse.getInvoiceDetail().setReorderedInvoiceDetail(null);
+//invoiceDetail.setReorderedInvoiceDetail(null);
+}
         return ResponseEntity.ok(completedInvoices);
     }
 
@@ -266,6 +267,22 @@ public class InvoiceController {
             invoiceResponse.setMessage("Cannot Reorder");
             invoiceResponse.setStatusCode("ERROR");
             return ResponseEntity.ok(invoiceResponse);
+        }
+    }
+
+    @PostMapping("/greenTax/{invoiceId}")
+    public ResponseEntity<?> forGreenTaxInvoice(@PathVariable Integer invoiceId, @RequestBody GreenTaxRequest request) {
+        Boolean success = invoiceDetailService.greenTaxInserting(invoiceId,request.getGreenTax());
+        if(success) {
+            InvoiceWithItemsResponse invoiceWithItems = invoiceDetailService.getInvoiceWithItemsById(invoiceId);
+            return ResponseEntity.ok(invoiceWithItems);
+        }
+
+        else{
+            InvoiceResponse invoiceResponse = new InvoiceResponse();
+        invoiceResponse.setMessage("Cannot insert green tax");
+        invoiceResponse.setStatusCode("ERROR");
+        return ResponseEntity.ok(invoiceResponse);
         }
     }
 
