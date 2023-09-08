@@ -16,7 +16,7 @@ public interface ReorderedInvoiceDetailRepository extends JpaRepository<Reordere
 
     boolean existsByInvoiceDetailnew_InvoiceId(Integer invoiceId);
 
-    @Query("SELECT i.reorderedInvoiceId FROM ReorderedInvoiceDetailDTO i WHERE i.invoiceDetailnew = :invoiceId ")
+    @Query("SELECT i.reorderedInvoiceId FROM ReorderedInvoiceDetailDTO i WHERE i.invoiceDetailnew.invoiceId = :invoiceId ")
     Integer reorderInvoiceId(@Param("invoiceId") Integer invoiceId);
 }
 
