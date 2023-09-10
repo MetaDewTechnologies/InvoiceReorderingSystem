@@ -270,11 +270,13 @@ invoiceWithItemsResponse.getInvoiceDetail().setReorderedInvoiceDetail(null);
         }
     }
 
+    @CrossOrigin
     @PostMapping("/greenTax/{invoiceId}")
     public ResponseEntity<?> forGreenTaxInvoice(@PathVariable Integer invoiceId, @RequestBody GreenTaxRequest request) {
         Boolean success = invoiceDetailService.greenTaxInserting(invoiceId,request.getGreenTax());
         if(success) {
             InvoiceWithItemsResponse invoiceWithItems = invoiceDetailService.getInvoiceWithItemsById(invoiceId);
+            invoiceWithItems.getInvoiceDetail().setReorderedInvoiceDetail(null);
             return ResponseEntity.ok(invoiceWithItems);
         }
 

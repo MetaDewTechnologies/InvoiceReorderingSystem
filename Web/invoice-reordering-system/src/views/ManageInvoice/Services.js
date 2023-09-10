@@ -30,8 +30,11 @@ async function GetInvoiceDetailsByRoomNumber(roomNum){
     return response
 }
 
-async function handleCompleteBilling(invoiceId){
-    const response = await CommonPostAxios('/api/v1/complete-invoice',invoiceId,null);
+async function handleCompleteBilling(invoiceId,cashierName){
+    const model={
+        cashierName:cashierName
+    }
+    const response = await CommonPostAxios('/api/v1/complete-invoice',invoiceId,model);
     return response;
 }
 

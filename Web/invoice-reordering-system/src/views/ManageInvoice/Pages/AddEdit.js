@@ -328,7 +328,8 @@ export default function InvoiceAddEdit(props) {
   }
 
   async function handleCompleteBilling(){
-    const response = await services.handleCompleteBilling(atob(invoiceId.toString()));
+    const cashierName = sessionStorage.getItem('userName')   
+    const response = await services.handleCompleteBilling(atob(invoiceId.toString()),cashierName);
     if (response.statusCode === "SUCCESS") {
       alert.success(response.message);
       setIsCompleteBilling(true)

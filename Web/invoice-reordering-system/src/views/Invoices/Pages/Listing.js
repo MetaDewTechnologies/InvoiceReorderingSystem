@@ -65,8 +65,11 @@ export default function Invoices(props) {
   const [invoices, setInvoices] = useState([]);
   const [selectedRows, setSelectedRows] = useState('');
   const [open, setOpen] = useState(false)
-  const [greenTax, setGreenTax] = useState('')
-
+  const [greenTax, setGreenTax] = useState('0')
+  const [rowId, setRowId] = useState('')
+  const [invoiceDetails,setInvoiceDetails] = useState("")
+  const [itemDetails, setItemDetails] = useState([])
+  const [print, setprint] = useState(false)
   const ProductSaveSchema = Yup.object().shape({
     fromdate: Yup.date().required('From Date is required'),
     todate: Yup.date().required('To Date is required')
@@ -123,7 +126,8 @@ export default function Invoices(props) {
       departureDate: new Date(formik.values.todate)
     };
     var response = await services.getInvoicesByDateRange(model);
-    const modifiedInvoices = response.map((invoice) => {
+    var filteredResponse = response.filter(item => item.invoiceDetail.isReordered == true); 
+    const modifiedInvoices = filteredResponse.map((invoice) => {
       if (invoice.invoiceDetail.isInvoiceGenerated === true) {
         return { ...invoice, status: 'Printed' };
       }
@@ -145,6 +149,8 @@ export default function Invoices(props) {
                 customerName: item.invoiceDetail.customerName,
                 arrivalDate: item.invoiceDetail.arrivalDate.split('T')[0],
                 departureDate: item.invoiceDetail.departureDate.split('T')[0],
+                greenTax:item.invoiceDetail.greenTax,
+                isReordered: item.invoiceDetail.isReordered,
                 invoiceItems : item.invoiceItems.map((item)=>{
                   return{
                     ...item,
@@ -169,17 +175,32 @@ export default function Invoices(props) {
   const handleClose = () => {
     setOpen(false);
   };
-  function handleGreenTax(){
-    setOpen(false)
+  const handleOpen=(row)=>{
+    setRowId(row.invoiceId)
+    setOpen(true)
+  }
+  async function handleGreenTax(){
+    const model = {
+      greenTax: parseFloat(greenTax)
+    }
+  const greenTaxresponse = await services.saveGreenTax(rowId,model)
+   setInvoiceDetails(greenTaxresponse.invoiceDetail);
+   setItemDetails(greenTaxresponse.invoiceItems)
+   setOpen(false)
   }
  async function customHandlePrint(row){
+   console.log(row);
     const response = await services.handleCreateInvoice(row.invoiceId)
+    // setprint(true)
     setSelectedRows(row);
  }
 
  useEffect(() => {
    if(selectedRows !=""){
+     console.log("green ",invoiceDetails.greenTax);
     handlePrint();
+    setInvoiceDetails('');
+    // setprint(false)
    }
 }, [selectedRows]);
 
@@ -290,13 +311,13 @@ export default function Invoices(props) {
                           columnResizable: false,
                           addRowPosition: "first",
                           headerStyle: { textAlign: "left", height: '1%' },
-                          actionsColumnIndex: -1,
+                          actionsColumnIndex: -1
                         }}
                         actions={[
                           {
                             icon: ()=> <PaymentIcon/>,
                             tooltip: 'Add green tax',
-                            onClick: () => { setOpen(true) }
+                            onClick: (event, rowData) => { handleOpen(rowData) },
                           },
                           {
                             icon: 'print',
@@ -310,7 +331,7 @@ export default function Invoices(props) {
                     {selectedRows.invoiceDetail !==""?
                     <div hidden={true}>
                     <CreatePDF ref={componentRef}
-                      invoiceData={selectedRows!=="" ?selectedRows:''} itemData={selectedRows.invoiceItems?selectedRows.invoiceItems:[]} greenTax={greenTax !==""?greenTax:''} 
+                      invoiceData={selectedRows!==""?selectedRows:''} itemData={selectedRows.invoiceItems?selectedRows.invoiceItems:[]} greenTax={invoiceDetails.greenTax?invoiceDetails.greenTax:0}
                     />
                   </div>:''
                     }                   

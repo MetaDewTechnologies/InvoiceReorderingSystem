@@ -11,14 +11,16 @@ export default class ComponentToPrint extends React.Component {
     const greenTax = this.props.greenTax;
     var totalDebit = 0;
     let totalCredit = 0;
-
     itemData.forEach(data => {
-      totalDebit += data.debit; 
-      totalCredit += data.credit; 
+      totalDebit += data.debit!==''?data.debit:0; 
+      totalCredit += data.credit!==''? data.credit:0;
     });
     const totalPayments = totalCredit
     const serviceCharge = (totalPayments * 10)/100
     const governmentTax = ((totalPayments+serviceCharge) * 16)/100
+    const totalGrossTaxes = totalPayments+serviceCharge+greenTax+governmentTax
+    const totalNetTaxes = totalPayments;
+    const totalTax = serviceCharge+greenTax+governmentTax
     const taxData = [
       {
         taxDetail : 'Service Charge',
@@ -144,6 +146,12 @@ export default class ComponentToPrint extends React.Component {
                       </TableCell>
                     </TableRow>
                   ))}
+                  <TableRow>
+                    <TableCell colSpan={1} align={'right'}>{'Total Tax'}</TableCell>
+                    <TableCell align={'center'}>{parseInt(totalTax).toFixed(2)}</TableCell>
+                    <TableCell align={'center'}>{parseInt(totalNetTaxes).toFixed(2)}</TableCell>
+                    <TableCell align={'center'}>{parseInt(totalGrossTaxes).toFixed(2)}</TableCell>
+                  </TableRow>
                 </TableBody>
               </Table>
             </TableContainer>
