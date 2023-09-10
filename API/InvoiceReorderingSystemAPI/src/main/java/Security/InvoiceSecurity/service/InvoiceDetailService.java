@@ -154,6 +154,16 @@ public class InvoiceDetailService {
         return false;
     }
 
+    public boolean greenTaxCheck(Integer invoiceId){
+        Optional<InvoiceDetailDTO> invoiceDetailOptional = invoiceDetailRepository.findById(invoiceId);
+
+        if (invoiceDetailOptional.isPresent()) {
+            return true;
+        }
+
+        return false;
+    }
+
     public Integer markInvoiceGeneratedCompletedReordered(Integer invoiceId) {
         Optional<InvoiceDetailDTO> invoiceDetailOptional = invoiceDetailRepository.findById(invoiceId);
 
