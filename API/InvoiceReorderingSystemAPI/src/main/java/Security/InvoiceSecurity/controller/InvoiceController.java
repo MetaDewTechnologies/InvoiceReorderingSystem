@@ -275,6 +275,18 @@ invoiceWithItemsResponse.getInvoiceDetail().setReorderedInvoiceDetail(null);
         invoiceResponse.setStatusCode("ERROR");
         return ResponseEntity.ok(invoiceResponse);
         }
+
     }
+    @PostMapping("/checkGreenTax/{invoiceId}")
+    public ResponseEntity<?> checkGreenTaxValue(@PathVariable Integer invoiceId){
+        Boolean success = invoiceDetailService.greenTaxCheck(invoiceId);
+        if(success) {
+            InvoiceWithItemsResponse invoiceWithItems = invoiceDetailService.getInvoiceWithItemsById(invoiceId);
+            return ResponseEntity.ok(invoiceWithItems.getInvoiceDetail().getGreenTax());
+        }
+        else
+            return ResponseEntity.ok(0);
+    }
+
 
 }
