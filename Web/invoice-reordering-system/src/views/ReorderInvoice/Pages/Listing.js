@@ -22,11 +22,12 @@ import MaterialTable from 'material-table';
 import { useFormik, Form, FormikProvider, Formik } from 'formik';
 import * as Yup from 'yup';
 import { LoadingComponent } from '../../../utils/newLoader';
-import { Autocomplete } from '@material-ui/lab';
-// import authService from '../../../../utils/permissionAuth';
-import Chip from '@material-ui/core/Chip';
-import LineWeightIcon from '@material-ui/icons/LineWeight';
+import VisibilityIcon from '@material-ui/icons/Visibility';
 import { useAlert } from "react-alert";
+import Dialog from '@material-ui/core/Dialog';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -61,6 +62,8 @@ export default function ReorderInvoice(props) {
   const [isViewTable, setIsViewTable] = useState(true);
   const [invoices, setInvoices] = useState([]);
   const [selectedRows, setSelectedRows] = useState([]);
+  const [open, setOpen] = useState(false)
+  const [ItemDataList, setItemDataList] = useState([])
 
   const ProductSaveSchema = Yup.object().shape({
     fromdate: Yup.date().required('From Date is required'),
@@ -122,7 +125,6 @@ export default function ReorderInvoice(props) {
       departureDate: new Date(formik.values.todate)
     };
     var response = await services.getInvoicesByDateRange(model);
-    console.log("res ", response);
     const modifiedInvoices = response.map((invoice) => {
       if (invoice.invoiceDetail.isInvoiceGenerated === true) {
         return { ...invoice, status: 'Invoice Printed' };
@@ -148,6 +150,13 @@ export default function ReorderInvoice(props) {
     setInvoices(modifiedDates);
     setIsViewTable(false);
   }
+  const handleClose = () => {
+    setOpen(false);
+  };
+  function handleView(data){
+    setItemDataList(data.invoiceItems)
+    setOpen(true)
+  }
   async function handleReordering(){
     const arrayOfInvoiceIds = selectedRows.map((obj) => obj.invoiceId);
     const model ={
@@ -164,6 +173,16 @@ export default function ReorderInvoice(props) {
   const clearFields = () => {
     formik.resetForm();
   };
+
+  const actions = [
+    {
+      icon: () => <VisibilityIcon />,
+      tooltip: <p>View Payments</p>,
+      onClick: (event, rowData) => handleView(rowData),
+      position: "row"
+    }
+  ];
+
   return (
     <Page className={classes.root} title="Reorder Invoices">
       <LoadingComponent />
@@ -250,6 +269,7 @@ export default function ReorderInvoice(props) {
                   <Box minWidth={1050} >
                     <Box minWidth={1050} >
                       <MaterialTable
+                        actions={actions}
                         hidden={isViewTable}
                         title="Multiple Actions Preview"
                         columns={[
@@ -257,7 +277,6 @@ export default function ReorderInvoice(props) {
                           { title: 'Room No.', align: 'center', field: 'roomNum' },
                           { title: 'Arrival Date', align: 'center', field: 'arrivalDate' },
                           { title: 'Departure Date', align: 'center', field: 'departureDate' },
-                          { title: 'Payment Type', align: 'center', field: 'paymentType' },
                           { title: 'Status', align: 'center', field: 'status'}
                         ]}
                         data={invoices}
@@ -295,6 +314,33 @@ export default function ReorderInvoice(props) {
             </Box>
           </Form>
         </FormikProvider>
+        <Dialog maxWidth  open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
+            <DialogTitle id="form-dialog-title">Payment Details</DialogTitle>
+            <DialogContent>
+              <Box minWidth={1000} >
+                          <MaterialTable
+                            title="Multiple Actions Preview"
+                            columns={[
+                              { title: 'Date', field: 'date' },
+                              { title: 'Description', field: 'description' },
+                              { title: 'Comment', field: 'comment' },
+                              { title: 'Amount', field:'amount'},
+                              { title: 'Payment Method', field: 'paymentMethod' },
+                              { title: 'Payment Type', field: 'paymentType' },
+                              { title: 'Cashier', field: 'cashier' }
+                            ]}
+                            data={ItemDataList}
+                            options={{
+                              exportButton: false,
+                              showTitle: false,
+                              headerStyle: { textAlign: "left" },
+                              cellStyle: { textAlign: "left" },
+                              columnResizable: false,
+                            }}
+                          />
+                        </Box>
+            </DialogContent>
+          </Dialog>
       </Container >
     </Page >
   );

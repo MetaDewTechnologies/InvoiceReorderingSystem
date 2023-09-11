@@ -270,11 +270,13 @@ invoiceWithItemsResponse.getInvoiceDetail().setReorderedInvoiceDetail(null);
         }
     }
 
+    @CrossOrigin
     @PostMapping("/greenTax/{invoiceId}")
     public ResponseEntity<?> forGreenTaxInvoice(@PathVariable Integer invoiceId, @RequestBody GreenTaxRequest request) {
         Boolean success = invoiceDetailService.greenTaxInserting(invoiceId,request.getGreenTax());
         if(success) {
             InvoiceWithItemsResponse invoiceWithItems = invoiceDetailService.getInvoiceWithItemsById(invoiceId);
+            invoiceWithItems.getInvoiceDetail().setReorderedInvoiceDetail(null);
             return ResponseEntity.ok(invoiceWithItems);
         }
 
@@ -286,6 +288,7 @@ invoiceWithItemsResponse.getInvoiceDetail().setReorderedInvoiceDetail(null);
         }
 
     }
+    @CrossOrigin
     @PostMapping("/checkGreenTax/{invoiceId}")
     public ResponseEntity<?> checkGreenTaxValue(@PathVariable Integer invoiceId){
         Boolean success = invoiceDetailService.greenTaxCheck(invoiceId);

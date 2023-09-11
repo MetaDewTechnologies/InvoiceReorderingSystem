@@ -8,7 +8,8 @@ export default {
     handleCompleteBilling,
     handlePermission,
     deleteInvoiceItem,
-    handleCreateInvoice
+    handleCreateInvoice,
+    saveGreenTax
 };
 
 async function saveInvoice(data) {
@@ -30,8 +31,11 @@ async function GetInvoiceDetailsByRoomNumber(roomNum){
     return response
 }
 
-async function handleCompleteBilling(invoiceId){
-    const response = await CommonPostAxios('/api/v1/complete-invoice',invoiceId,null);
+async function handleCompleteBilling(invoiceId,cashierName){
+    const model={
+        cashierName:cashierName
+    }
+    const response = await CommonPostAxios('/api/v1/complete-invoice',invoiceId,model);
     return response;
 }
 
@@ -47,5 +51,10 @@ async function deleteInvoiceItem(itemId){
 
 async function handleCreateInvoice(invoiceId){
     const response = await CommonPostAxios('/api/v1/reorder-invoice',invoiceId,null)
+    return response
+}
+
+async function saveGreenTax(invoiceId, model){
+    const response = await CommonPostAxios('/api/v1/greenTax',invoiceId,model)
     return response
 }

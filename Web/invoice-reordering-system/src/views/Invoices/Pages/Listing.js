@@ -25,6 +25,12 @@ import { LoadingComponent } from '../../../utils/newLoader';
 import CreatePDF from '../../ManageInvoice/Pages/CreatePDF';
 import ReactToPrint from 'react-to-print';
 import { useReactToPrint } from 'react-to-print';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import PaymentIcon from '@material-ui/icons/Payment';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -48,7 +54,6 @@ const useStyles = makeStyles(theme => ({
 }));
 
 export default function Invoices(props) {
-
   const classes = useStyles();
   const [invoiceList, setInvoiceList] = useState({
     fromdate: '',
@@ -59,6 +64,13 @@ export default function Invoices(props) {
   const [isViewTable, setIsViewTable] = useState(true);
   const [invoices, setInvoices] = useState([]);
   const [selectedRows, setSelectedRows] = useState('');
+  const [open, setOpen] = useState(false)
+  const [greenTax, setGreenTax] = useState('0')
+  const [rowId, setRowId] = useState('')
+  const [gTax,setGTax] = useState("")
+  const [print, setprint] = useState(false)
+  const [cashierName, setCashierName] = useState("")
+  const [invoiceID, setInvoiceID] = useState('')
 
   const ProductSaveSchema = Yup.object().shape({
     fromdate: Yup.date().required('From Date is required'),
@@ -116,7 +128,8 @@ export default function Invoices(props) {
       departureDate: new Date(formik.values.todate)
     };
     var response = await services.getInvoicesByDateRange(model);
-    const modifiedInvoices = response.map((invoice) => {
+    var filteredResponse = response.filter(item => item.invoiceDetail.isReordered == true); 
+    const modifiedInvoices = filteredResponse.map((invoice) => {
       if (invoice.invoiceDetail.isInvoiceGenerated === true) {
         return { ...invoice, status: 'Printed' };
       }
@@ -138,6 +151,8 @@ export default function Invoices(props) {
                 customerName: item.invoiceDetail.customerName,
                 arrivalDate: item.invoiceDetail.arrivalDate.split('T')[0],
                 departureDate: item.invoiceDetail.departureDate.split('T')[0],
+                greenTax:item.invoiceDetail.greenTax,
+                isReordered: item.invoiceDetail.isReordered,
                 invoiceItems : item.invoiceItems.map((item)=>{
                   return{
                     ...item,
@@ -146,12 +161,13 @@ export default function Invoices(props) {
                   }
                 })}
     })
+    const name = sessionStorage.getItem("userName")
+    setCashierName(name);
     setInvoices(modifiedDates);
     setIsViewTable(false);
   }
 
   const clearFields = () => {
-
     formik.resetForm();
     setInvoiceList({
       ...invoiceList
@@ -159,16 +175,36 @@ export default function Invoices(props) {
     setInvoices([]);
     setTotalNet({ total: 0 });
   };
+  const handleClose = () => {
+    setOpen(false);
+  };
+  const handleOpen=(row)=>{
+    setRowId(row.invoiceId)
+    setOpen(true)
+  }
+  async function handleGreenTax(){
+    const model = {
+      greenTax: parseFloat(greenTax)
+    }
+  const greenTaxresponse = await services.saveGreenTax(rowId,model)
+   setOpen(false)
+  }
  async function customHandlePrint(row){
+   const gTax = await services.getGreenTaxByInvoiceId(row.invoiceId)
+   setGTax(gTax)
     const response = await services.handleCreateInvoice(row.invoiceId)
+    console.log("response", response);
+    setInvoiceID(response)
+    setprint(true)
     setSelectedRows(row);
  }
 
  useEffect(() => {
    if(selectedRows !=""){
+    setprint(false)
     handlePrint();
    }
-}, [selectedRows]);
+}, [selectedRows,print]);
 
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
@@ -277,13 +313,18 @@ export default function Invoices(props) {
                           columnResizable: false,
                           addRowPosition: "first",
                           headerStyle: { textAlign: "left", height: '1%' },
-                          actionsColumnIndex: -1,
+                          actionsColumnIndex: -1
                         }}
                         actions={[
                           {
+                            icon: ()=> <PaymentIcon/>,
+                            tooltip: 'Add green tax',
+                            onClick: (event, rowData) => { handleOpen(rowData) },
+                          },
+                          {
                             icon: 'print',
                             tooltip: 'Print Invoice',
-                            onClick: (event, rowData) => { customHandlePrint (rowData) }
+                            onClick: (event, rowData) => { customHandlePrint(rowData) }
                           },
                         ]}
                       />
@@ -292,7 +333,7 @@ export default function Invoices(props) {
                     {selectedRows.invoiceDetail !==""?
                     <div hidden={true}>
                     <CreatePDF ref={componentRef}
-                      invoiceData={selectedRows!=="" ?selectedRows:''} itemData={selectedRows.invoiceItems?selectedRows.invoiceItems:[]} 
+                      invoiceData={selectedRows!==""?selectedRows:''} itemData={selectedRows.invoiceItems?selectedRows.invoiceItems:[]} greenTax={gTax} cashierName={cashierName} invoiceID={invoiceID}
                     />
                   </div>:''
                     }                   
@@ -302,6 +343,28 @@ export default function Invoices(props) {
             </Box>
           </Form>
         </FormikProvider>
+        <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
+        <DialogTitle id="form-dialog-title">Green Tax</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            id="greenTax"
+            label="Green Tax"
+            type="greenTax"
+            fullWidth
+            onChange = {e => setGreenTax(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleGreenTax} color="primary">
+            Add
+          </Button>
+        </DialogActions>
+      </Dialog>
       </Container >
     </Page >
   );
