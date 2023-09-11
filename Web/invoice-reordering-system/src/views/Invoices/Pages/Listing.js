@@ -67,9 +67,11 @@ export default function Invoices(props) {
   const [open, setOpen] = useState(false)
   const [greenTax, setGreenTax] = useState('0')
   const [rowId, setRowId] = useState('')
-  const [invoiceDetails,setInvoiceDetails] = useState("")
-  const [itemDetails, setItemDetails] = useState([])
+  const [gTax,setGTax] = useState("")
   const [print, setprint] = useState(false)
+  const [cashierName, setCashierName] = useState("")
+  const [invoiceID, setInvoiceID] = useState('')
+
   const ProductSaveSchema = Yup.object().shape({
     fromdate: Yup.date().required('From Date is required'),
     todate: Yup.date().required('To Date is required')
@@ -159,12 +161,13 @@ export default function Invoices(props) {
                   }
                 })}
     })
+    const name = sessionStorage.getItem("userName")
+    setCashierName(name);
     setInvoices(modifiedDates);
     setIsViewTable(false);
   }
 
   const clearFields = () => {
-
     formik.resetForm();
     setInvoiceList({
       ...invoiceList
@@ -184,25 +187,24 @@ export default function Invoices(props) {
       greenTax: parseFloat(greenTax)
     }
   const greenTaxresponse = await services.saveGreenTax(rowId,model)
-   setInvoiceDetails(greenTaxresponse.invoiceDetail);
-   setItemDetails(greenTaxresponse.invoiceItems)
    setOpen(false)
   }
  async function customHandlePrint(row){
-   console.log(row);
+   const gTax = await services.getGreenTaxByInvoiceId(row.invoiceId)
+   setGTax(gTax)
     const response = await services.handleCreateInvoice(row.invoiceId)
-    // setprint(true)
+    console.log("response", response);
+    setInvoiceID(response)
+    setprint(true)
     setSelectedRows(row);
  }
 
  useEffect(() => {
    if(selectedRows !=""){
-     console.log("green ",invoiceDetails.greenTax);
+    setprint(false)
     handlePrint();
-    setInvoiceDetails('');
-    // setprint(false)
    }
-}, [selectedRows]);
+}, [selectedRows,print]);
 
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
@@ -331,7 +333,7 @@ export default function Invoices(props) {
                     {selectedRows.invoiceDetail !==""?
                     <div hidden={true}>
                     <CreatePDF ref={componentRef}
-                      invoiceData={selectedRows!==""?selectedRows:''} itemData={selectedRows.invoiceItems?selectedRows.invoiceItems:[]} greenTax={invoiceDetails.greenTax?invoiceDetails.greenTax:0}
+                      invoiceData={selectedRows!==""?selectedRows:''} itemData={selectedRows.invoiceItems?selectedRows.invoiceItems:[]} greenTax={gTax} cashierName={cashierName} invoiceID={invoiceID}
                     />
                   </div>:''
                     }                   

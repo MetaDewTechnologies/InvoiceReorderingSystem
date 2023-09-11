@@ -4,6 +4,7 @@ export default{
     getInvoicesByDateRange,
     handleCreateInvoice,
     saveGreenTax,
+    getGreenTaxByInvoiceId 
 }
 
 async function getInvoicesByDateRange(data){
@@ -11,6 +12,7 @@ async function getInvoicesByDateRange(data){
     return response;
 }
 async function handleCreateInvoice(invoiceId){
+    console.log("inv", invoiceId);
     const response = await CommonPostAxios('/api/v1/reorder-invoice',invoiceId,null)
     return response
 }
@@ -20,3 +22,7 @@ async function saveGreenTax(invoiceId, model){
     return response
 }
 
+async function getGreenTaxByInvoiceId(invoiceId){
+    const response = await CommonPostAxios('/api/v1/checkGreenTax',invoiceId,null)
+    return response;
+}

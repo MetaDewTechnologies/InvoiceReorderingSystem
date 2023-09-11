@@ -9,6 +9,8 @@ export default class ComponentToPrint extends React.Component {
     const invoiceData = this.props.invoiceData;
     const itemData = this.props.itemData;
     const greenTax = this.props.greenTax;
+    const cashierName = this.props.cashierName
+
     var totalDebit = 0;
     let totalCredit = 0;
     itemData.forEach(data => {
@@ -56,10 +58,10 @@ export default class ComponentToPrint extends React.Component {
                 <div className="col" align={'left'} style={{ paddingBottom: '10px' }}><b>Room Number: </b> {invoiceData.roomNum}</div>
                 <div className="col" align={'left'} style={{ paddingBottom: '10px' }}><b>Arrival Date: </b> {invoiceData.arrivalDate}</div>
                 <div className="col" align={'left'} style={{ paddingBottom: '10px' }}><b>Departure Date: </b> {invoiceData.departureDate}</div>
-                <div className="col" align={'left'} style={{ paddingBottom: '10px' }}><b>Cashier: </b> {""}</div>
+                <div className="col" align={'left'} style={{ paddingBottom: '10px' }}><b>Cashier: </b> {cashierName}</div>
                 <div className="col" align={'left'} style={{ paddingBottom: '10px' }}><b>Invoice Date: </b> {new Date().toISOString().split('T')[0]}</div>
                 <h4 style={{ paddingBottom: '10px' }}><left>{invoiceData.customerName}</left></h4>
-                <h4><left>COPY OF INVOICE: {invoiceData.invoiceId}{invoiceID}</left></h4>
+                <h4><left>COPY OF INVOICE: {invoiceID}</left></h4>
                 <div>&nbsp;</div>
                 </div>
                 </Grid>

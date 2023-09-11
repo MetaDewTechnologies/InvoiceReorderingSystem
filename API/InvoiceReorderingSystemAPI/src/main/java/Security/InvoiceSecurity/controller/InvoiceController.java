@@ -288,6 +288,7 @@ invoiceWithItemsResponse.getInvoiceDetail().setReorderedInvoiceDetail(null);
         }
 
     }
+    @CrossOrigin
     @PostMapping("/checkGreenTax/{invoiceId}")
     public ResponseEntity<?> checkGreenTaxValue(@PathVariable Integer invoiceId){
         Boolean success = invoiceDetailService.greenTaxCheck(invoiceId);

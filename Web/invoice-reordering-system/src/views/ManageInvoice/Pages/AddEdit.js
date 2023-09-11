@@ -90,6 +90,11 @@ export default function InvoiceAddEdit(props) {
   const [removeRequest, setRemoveRequest] = useState(false)
   const [disableIsComplete, setDisableIsComplete] = useState(false)
   const [invoiceID, setInvoiceID] = useState('')
+  const [openTax, setOpenTax] = useState(false)
+  const [greenTax, setGreenTax] = useState('0')
+  const [gTax,setGTax] = useState("")
+  const [cashierName, setCashierName] = useState("")
+
   const navigate = useNavigate();
   const handleClick = () => {
     navigate('/app/manageInvoices/listing/');
@@ -124,6 +129,17 @@ export default function InvoiceAddEdit(props) {
   const handleClose = () => {
     setOpen(false);
   };
+  const handleCloseTax = () => {
+    setOpenTax(false);
+  };
+  async function handleGreenTax(){
+    const model = {
+      greenTax: parseFloat(greenTax)
+    }
+  const greenTaxresponse = await services.saveGreenTax(atob(invoiceId.toString()),model)
+  setGTax(greenTaxresponse.invoiceDetail.greenTax)
+   setOpenTax(false)
+  }
 
   async function handlePermission (){
     const data={
@@ -156,6 +172,8 @@ export default function InvoiceAddEdit(props) {
       handleClose();
       alert.error("Permission denied!");
     }
+    const name = sessionStorage.getItem("userName")
+    setCashierName(name);
   }
   async function getInvoiceDetails(invoiceId) {
     let response = await services.getInvoiceDetailsByID(invoiceId);
@@ -879,6 +897,15 @@ export default function InvoiceAddEdit(props) {
                         &nbsp;
                         {isPrintRequested === true?(
                           <Box>
+                        <Button
+                          style={{color:isCompleteBilling?'#FFFFFF':'', backgroundColor:isCompleteBilling?"#489EE7":''}}
+                          variant="contained"
+                          onClick={()=>{setOpenTax(true)}}
+                          disabled={!isCompleteBilling}
+                        >
+                          Add Green Tax
+                        </Button>
+                        &nbsp;
                           <ReactToPrint
                           documentTitle={"Kiha Beach"}
                           trigger={() => <Button
@@ -893,7 +920,7 @@ export default function InvoiceAddEdit(props) {
                         />
                         <div hidden={true}>
                           <CreatePDF ref={componentRef}
-                            invoiceData={invoiceData} itemData={ItemDataList} invoiceID={invoiceID} 
+                            invoiceData={invoiceData} itemData={ItemDataList} invoiceID={invoiceID} greenTax={gTax} cashierName={cashierName}
                           />
                         </div>
                         &nbsp;
@@ -949,6 +976,28 @@ export default function InvoiceAddEdit(props) {
               </Button>
             </DialogActions>
           </Dialog>
+          <Dialog open={openTax} onClose={handleCloseTax} aria-labelledby="form-dialog-title">
+        <DialogTitle id="form-dialog-title">Green Tax</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            id="greenTax"
+            label="Green Tax"
+            type="greenTax"
+            fullWidth
+            onChange = {e => setGreenTax(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseTax} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleGreenTax} color="primary">
+            Add
+          </Button>
+        </DialogActions>
+      </Dialog>
         </Container>
       </Page>
     </Fragment>
