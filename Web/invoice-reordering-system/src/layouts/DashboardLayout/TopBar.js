@@ -4,25 +4,16 @@ import clsx from 'clsx';
 import PropTypes from 'prop-types';
 import {
   AppBar,
-  Badge,
   Box,
   Hidden,
   IconButton,
   Toolbar,
-  Button,
   makeStyles,
-  Avatar,
   Typography,
   withStyles
 } from '@material-ui/core';
-import MenuIcon from '@material-ui/icons/Menu';
-import NotificationsIcon from '@material-ui/icons/NotificationsOutlined';
 import InputIcon from '@material-ui/icons/Input';
 import Logo from '../../components/Logo';
-import Popover from '@material-ui/core/Popover';
-import tokenService from '../../utils/tokenDecoder';
-import { Offline, Online, Detector } from "react-detect-offline"
-import WifiIcon from '@material-ui/icons/Wifi';
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -40,28 +31,14 @@ const NameTextTypography = withStyles({
   }
 })(Typography);
 
-const CaptionTextTypography = withStyles({
-  root: {
-    color: "#0308AB"
-  }
-})(Typography);
-
-// const user = {
-//   avatar: '/static/images/avatars/avatar_6.png',
-//   jobTitle: tokenService.getRoleNameFromToken(),
-//   name: tokenService.getUserNameFromToken()
-// };
-
 const TopBar = ({
   className,
   onMobileNavOpen,
   ...rest
 }) => {
   const classes = useStyles();
-  const [notifications] = useState([]);
 
   const [userName, setUserName] = useState()
-  const [roleName, setRoleName] = useState()
 
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
@@ -74,28 +51,10 @@ const TopBar = ({
     navigate('/login');
   };
 
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handlePasswordChange = (event) => {
-    // let encryptedUserID = btoa(tokenService.getUserIDFromToken().toString())
-    // navigate("/app/users/changeUserPassword/" + encryptedUserID)
-  }
-
   useEffect(() => {
-    // setUserName(tokenService.getUserNameFromToken())
-    // setRoleName(tokenService.getRoleNameFromToken())
+    const user = sessionStorage.getItem('userName')
+    setUserName(user)
   }, []);
-
-  const user = {
-    //avatar: '/static/images/not_found.png',
-    jobTitle: roleName,
-    name: userName
-  };
 
   return (
     <AppBar
@@ -105,7 +64,7 @@ const TopBar = ({
     >
       <Toolbar>
         <Hidden mdDown>
-          <RouterLink to="/">
+          <RouterLink to="/app/manageInvoices/listing">
             <Logo />
           </RouterLink>
           <Box flexGrow={1} />
@@ -115,17 +74,8 @@ const TopBar = ({
             paddingRight="5px">
             <NameTextTypography
               variant="h6"  style={{ color: '#FFFFFF' }}>
-              {/* {user.name} */}
-              Akila
+              {userName}
             </NameTextTypography>
-          </Box>
-          <Box>
-            <Avatar
-              className={classes.avatar}
-              component={RouterLink}
-              src={user.avatar}
-              to="/app/account"
-            />
           </Box>
           <IconButton>
             <InputIcon 

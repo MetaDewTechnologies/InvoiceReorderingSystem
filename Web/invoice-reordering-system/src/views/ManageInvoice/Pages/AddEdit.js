@@ -194,6 +194,7 @@ export default function InvoiceAddEdit(props) {
     });
     const itemData = response.invoiceItems
     const updatedItems = [];
+    var filteredResponse = []
     if(itemData.length>0){
       for (const item of itemData) {
         const updatedItem = {
@@ -205,8 +206,9 @@ export default function InvoiceAddEdit(props) {
         };
         updatedItems.push(updatedItem);
       }
+      filteredResponse = updatedItems.filter(item => item.isActive== true); 
     }
-    setItemDataList(updatedItems)
+    setItemDataList(filteredResponse)
     setIsUpdate(true)
   }
 
