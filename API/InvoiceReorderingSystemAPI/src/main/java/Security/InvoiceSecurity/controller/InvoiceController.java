@@ -183,7 +183,7 @@ public class InvoiceController {
             // Return the reorderedInvoiceId
             return ResponseEntity.ok(reorderedInvoiceId);
         } else {
-            return ResponseEntity.ok(invoiceId);
+            return ResponseEntity.ok(reorderedInvoiceId);
         }
     }
 

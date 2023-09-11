@@ -179,7 +179,8 @@ public class InvoiceDetailService {
 
             // Check if the invoiceId already exists in reordered_invoice_details
             if (reorderedInvoiceDetailRepository.existsByInvoiceDetailnew(invoiceDetail)) {
-                return null; // InvoiceId already exists in reordered_invoice_details
+                return reorderedInvoiceDetailRepository.reorderInvoiceId(invoiceId);
+               // return null; // InvoiceId already exists in reordered_invoice_details
             }
 
             // Create a new ReorderedInvoiceDetailDTO
@@ -191,7 +192,7 @@ public class InvoiceDetailService {
             return reorderedInvoiceDetail.getReorderedInvoiceId();
         }
 
-        return null;
+        return reorderedInvoiceDetailRepository.reorderInvoiceId(invoiceId);
     }
 
     public Integer areAllInvoicesCompletedForRoom(String roomNum) {
