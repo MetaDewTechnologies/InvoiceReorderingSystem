@@ -53,22 +53,6 @@ export default function ManageInvoiceListing(props) {
     navigate('/app/manageInvoices/addEdit/' + encryptedID);
   }
 
-  useEffect(() => {
-    // trackPromise(
-      // getPermission(),
-      //GetRetailorDetailsByMobileNumber()
-    // );
-  }, []);
-
-//   async function getPermission() {
-//     var permissions = await authService.getPermissionsByScreen(screenCode);
-//     var isAuthorized = permissions.find(p => p.permissionCode == 'VIEWRETAILERREGISTRATION');
-
-//     if (isAuthorized === undefined) {
-//       navigate('/404');
-//     }
-//   }
-
   async function GetInvoiceDetailsByRoomNumber() {
     setInvoiceData([])
     var result = await services.GetInvoiceDetailsByRoomNumber(roomNo.roomNumber);
