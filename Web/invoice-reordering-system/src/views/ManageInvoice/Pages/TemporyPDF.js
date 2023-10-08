@@ -13,13 +13,10 @@ import {
 
 export default class ComponentToPrint extends React.Component {
   render() {
-    const invoiceID = this.props.invoiceID;
     const invoiceData = this.props.invoiceData;
     const itemData = this.props.itemData;
-    const greenTax = this.props.greenTax;
-    const cashierName = this.props.cashierName;
 
-    var totalDebit = 0;
+    let totalDebit = 0;
     let totalCredit = 0;
     itemData.forEach((data) => {
       totalDebit += data.debit !== "" ? data.debit : 0;
@@ -27,29 +24,16 @@ export default class ComponentToPrint extends React.Component {
     });
     const totalPayments = totalCredit + totalDebit;
     const serviceCharge = (totalPayments * 10) / 100;
-    const governmentTax = ((totalPayments + serviceCharge) * 16) / 100;
-    const totalGrossTaxes =
-      totalPayments + serviceCharge + greenTax + governmentTax;
+
+    const totalGrossTaxes = totalPayments + serviceCharge;
     const totalNetTaxes = totalPayments;
-    const totalTax = serviceCharge + greenTax + governmentTax;
+    const totalTax = serviceCharge;
     const taxData = [
       {
         taxDetail: "Service Charge",
         taxes: serviceCharge,
         net: totalPayments,
         gross: totalPayments + serviceCharge,
-      },
-      {
-        taxDetail: "Green Tax",
-        taxes: greenTax,
-        net: "0",
-        gross: greenTax,
-      },
-      {
-        taxDetail: "Government Service Tax",
-        taxes: governmentTax,
-        net: "0",
-        gross: governmentTax,
       },
     ];
     return (
@@ -64,23 +48,13 @@ export default class ComponentToPrint extends React.Component {
         <div>&nbsp;</div>
         <Box>
           <Box mb={3} style={{ display: "flex", justifyContent: "center" }}>
-            <img
-              style={{
-                width: 250,
-                height: 155,
-                marginLeft: 0,
-                marginBottom: 10,
-              }}
-              src="/static/images/logo/clientLogo.jpg"
-              alt="logo"
-            />
+            <div className="col pb-4 pt-4 pl-2">
+              <h2>Temporary Bill</h2>
+            </div>
           </Box>
           <Grid container>
             <Grid item md={8} xs={6}>
               <div className="col pb-4 pt-4 pl-2">
-                <h2 style={{ paddingBottom: "10px" }}>
-                  <left>Kiha Beach</left>
-                </h2>
                 <div
                   className="col"
                   align={"left"}
@@ -109,26 +83,6 @@ export default class ComponentToPrint extends React.Component {
                 >
                   <b>Departure Date: </b> {invoiceData.departureDate}
                 </div>
-                <div
-                  className="col"
-                  align={"left"}
-                  style={{ paddingBottom: "10px" }}
-                >
-                  <b>Cashier: </b> {cashierName}
-                </div>
-                <div
-                  className="col"
-                  align={"left"}
-                  style={{ paddingBottom: "10px" }}
-                >
-                  <b>Invoice Date: </b> {new Date().toISOString().split("T")[0]}
-                </div>
-                <h4 style={{ paddingBottom: "10px" }}>
-                  <left>{invoiceData.customerName}</left>
-                </h4>
-                <h4>
-                  <left>COPY OF INVOICE: {invoiceID}</left>
-                </h4>
                 <div>&nbsp;</div>
               </div>
             </Grid>
@@ -280,13 +234,13 @@ export default class ComponentToPrint extends React.Component {
                       align={"center"}
                       style={{ borderBottom: "1px solid black" }}
                     >
-                      {"Tax Details"}
+                      {"Other Charges"}
                     </TableCell>
                     <TableCell
                       align={"center"}
                       style={{ borderBottom: "1px solid black" }}
                     >
-                      {"Taxes"}
+                      {"Amount"}
                     </TableCell>
                     <TableCell
                       align={"center"}
@@ -342,7 +296,7 @@ export default class ComponentToPrint extends React.Component {
                     ))}
                   <TableRow>
                     <TableCell colSpan={1} align={"right"}>
-                      {"Total Tax"}
+                      {"Total"}
                     </TableCell>
                     <TableCell align={"center"}>
                       {parseInt(totalTax).toFixed(2)}
@@ -357,80 +311,6 @@ export default class ComponentToPrint extends React.Component {
                 </TableBody>
               </Table>
             </TableContainer>
-          </Box>
-          <Box
-            maxWidth="70%"
-            display="flex"
-            style={{ paddingTop: "5px", marginLeft: "40%" }}
-          >
-            <h5 style={{ paddingBottom: "10px" }}>
-              TAX INVOICE TIN No: 1047945GST501
-            </h5>
-          </Box>
-          <Divider style={{ background: "black" }} />
-          <Box style={{ paddingTop: "5px" }}>
-            <Grid container>
-              <Grid item md={6} xs={6}>
-                <div
-                  className="col"
-                  align={"left"}
-                  style={{ paddingBottom: "10px" }}
-                >
-                  kiha beach
-                </div>
-                <div
-                  className="col"
-                  align={"left"}
-                  style={{ paddingBottom: "10px" }}
-                >
-                  Dharavandhoo, Maldives
-                </div>
-                <div
-                  className="col"
-                  align={"left"}
-                  style={{ paddingBottom: "10px" }}
-                >
-                  Dharavandhoo
-                </div>
-                <div
-                  className="col"
-                  align={"left"}
-                  style={{ paddingBottom: "10px" }}
-                >
-                  Maldives
-                </div>
-              </Grid>
-              <Grid item md={6} xs={6}>
-                <div
-                  className="col"
-                  align={"left"}
-                  style={{ paddingBottom: "10px" }}
-                >
-                  Telephone: +960 7779667
-                </div>
-                <div
-                  className="col"
-                  align={"left"}
-                  style={{ paddingBottom: "10px" }}
-                >
-                  Fax: +960 7779667
-                </div>
-                <div
-                  className="col"
-                  align={"left"}
-                  style={{ paddingBottom: "10px" }}
-                >
-                  Email: reservations@kihabeach.com
-                </div>
-                <div
-                  className="col"
-                  align={"left"}
-                  style={{ paddingBottom: "10px" }}
-                >
-                  Website: http://kihabeach.com/
-                </div>
-              </Grid>
-            </Grid>
           </Box>
         </div>
       </div>
