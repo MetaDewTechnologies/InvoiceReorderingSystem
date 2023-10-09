@@ -93,6 +93,7 @@ export default function InvoiceAddEdit(props) {
   const [greenTax, setGreenTax] = useState("0");
   const [gTax, setGTax] = useState("");
   const [cashierName, setCashierName] = useState("");
+  const [checkoutItemList, setCheckoutItemList] = useState([]);
 
   const navigate = useNavigate();
   const handleClick = () => {
@@ -215,6 +216,7 @@ export default function InvoiceAddEdit(props) {
       filteredResponse = updatedItems.filter((item) => item.isActive == true);
     }
     setItemDataList(filteredResponse);
+    setCheckoutItemList(filteredResponse);
     setIsUpdate(true);
   }
 
@@ -1004,7 +1006,7 @@ export default function InvoiceAddEdit(props) {
                             <TemporyBillPDF
                               ref={componentRef}
                               invoiceData={invoiceData}
-                              itemData={ItemDataList}
+                              itemData={checkoutItemList}
                             />
                           </div>
                           &nbsp;

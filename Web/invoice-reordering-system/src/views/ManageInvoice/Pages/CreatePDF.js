@@ -78,9 +78,6 @@ export default class ComponentToPrint extends React.Component {
           <Grid container>
             <Grid item md={8} xs={6}>
               <div className="col pb-4 pt-4 pl-2">
-                <h2 style={{ paddingBottom: "10px" }}>
-                  <left>Kiha Beach</left>
-                </h2>
                 <div
                   className="col"
                   align={"left"}
@@ -123,18 +120,12 @@ export default class ComponentToPrint extends React.Component {
                 >
                   <b>Invoice Date: </b> {new Date().toISOString().split("T")[0]}
                 </div>
-                <h4 style={{ paddingBottom: "10px" }}>
-                  <left>{invoiceData.customerName}</left>
-                </h4>
-                <h4>
-                  <left>COPY OF INVOICE: {invoiceID}</left>
-                </h4>
                 <div>&nbsp;</div>
               </div>
             </Grid>
             <Grid md={4} xs={6}>
               <div className="col pb-4 pt-4 pl-2">
-                <h3 style={{ paddingBottom: "10px" }}>
+                {/* <h3 style={{ paddingBottom: "10px" }}>
                   <left>Billing Profile</left>
                 </h3>
                 <div
@@ -143,7 +134,7 @@ export default class ComponentToPrint extends React.Component {
                   style={{ paddingBottom: "10px" }}
                 >
                   <b>Name : </b> {invoiceData.customerName}
-                </div>
+                </div> */}
                 <div>&nbsp;</div>
               </div>
             </Grid>
