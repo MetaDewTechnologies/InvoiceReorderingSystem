@@ -341,9 +341,7 @@ export default class ComponentToPrint extends React.Component {
                     <TableCell align={"center"}>
                       {parseInt(totalNetTaxes).toFixed(2)}
                     </TableCell>
-                    <TableCell align={"center"}>
-                      {parseInt(totalGrossTaxes).toFixed(2)}
-                    </TableCell>
+                    <TableCell align={"center"}>{totalGrossTaxes}</TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
