@@ -30,7 +30,7 @@ import { trackPromise } from "react-promise-tracker";
 // import tokenService from '../../../utils/tokenDecoder';
 import MaterialTable from "material-table";
 import ReactToPrint from "react-to-print";
-import { useReactToPrint } from 'react-to-print';
+import { useReactToPrint } from "react-to-print";
 import CreatePDF from "./CreatePDF";
 import TemporyBillPDF from "./TemporyPDF";
 import Dialog from "@material-ui/core/Dialog";
@@ -107,10 +107,10 @@ export default function InvoiceAddEdit(props) {
   const [gTax, setGTax] = useState("");
   const [cashierName, setCashierName] = useState("");
   const [checkoutItemList, setCheckoutItemList] = useState([]);
-  const [print, setprint] = useState(false)
-  const [openBillSettle, setOpenBillSettle] = useState(false)
-  const [paymentToBePaid, setPaymentToBePaid] = useState('')
-  const [isSettledBill, setIsSettledBill] = useState(false)
+  const [print, setprint] = useState(false);
+  const [openBillSettle, setOpenBillSettle] = useState(false);
+  const [paymentToBePaid, setPaymentToBePaid] = useState("");
+  const [isSettledBill, setIsSettledBill] = useState(false);
   const navigate = useNavigate();
   const handleClick = () => {
     navigate("/app/manageInvoices/listing/");
@@ -155,17 +155,19 @@ export default function InvoiceAddEdit(props) {
       atob(invoiceId.toString()),
       model
     );
-    if(greenTaxresponse.invoiceDetail.greenTax){
-      alert.success("Green tax is added succesfully")
+    if (greenTaxresponse.invoiceDetail.greenTax) {
+      alert.success("Green tax is added succesfully");
       setGTax(greenTaxresponse.invoiceDetail.greenTax);
       setOpenTax(false);
-    }else{
-      alert.error("Error in green tax adding")
+    } else {
+      alert.error("Error in green tax adding");
     }
   }
-  async function getGreenTax(){
-    const gTax = await services.getGreenTaxByInvoiceId(atob(invoiceId.toString()))
-    setGTax(gTax)
+  async function getGreenTax() {
+    const gTax = await services.getGreenTaxByInvoiceId(
+      atob(invoiceId.toString())
+    );
+    setGTax(gTax);
   }
   async function handlePermission() {
     const data = {
@@ -406,26 +408,18 @@ export default function InvoiceAddEdit(props) {
     });
     const totalPayments = totalCredit + totalDebit;
     const serviceCharge = (totalPayments * 10) / 100;
-    const grandTotal = serviceCharge+totalPayments+gTax
-    if(gTax===""){
-      alert.show("Add green tax before completing the bill");
-    }
-    else if(!isSettledBill){
-      alert.show("Settle the open balance before completing the bill");
-    }
-    else {
-      const cashierName = sessionStorage.getItem("userName");
-      const response = await services.handleCompleteBilling(
-        atob(invoiceId.toString()),
-        cashierName
-      );
-      if (response.statusCode === "SUCCESS") {
-        alert.success(response.message);
-        setIsCompleteBilling(true);
-        setDisableIsComplete(true);
-      } else {
-        alert.error(response.message);
-      }
+    const grandTotal = serviceCharge + totalPayments + gTax;
+    const cashierName = sessionStorage.getItem("userName");
+    const response = await services.handleCompleteBilling(
+      atob(invoiceId.toString()),
+      cashierName
+    );
+    if (response.statusCode === "SUCCESS") {
+      alert.success(response.message);
+      setIsCompleteBilling(true);
+      setDisableIsComplete(true);
+    } else {
+      alert.error(response.message);
     }
   }
 
@@ -473,33 +467,34 @@ export default function InvoiceAddEdit(props) {
     });
   }
 
-  function handleBillPrint(){
-    setIsSettledBill(true)
-    setOpenBillSettle(false)
-    setprint(true)
+  function handleBillPrint() {
+    handleCompleteBilling();
+    setIsSettledBill(true);
+    setOpenBillSettle(false);
+    setprint(true);
   }
   useEffect(() => {
-    if(print){
-     setprint(false)
-     handlePrint();
+    if (print) {
+      setprint(false);
+      handlePrint();
     }
- }, [print]);
+  }, [print]);
 
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
   });
 
-  async function handleSettleBillPopup(){
-    if(gTax===""){
+  async function handleSettleBillPopup() {
+    if (gTax === "") {
       alert.show("Add green tax before checkout");
-    }
-    else if(isSettledBill){
-      setPaymentToBePaid(0.00)
-      setOpenBillSettle(true)
-    }
-    else{
-      const grTax = await services.getGreenTaxByInvoiceId(atob(invoiceId.toString()))
-      setGTax(grTax)
+    } else if (isSettledBill) {
+      setPaymentToBePaid(0.0);
+      setOpenBillSettle(true);
+    } else {
+      const grTax = await services.getGreenTaxByInvoiceId(
+        atob(invoiceId.toString())
+      );
+      setGTax(grTax);
       let totalDebit = 0;
       let totalCredit = 0;
       checkoutItemList.forEach((data) => {
@@ -508,9 +503,9 @@ export default function InvoiceAddEdit(props) {
       });
       const totalPayments = totalCredit + totalDebit;
       const serviceCharge = (totalPayments * 10) / 100;
-      const grandTotal = serviceCharge+totalPayments+grTax
-      setPaymentToBePaid(grandTotal-totalDebit)
-      setOpenBillSettle(true)
+      const grandTotal = serviceCharge + totalPayments + grTax;
+      setPaymentToBePaid(grandTotal - totalDebit);
+      setOpenBillSettle(true);
     }
   }
   return (
@@ -852,7 +847,12 @@ export default function InvoiceAddEdit(props) {
                                       onBlur={handleBlur}
                                       variant="outlined"
                                       size="small"
-                                      InputProps={{inputProps: { min: invoiceData.arrivalDate, max: invoiceData.departureDate} }}
+                                      InputProps={{
+                                        inputProps: {
+                                          min: invoiceData.arrivalDate,
+                                          max: invoiceData.departureDate,
+                                        },
+                                      }}
                                     />
                                   </FormControl>
                                 </Grid>
@@ -1075,7 +1075,7 @@ export default function InvoiceAddEdit(props) {
                               color: disableIsComplete ? "" : "#FFFFFF",
                               backgroundColor: disableIsComplete
                                 ? ""
-                                : "'#2ef242",
+                                : "#2ef242",
                             }}
                             variant="contained"
                             onClick={() => {
@@ -1086,21 +1086,21 @@ export default function InvoiceAddEdit(props) {
                             Add Green Tax
                           </Button>
                           &nbsp;
-                              <Button
-                                style={{
-                                  color: disableIsComplete ? "" : "#FFFFFF",
-                                  backgroundColor: disableIsComplete
-                                    ? ""
-                                    : "#489EE7",
-                                }}
-                                id="btnRecord"
-                                variant="contained"
-                                onClick={handleSettleBillPopup}
-                                disabled={disableIsComplete}
-                              >
-                                Settle the bill
-                              </Button>
-                          &nbsp;
+                          <Button
+                            style={{
+                              color: disableIsComplete ? "" : "#FFFFFF",
+                              backgroundColor: disableIsComplete
+                                ? ""
+                                : "#489EE7",
+                            }}
+                            id="btnRecord"
+                            variant="contained"
+                            onClick={handleSettleBillPopup}
+                            disabled={disableIsComplete}
+                          >
+                            Settle the bill
+                          </Button>
+                          {/* &nbsp;
                           <Button
                             style={{
                               color: disableIsComplete ? "" : "#FFFFFF",
@@ -1113,7 +1113,7 @@ export default function InvoiceAddEdit(props) {
                             disabled={disableIsComplete}
                           >
                             Complete Billing
-                          </Button>
+                          </Button> */}
                           &nbsp;
                           <Button
                             style={{
@@ -1255,7 +1255,7 @@ export default function InvoiceAddEdit(props) {
 
           <Dialog
             open={openBillSettle}
-            onClose={()=>setOpenBillSettle(false)}
+            onClose={() => setOpenBillSettle(false)}
             aria-labelledby="form-dialog-title"
           >
             <DialogTitle id="form-dialog-title">Settle the bill</DialogTitle>
@@ -1265,10 +1265,14 @@ export default function InvoiceAddEdit(props) {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={()=>setOpenBillSettle(false)} color="primary">
+              <Button onClick={() => setOpenBillSettle(false)} color="primary">
                 Cancel
               </Button>
-              <Button onClick={handleBillPrint} color="primary" variant="contained">
+              <Button
+                onClick={handleBillPrint}
+                color="primary"
+                variant="contained"
+              >
                 Settle and print
               </Button>
               <div hidden={true}>
@@ -1281,7 +1285,6 @@ export default function InvoiceAddEdit(props) {
               </div>
             </DialogActions>
           </Dialog>
-
         </Container>
       </Page>
     </Fragment>
