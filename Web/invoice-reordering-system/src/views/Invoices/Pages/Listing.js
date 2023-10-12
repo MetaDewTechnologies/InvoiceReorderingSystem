@@ -296,7 +296,6 @@ export default function Invoices(props) {
                     <Box minWidth={1050} >
                       <MaterialTable
                         hidden={isViewTable}
-                        title="Multiple Actions Preview"
                         columns={[
                           { title: 'Reservation No.', align: 'left', field: 'reservationNum' },
                           { title: 'Room No.', align: 'center', field: 'roomNum' },

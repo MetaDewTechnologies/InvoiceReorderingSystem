@@ -145,34 +145,39 @@ export default class ComponentToPrint extends React.Component {
             <TableContainer>
               <Table aria-label="caption table">
                 <TableHead>
-                  <TableRow style={{ borderTop: "1px solid black" }}>
+                  <TableRow style={{ borderTop: "1px solid black"}}>
                     <TableCell
                       align={"center"}
-                      style={{ borderBottom: "1px solid black" }}
+                      padding="none"
+                      style={{ borderBottom: "1px solid black" , padding:'10px'}}
                     >
                       {"Date"}
                     </TableCell>
                     <TableCell
                       align={"center"}
-                      style={{ borderBottom: "1px solid black" }}
+                      padding="none"
+                      style={{ borderBottom: "1px solid black", padding:'10px'}}
                     >
                       {"Description"}
                     </TableCell>
                     <TableCell
                       align={"center"}
-                      style={{ borderBottom: "1px solid black" }}
+                      padding="none"
+                      style={{ borderBottom: "1px solid black",padding:'10px' }}
                     >
                       {"Comment"}
                     </TableCell>
                     <TableCell
                       align={"center"}
-                      style={{ borderBottom: "1px solid black" }}
+                      padding="none"
+                      style={{ borderBottom: "1px solid black",padding:'10px' }}
                     >
                       {"Debit"}
                     </TableCell>
                     <TableCell
                       align={"center"}
-                      style={{ borderBottom: "1px solid black" }}
+                      padding="none"
+                      style={{ borderBottom: "1px solid black",padding:'10px' }}
                     >
                       {"Credit"}
                     </TableCell>
@@ -186,7 +191,8 @@ export default class ComponentToPrint extends React.Component {
                           align={"left"}
                           component="th"
                           scope="row"
-                          style={{ borderBottom: "none" }}
+                          padding="none"
+                          style={{ borderBottom: "none", paddingTop:'10px'}}
                         >
                           {data.date.split("T")[0]}
                         </TableCell>
@@ -194,7 +200,8 @@ export default class ComponentToPrint extends React.Component {
                           align={"center"}
                           component="th"
                           scope="row"
-                          style={{ borderBottom: "none" }}
+                          padding="none"
+                          style={{ borderBottom: "none", paddingTop:'10px'}}
                         >
                           {data.description}
                         </TableCell>
@@ -202,7 +209,8 @@ export default class ComponentToPrint extends React.Component {
                           align={"center"}
                           component="th"
                           scope="row"
-                          style={{ borderBottom: "none" }}
+                          padding="none"
+                          style={{ borderBottom: "none", paddingTop:'10px'}}
                         >
                           {data.comment}
                         </TableCell>
@@ -210,20 +218,22 @@ export default class ComponentToPrint extends React.Component {
                           align={"center"}
                           component="th"
                           scope="row"
-                          style={{ borderBottom: "none" }}
+                          padding="none"
+                          style={{ borderBottom: "none", paddingTop:'10px'}}
                         >
                           {data.debit !== ""
-                            ? parseInt(data.debit).toFixed(2)
+                            ? parseFloat(data.debit).toFixed(2)
                             : ""}
                         </TableCell>
                         <TableCell
                           align={"center"}
                           component="th"
                           scope="row"
-                          style={{ borderBottom: "none" }}
+                          padding="none"
+                          style={{ borderBottom: "none",paddingTop:'10px'}}
                         >
                           {data.credit !== ""
-                            ? parseInt(data.credit).toFixed(2)
+                            ? parseFloat(data.credit).toFixed(2)
                             : ""}
                         </TableCell>
                       </TableRow>
@@ -233,11 +243,109 @@ export default class ComponentToPrint extends React.Component {
                       {"Total"}
                     </TableCell>
                     <TableCell align={"center"}>
-                      {parseInt(totalDebit).toFixed(2)}
+                      {parseFloat(totalDebit).toFixed(2)}
                     </TableCell>
                     <TableCell align={"center"}>
-                      {parseInt(totalCredit).toFixed(2)}
+                      {parseFloat(totalCredit).toFixed(2)}
                     </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Box>
+          <Box
+            maxWidth="60%"
+            display="flex"
+            justifyContent="flex-end"
+            style={{ paddingTop: "10px", marginLeft: "40%" }}
+          >
+            <TableContainer style={{ maxWidth: "100%" }}>
+              <Table>
+                <TableHead>
+                  <TableRow style={{ borderTop: "1px solid black",padding:'10px' }}>
+                    <TableCell
+                      align={"center"}
+                      padding="none"
+                      style={{ borderBottom: "1px solid black",padding:'10px' }}
+                    >
+                      {"Tax Details"}
+                    </TableCell>
+                    <TableCell
+                      align={"center"}
+                      padding="none"
+                      style={{ borderBottom: "1px solid black",padding:'10px' }}
+                    >
+                      {"Taxes"}
+                    </TableCell>
+                    <TableCell
+                      align={"center"}
+                      padding="none"
+                      style={{ borderBottom: "1px solid black",padding:'10px' }}
+                    >
+                      {"Net"}
+                    </TableCell>
+                    <TableCell
+                      align={"center"}
+                      padding="none"
+                      style={{ borderBottom: "1px solid black",padding:'10px' }}
+                    >
+                      {"Gross"}
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {taxData &&
+                    taxData.map((data, index) => (
+                      <TableRow key={index}>
+                        <TableCell
+                          align={"left"}
+                          component="th"
+                          scope="row"
+                          padding="none"
+                          style={{ borderBottom: "none",paddingTop:'10px' }}
+                        >
+                          {data.taxDetail}
+                        </TableCell>
+                        <TableCell
+                          align={"center"}
+                          component="th"
+                          scope="row"
+                          padding="none"
+                          style={{ borderBottom: "none",paddingTop:'10px' }}
+                        >
+                          {parseFloat(data.taxes).toFixed(2)}
+                        </TableCell>
+                        <TableCell
+                          align={"center"}
+                          component="th"
+                          scope="row"
+                          padding="none"
+                          style={{ borderBottom: "none",paddingTop:'10px' }}
+                        >
+                          {data.net}
+                        </TableCell>
+                        <TableCell
+                          align={"center"}
+                          component="th"
+                          scope="row"
+                          padding="none"
+                          style={{ borderBottom: "none",paddingTop:'10px' }}
+                        >
+                          {parseFloat(data.gross).toFixed(2)}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  <TableRow>
+                    <TableCell colSpan={1} align={"right"}>
+                      {"Total Tax"}
+                    </TableCell>
+                    <TableCell align={"center"}>
+                      {parseFloat(totalTax).toFixed(2)}
+                    </TableCell>
+                    <TableCell align={"center"}>
+                      {parseFloat(totalNetTaxes).toFixed(2)}
+                    </TableCell>
+                    <TableCell align={"center"}>{parseFloat(totalGrossTaxes).toFixed(2)}</TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
@@ -255,97 +363,8 @@ export default class ComponentToPrint extends React.Component {
             }}
           >
             <h3>Open Balance</h3>
-            <h3>{parseInt(totalPayments - totalDebit).toFixed(2)}</h3>
-          </Box>
-          <Box
-            maxWidth="60%"
-            display="flex"
-            justifyContent="flex-end"
-            style={{ paddingTop: "10px", marginLeft: "40%" }}
-          >
-            <TableContainer style={{ maxWidth: "100%" }}>
-              <Table>
-                <TableHead>
-                  <TableRow style={{ borderTop: "1px solid black" }}>
-                    <TableCell
-                      align={"center"}
-                      style={{ borderBottom: "1px solid black" }}
-                    >
-                      {"Tax Details"}
-                    </TableCell>
-                    <TableCell
-                      align={"center"}
-                      style={{ borderBottom: "1px solid black" }}
-                    >
-                      {"Taxes"}
-                    </TableCell>
-                    <TableCell
-                      align={"center"}
-                      style={{ borderBottom: "1px solid black" }}
-                    >
-                      {"Net"}
-                    </TableCell>
-                    <TableCell
-                      align={"center"}
-                      style={{ borderBottom: "1px solid black" }}
-                    >
-                      {"Gross"}
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {taxData &&
-                    taxData.map((data, index) => (
-                      <TableRow key={index}>
-                        <TableCell
-                          align={"left"}
-                          component="th"
-                          scope="row"
-                          style={{ borderBottom: "none" }}
-                        >
-                          {data.taxDetail}
-                        </TableCell>
-                        <TableCell
-                          align={"center"}
-                          component="th"
-                          scope="row"
-                          style={{ borderBottom: "none" }}
-                        >
-                          {data.taxes}
-                        </TableCell>
-                        <TableCell
-                          align={"center"}
-                          component="th"
-                          scope="row"
-                          style={{ borderBottom: "none" }}
-                        >
-                          {data.net}
-                        </TableCell>
-                        <TableCell
-                          align={"center"}
-                          component="th"
-                          scope="row"
-                          style={{ borderBottom: "none" }}
-                        >
-                          {data.gross}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  <TableRow>
-                    <TableCell colSpan={1} align={"right"}>
-                      {"Total Tax"}
-                    </TableCell>
-                    <TableCell align={"center"}>
-                      {parseInt(totalTax).toFixed(2)}
-                    </TableCell>
-                    <TableCell align={"center"}>
-                      {parseInt(totalNetTaxes).toFixed(2)}
-                    </TableCell>
-                    <TableCell align={"center"}>{totalGrossTaxes}</TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </TableContainer>
+            {/* <h3>{parseInt(totalGrossTaxes - totalDebit).toFixed(2)}</h3> */}
+            <h3>{parseFloat(0.00).toFixed(2)}</h3>
           </Box>
           <Box
             maxWidth="70%"

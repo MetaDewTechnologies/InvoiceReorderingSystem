@@ -15,6 +15,7 @@ export default class ComponentToPrint extends React.Component {
   render() {
     const invoiceData = this.props.invoiceData;
     const itemData = this.props.itemData;
+    const greenTax = this.props.greenTax;
 
     let totalDebit = 0;
     let totalCredit = 0;
@@ -25,15 +26,22 @@ export default class ComponentToPrint extends React.Component {
     const totalPayments = totalCredit + totalDebit;
     const serviceCharge = (totalPayments * 10) / 100;
 
-    const totalGrossTaxes = totalPayments + serviceCharge;
+    const totalGrossTaxes = totalPayments + serviceCharge+greenTax;
     const totalNetTaxes = totalPayments;
-    const totalTax = serviceCharge;
+    const totalTax = serviceCharge+greenTax;
     const taxData = [
       {
         taxDetail: "Service Charge",
         taxes: serviceCharge,
         net: totalPayments,
         gross: totalPayments + serviceCharge,
+        
+      },
+      {
+        taxDetail: "Green Tax",
+        taxes: greenTax,
+        net: "0",
+        gross: greenTax,
       },
     ];
     return (
@@ -176,7 +184,7 @@ export default class ComponentToPrint extends React.Component {
                           style={{ borderBottom: "none" }}
                         >
                           {data.debit !== ""
-                            ? parseInt(data.debit).toFixed(2)
+                            ? parseFloat(data.debit).toFixed(2)
                             : ""}
                         </TableCell>
                         <TableCell
@@ -186,7 +194,7 @@ export default class ComponentToPrint extends React.Component {
                           style={{ borderBottom: "none" }}
                         >
                           {data.credit !== ""
-                            ? parseInt(data.credit).toFixed(2)
+                            ? parseFloat(data.credit).toFixed(2)
                             : ""}
                         </TableCell>
                       </TableRow>
@@ -196,29 +204,15 @@ export default class ComponentToPrint extends React.Component {
                       {"Total"}
                     </TableCell>
                     <TableCell align={"center"}>
-                      {parseInt(totalDebit).toFixed(2)}
+                      {parseFloat(totalDebit).toFixed(2)}
                     </TableCell>
                     <TableCell align={"center"}>
-                      {parseInt(totalCredit).toFixed(2)}
+                      {parseFloat(totalCredit).toFixed(2)}
                     </TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
             </TableContainer>
-          </Box>
-          <Box
-            display="flex"
-            justifyContent="space-between"
-            style={{
-              border: "1px solid",
-              padding: "5px 10px 5px 10px",
-              width: "60%",
-              marginLeft: "40%",
-              marginTop: "20px",
-            }}
-          >
-            <h3>Open Balance</h3>
-            <h3>{parseInt(totalPayments - totalDebit).toFixed(2)}</h3>
           </Box>
           <Box
             maxWidth="60%"
@@ -274,7 +268,7 @@ export default class ComponentToPrint extends React.Component {
                           scope="row"
                           style={{ borderBottom: "none" }}
                         >
-                          {data.taxes}
+                          {parseFloat(data.taxes).toFixed(2)}
                         </TableCell>
                         <TableCell
                           align={"center"}
@@ -282,7 +276,7 @@ export default class ComponentToPrint extends React.Component {
                           scope="row"
                           style={{ borderBottom: "none" }}
                         >
-                          {data.net}
+                          {parseFloat(data.net).toFixed(2)}
                         </TableCell>
                         <TableCell
                           align={"center"}
@@ -290,7 +284,7 @@ export default class ComponentToPrint extends React.Component {
                           scope="row"
                           style={{ borderBottom: "none" }}
                         >
-                          {data.gross}
+                          {parseFloat(data.gross).toFixed(2)}
                         </TableCell>
                       </TableRow>
                     ))}
@@ -299,16 +293,30 @@ export default class ComponentToPrint extends React.Component {
                       {"Total"}
                     </TableCell>
                     <TableCell align={"center"}>
-                      {parseInt(totalTax).toFixed(2)}
+                      {parseFloat(totalTax).toFixed(2)}
                     </TableCell>
                     <TableCell align={"center"}>
-                      {parseInt(totalNetTaxes).toFixed(2)}
+                      {parseFloat(totalNetTaxes).toFixed(2)}
                     </TableCell>
                     <TableCell align={"center"}>{totalGrossTaxes}</TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
             </TableContainer>
+          </Box>
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            style={{
+              border: "1px solid",
+              padding: "5px 10px 5px 10px",
+              width: "60%",
+              marginLeft: "40%",
+              marginTop: "20px",
+            }}
+          >
+            <h3>Open Balance</h3>
+            <h3>0.00</h3>
           </Box>
         </div>
       </div>
