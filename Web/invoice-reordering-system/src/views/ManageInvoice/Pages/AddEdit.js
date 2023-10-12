@@ -852,6 +852,7 @@ export default function InvoiceAddEdit(props) {
                                       onBlur={handleBlur}
                                       variant="outlined"
                                       size="small"
+                                      InputProps={{inputProps: { min: invoiceData.arrivalDate, max: invoiceData.departureDate} }}
                                     />
                                   </FormControl>
                                 </Grid>
