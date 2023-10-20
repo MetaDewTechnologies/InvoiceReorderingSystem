@@ -25,23 +25,29 @@ export default class ComponentToPrint extends React.Component {
     });
     const totalPayments = totalCredit + totalDebit;
     const serviceCharge = (totalPayments * 10) / 100;
-
-    const totalGrossTaxes = totalPayments + serviceCharge+greenTax;
+    const governmentTax = ((totalPayments + serviceCharge) * 16) / 100;
+    const totalGrossTaxes =
+      totalPayments + serviceCharge + greenTax + governmentTax;
     const totalNetTaxes = totalPayments;
-    const totalTax = serviceCharge+greenTax;
+    const totalTax = serviceCharge + greenTax + governmentTax;
     const taxData = [
       {
         taxDetail: "Service Charge",
         taxes: serviceCharge,
         net: totalPayments,
         gross: totalPayments + serviceCharge,
-        
       },
       {
         taxDetail: "Green Tax",
         taxes: greenTax,
         net: "0",
         gross: greenTax,
+      },
+      {
+        taxDetail: "Government Service Tax",
+        taxes: governmentTax,
+        net: "0",
+        gross: governmentTax,
       },
     ];
     return (

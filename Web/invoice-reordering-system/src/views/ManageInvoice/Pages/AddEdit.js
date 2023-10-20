@@ -503,7 +503,8 @@ export default function InvoiceAddEdit(props) {
       });
       const totalPayments = totalCredit + totalDebit;
       const serviceCharge = (totalPayments * 10) / 100;
-      const grandTotal = serviceCharge + totalPayments + grTax;
+      const governmentTax = ((totalPayments + serviceCharge) * 16) / 100;
+      const grandTotal = serviceCharge + totalPayments + grTax + governmentTax;
       setPaymentToBePaid(grandTotal - totalDebit);
       setOpenBillSettle(true);
     }
