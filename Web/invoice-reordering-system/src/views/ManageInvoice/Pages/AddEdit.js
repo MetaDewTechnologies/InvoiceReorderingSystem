@@ -774,6 +774,7 @@ export default function InvoiceAddEdit(props) {
                               </MenuItem>
                               <MenuItem value="1">Online</MenuItem>
                               <MenuItem value="2">Direct</MenuItem>
+                              <MenuItem value="3">Agent</MenuItem>
                             </TextField>
                           </Grid>
                         </Grid>
