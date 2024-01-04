@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import PerfectScrollbar from 'react-perfect-scrollbar';
+import React, { useState, useEffect, useRef } from "react";
+import PerfectScrollbar from "react-perfect-scrollbar";
 import {
   Box,
   Card,
@@ -12,88 +12,80 @@ import {
   CardHeader,
   Button,
   FormControl,
-  MenuItem,
-} from '@material-ui/core';
-import Page from '../../../components/Page';
-import services from '../Services';
-import { useNavigate } from 'react-router-dom';
-import { trackPromise } from 'react-promise-tracker';
-import MaterialTable from 'material-table';
-import { useFormik, Form, FormikProvider, Formik } from 'formik';
-import * as Yup from 'yup';
-import { LoadingComponent } from '../../../utils/newLoader';
-import VisibilityIcon from '@material-ui/icons/Visibility';
+} from "@material-ui/core";
+import Page from "../../../components/Page";
+import services from "../Services";
+import { trackPromise } from "react-promise-tracker";
+import MaterialTable from "material-table";
+import { useFormik, Form, FormikProvider, Formik } from "formik";
+import * as Yup from "yup";
+import { LoadingComponent } from "../../../utils/newLoader";
+import VisibilityIcon from "@material-ui/icons/Visibility";
 import { useAlert } from "react-alert";
-import Dialog from '@material-ui/core/Dialog';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
+// import Dialog from "@material-ui/core/Dialog";
+// import DialogContent from "@material-ui/core/DialogContent";
+// import DialogContentText from "@material-ui/core/DialogContentText";
+// import DialogTitle from "@material-ui/core/DialogTitle";
+import CreatePDF from "../../ManageInvoice/Pages/CreatePDF";
+import { useReactToPrint } from "react-to-print";
+import TemporyBillPDF from "../../ManageInvoice/Pages/TemporyPDF";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   root: {
     backgroundColor: theme.palette.background.dark,
-    minHeight: '100%',
+    minHeight: "100%",
     paddingBottom: theme.spacing(3),
-    paddingTop: theme.spacing(3)
+    paddingTop: theme.spacing(3),
   },
   avatar: {
-    marginRight: theme.spacing(2)
+    marginRight: theme.spacing(2),
   },
   colorCancel: {
-    backgroundColor: 'red'
+    backgroundColor: "red",
   },
   colorRecordAndNew: {
-    backgroundColor: '#FFBE00'
+    backgroundColor: "#FFBE00",
   },
   colorRecord: {
-    backgroundColor: 'green'
-  }
+    backgroundColor: "green",
+  },
 }));
 
 export default function ReorderInvoice(props) {
   const alert = useAlert();
   const classes = useStyles();
   const [invoiceList, setInvoiceList] = useState({
-    fromdate: '',
-    todate: ''
+    fromdate: "",
+    todate: "",
   });
-  const navigate = useNavigate();
   const componentRef = useRef();
   const [isViewTable, setIsViewTable] = useState(true);
   const [invoices, setInvoices] = useState([]);
   const [selectedRows, setSelectedRows] = useState([]);
-  const [open, setOpen] = useState(false)
-  const [ItemDataList, setItemDataList] = useState([])
+  const [open, setOpen] = useState(false);
+  const [billData, setBillData] = useState("");
+  const [billItems, setBillItems] = useState([]);
 
   const ProductSaveSchema = Yup.object().shape({
-    fromdate: Yup.date().required('From Date is required'),
-    todate: Yup.date().required('To Date is required')
+    fromdate: Yup.date().required("From Date is required"),
+    todate: Yup.date().required("To Date is required"),
   });
 
   const formik = useFormik({
     initialValues: {
       fromdate: invoiceList.fromdate,
-      todate: invoiceList.todate
+      todate: invoiceList.todate,
     },
     validationSchema: ProductSaveSchema,
-    onSubmit: values => {
+    onSubmit: (values) => {
       trackPromise(SearchData());
-    }
+    },
   });
 
-  const {
-    errors,
-    setValues,
-    touched,
-    handleSubmit,
-    values
-  } = formik;
-  const [totalNet, setTotalNet] = useState({
-    total: 0
-  });
+  const { errors, setValues, touched, handleSubmit, values } = formik;
 
   useEffect(() => {
-    setInvoices([])
+    setInvoices([]);
   }, [formik.values.fromdate || formik.values.todate]);
 
   const handleSelectionChange = (rows) => {
@@ -105,7 +97,7 @@ export default function ReorderInvoice(props) {
     const value = target.value;
     setValues({
       ...values,
-      [e.target.name]: value
+      [e.target.name]: value,
     });
   }
 
@@ -122,50 +114,95 @@ export default function ReorderInvoice(props) {
   async function SearchData() {
     let model = {
       arrivalDate: new Date(formik.values.fromdate),
-      departureDate: new Date(formik.values.todate)
+      departureDate: new Date(formik.values.todate),
     };
     var response = await services.getInvoicesByDateRange(model);
     const modifiedInvoices = response.map((invoice) => {
       if (invoice.invoiceDetail.isInvoiceGenerated === true) {
-        return { ...invoice, status: 'Invoice Printed' };
-      }
-      else if(invoice.invoiceDetail.isReordered === true && invoice.invoiceDetail.isInvoiceGenerated === false){
-        return {...invoice, status:'Process Executed - To Be Printed'}
-      }
-      else if(invoice.invoiceDetail.isReordered === false){
-        return {...invoice, status:'Reorder Process Pending'}
-      }
-       else {
+        return { ...invoice, status: "Invoice Printed" };
+      } else if (
+        invoice.invoiceDetail.isReordered === true &&
+        invoice.invoiceDetail.isInvoiceGenerated === false
+      ) {
+        return { ...invoice, status: "Process Executed - To Be Printed" };
+      } else if (invoice.invoiceDetail.isReordered === false) {
+        return { ...invoice, status: "Reorder Process Pending" };
+      } else {
         return invoice;
       }
     });
-    const modifiedDates = modifiedInvoices.map((item)=>{
-      return { ...item, 
-                invoiceId: item.invoiceDetail.invoiceId,
-                reservationNum: item.invoiceDetail.reservationNum,
-                roomNum: item.invoiceDetail.roomNum,
-                arrivalDate: item.invoiceDetail.arrivalDate.split('T')[0],
-                departureDate: item.invoiceDetail.departureDate.split('T')[0]}
-    })
+    const modifiedDates = modifiedInvoices.map((item) => {
+      return {
+        ...item,
+        invoiceId: item.invoiceDetail.invoiceId,
+        reservationNum: item.invoiceDetail.reservationNum,
+        roomNum: item.invoiceDetail.roomNum,
+        arrivalDate: item.invoiceDetail.arrivalDate.split("T")[0],
+        departureDate: item.invoiceDetail.departureDate.split("T")[0],
+      };
+    });
     setInvoices(modifiedDates);
     setIsViewTable(false);
   }
-  const handleClose = () => {
-    setOpen(false);
-  };
-  function handleView(data){
-    setItemDataList(data.invoiceItems)
-    setOpen(true)
-  }
-  async function handleReordering(){
-    const arrayOfInvoiceIds = selectedRows.map((obj) => obj.invoiceId);
-    const model ={
-      invoiceIds:arrayOfInvoiceIds
+
+  function handleView(data) {
+    const invoiceDetails = data.invoiceDetail;
+    setBillData({
+      ...data,
+      reservationNum: invoiceDetails.reservationNum,
+      roomNum: invoiceDetails.roomNum,
+      departureDate: invoiceDetails.departureDate.split("T")[0],
+      customerName: invoiceDetails.customerName,
+      customerEmail: invoiceDetails.customerEmail,
+      address: invoiceDetails.address,
+      city: invoiceDetails.city,
+      country: invoiceDetails.country,
+      bookingType: invoiceDetails.bookingType == "Online" ? "1" : "2",
+      arrivalDate: invoiceDetails.arrivalDate.split("T")[0],
+      greenTax: invoiceDetails.greenTax,
+    });
+
+    console.log(data);
+    const itemData = data.invoiceItems;
+    const updatedItems = [];
+    var filteredResponse = [];
+    if (itemData.length > 0) {
+      for (const item of itemData) {
+        const updatedItem = {
+          ...item,
+          date: item.date.split("T")[0],
+          debit: item.paymentType === "Debit" ? item.amount : "",
+          credit: item.paymentType === "Credit" ? item.amount : "",
+          paymentMethod: item.paymentMethod,
+        };
+        updatedItems.push(updatedItem);
+      }
+      filteredResponse = updatedItems.filter((item) => item.isActive == true);
     }
-    const response = await services.reorderingInvoices(model)
-    if(response.statusCode==='SUCCESS'){
+    setBillItems(filteredResponse);
+    setOpen(true);
+  }
+
+  useEffect(() => {
+    if (billData != "") {
+      setOpen(false);
+      handlePrint();
+    }
+  }, [billData, open]);
+
+  const handlePrint = useReactToPrint({
+    content: () => componentRef.current,
+  });
+
+  async function handleReordering() {
+    const arrayOfInvoiceIds = selectedRows.map((obj) => obj.invoiceId);
+    const model = {
+      invoiceIds: arrayOfInvoiceIds,
+    };
+    const response = await services.reorderingInvoices(model);
+    if (response.statusCode === "SUCCESS") {
       alert.success(response.message);
-    }else{
+    } else {
       alert.success("Error in reordering");
     }
     clearFields();
@@ -179,8 +216,8 @@ export default function ReorderInvoice(props) {
       icon: () => <VisibilityIcon />,
       tooltip: <p>View Payments</p>,
       onClick: (event, rowData) => handleView(rowData),
-      position: "row"
-    }
+      position: "row",
+    },
   ];
 
   return (
@@ -196,10 +233,10 @@ export default function ReorderInvoice(props) {
           >
             <Box mt={0}>
               <Card>
-                <CardHeader title={cardTitle('Reorder Invoices')} />
+                <CardHeader title={cardTitle("Reorder Invoices")} />
                 <PerfectScrollbar>
                   <Divider />
-                  <CardContent style={{ marginBottom: '2rem' }}>
+                  <CardContent style={{ marginBottom: "2rem" }}>
                     <Grid container spacing={4}>
                       <Grid item md={4} xs={12}>
                         <FormControl
@@ -208,9 +245,7 @@ export default function ReorderInvoice(props) {
                           label="fromdate"
                         >
                           <TextField
-                            error={Boolean(
-                              touched.fromdate && errors.fromdate
-                            )}
+                            error={Boolean(touched.fromdate && errors.fromdate)}
                             fullWidth
                             helperText={touched.fromdate && errors.fromdate}
                             name="fromdate"
@@ -218,7 +253,7 @@ export default function ReorderInvoice(props) {
                             type="date"
                             InputLabelProps={{ shrink: true }}
                             value={formik.values.fromdate}
-                            onChange={e => handleChange(e)}
+                            onChange={(e) => handleChange(e)}
                             variant="outlined"
                             size="small"
                           />
@@ -238,7 +273,7 @@ export default function ReorderInvoice(props) {
                             label="To Date *"
                             type="date"
                             InputLabelProps={{ shrink: true }}
-                            onChange={e => handleChange(e)}
+                            onChange={(e) => handleChange(e)}
                             value={formik.values.todate}
                             variant="outlined"
                             size="small"
@@ -247,7 +282,10 @@ export default function ReorderInvoice(props) {
                       </Grid>
                       <Grid item md={4} xs={12}>
                         <Button
-                          style={{color:'#FFFFFF', backgroundColor:"#489EE7"}}
+                          style={{
+                            color: "#FFFFFF",
+                            backgroundColor: "#489EE7",
+                          }}
                           type="submit"
                           variant="contained"
                         >
@@ -255,7 +293,7 @@ export default function ReorderInvoice(props) {
                         </Button>
                         &nbsp;
                         <Button
-                          style={{color:'#489EE7'}}
+                          style={{ color: "#489EE7" }}
                           type="button"
                           variant="outlined"
                           onClick={clearFields}
@@ -264,84 +302,128 @@ export default function ReorderInvoice(props) {
                         </Button>
                       </Grid>
                     </Grid>
-                    </CardContent>
-                    <CardContent>
-                  <Box minWidth={1050} >
-                    <Box minWidth={1050} >
-                      <MaterialTable
-                        actions={actions}
-                        hidden={isViewTable}
-                        title="Multiple Actions Preview"
-                        columns={[
-                          { title: 'Reservation No.', align: 'left', field: 'reservationNum' },
-                          { title: 'Room No.', align: 'center', field: 'roomNum' },
-                          { title: 'Arrival Date', align: 'center', field: 'arrivalDate' },
-                          { title: 'Departure Date', align: 'center', field: 'departureDate' },
-                          { title: 'Status', align: 'center', field: 'status'}
-                        ]}
-                        data={invoices}
-                        title="Invoice List"
-                        options={{
-                          exportButton: false,
-                          cellStyle: { textAlign: 'left' },
-                          columnResizable: false,
-                          addRowPosition: "first",
-                          headerStyle: { textAlign: "left", height: '1%' },
-                          actionsColumnIndex: -1,
-                          selection:true,
-                          selectionProps: rowData => ({
-                            disabled: rowData.invoiceDetail.isReordered ===  true || rowData.invoiceDetail.isInvoiceGenerated === true,
-                            color: 'primary'
-                          })
-                        }}
-                        onSelectionChange={(e) => handleSelectionChange(e)}
-                      />
+                  </CardContent>
+                  <CardContent>
+                    <Box minWidth={1050}>
+                      <Box minWidth={1050}>
+                        <MaterialTable
+                          actions={actions}
+                          hidden={isViewTable}
+                          title="Multiple Actions Preview"
+                          columns={[
+                            {
+                              title: "Reservation No.",
+                              align: "left",
+                              field: "reservationNum",
+                            },
+                            {
+                              title: "Room No.",
+                              align: "center",
+                              field: "roomNum",
+                            },
+                            {
+                              title: "Arrival Date",
+                              align: "center",
+                              field: "arrivalDate",
+                            },
+                            {
+                              title: "Departure Date",
+                              align: "center",
+                              field: "departureDate",
+                            },
+                            {
+                              title: "Status",
+                              align: "center",
+                              field: "status",
+                            },
+                          ]}
+                          data={invoices}
+                          title="Invoice List"
+                          options={{
+                            exportButton: false,
+                            cellStyle: { textAlign: "left" },
+                            columnResizable: false,
+                            addRowPosition: "first",
+                            headerStyle: { textAlign: "left", height: "1%" },
+                            actionsColumnIndex: -1,
+                            selection: true,
+                            selectionProps: (rowData) => ({
+                              disabled:
+                                rowData.invoiceDetail.isReordered === true ||
+                                rowData.invoiceDetail.isInvoiceGenerated ===
+                                  true,
+                              color: "primary",
+                            }),
+                          }}
+                          onSelectionChange={(e) => handleSelectionChange(e)}
+                        />
+                      </Box>
+                      <Box display="flex" justifyContent="flex-end" p={2}>
+                        <Button
+                          style={{
+                            color: selectedRows.length > 0 ? "#FFFFFF" : "",
+                            backgroundColor:
+                              selectedRows.length > 0 ? "#489EE7" : "",
+                          }}
+                          variant="contained"
+                          onClick={() => handleReordering()}
+                          disabled={selectedRows.length == 0}
+                        >
+                          Reorder
+                        </Button>
+                      </Box>
                     </Box>
-                  <Box display="flex" justifyContent="flex-end" p={2}>
-                    <Button
-                    style={{color:selectedRows.length>0?'#FFFFFF':'', backgroundColor:selectedRows.length>0?"#489EE7":''}}
-                    variant="contained"
-                    onClick={() => handleReordering()}
-                    disabled={selectedRows.length==0}
-                    >
-                    Reorder
-                    </Button>
-                </Box>
-                </Box>
-                </CardContent>
+                  </CardContent>
                 </PerfectScrollbar>
               </Card>
             </Box>
           </Form>
         </FormikProvider>
-        <Dialog maxWidth  open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
-            <DialogTitle id="form-dialog-title">Payment Details</DialogTitle>
-            <DialogContent>
-              <Box minWidth={1000} >
-                          <MaterialTable
-                            title="Multiple Actions Preview"
-                            columns={[
-                              { title: 'Date', field: 'date' },
-                              { title: 'Description', field: 'description' },
-                              { title: 'Comment', field: 'comment' },
-                              { title: 'Amount', field:'amount'},
-                              { title: 'Payment Method', field: 'paymentMethod' },
-                              { title: 'Payment Type', field: 'paymentType' },
-                              { title: 'Cashier', field: 'cashier' }
-                            ]}
-                            data={ItemDataList}
-                            options={{
-                              exportButton: false,
-                              showTitle: false,
-                              headerStyle: { textAlign: "left" },
-                              cellStyle: { textAlign: "left" },
-                              columnResizable: false,
-                            }}
-                          />
-                        </Box>
-            </DialogContent>
-          </Dialog>
-      </Container >
-    </Page >
+        {/* <Dialog
+          maxWidth
+          open={open}
+          onClose={handleClose}
+          aria-labelledby="form-dialog-title"
+        >
+          <DialogTitle id="form-dialog-title">Payment Details</DialogTitle>
+          <DialogContent>
+            <Box minWidth={1000}>
+              <MaterialTable
+                title="Multiple Actions Preview"
+                columns={[
+                  { title: "Date", field: "date" },
+                  { title: "Description", field: "description" },
+                  { title: "Comment", field: "comment" },
+                  { title: "Amount", field: "amount" },
+                  { title: "Payment Method", field: "paymentMethod" },
+                  { title: "Payment Type", field: "paymentType" },
+                  { title: "Cashier", field: "cashier" },
+                ]}
+                data={ItemDataList}
+                options={{
+                  exportButton: false,
+                  showTitle: false,
+                  headerStyle: { textAlign: "left" },
+                  cellStyle: { textAlign: "left" },
+                  columnResizable: false,
+                }}
+              />
+            </Box>
+          </DialogContent>
+        </Dialog> */}
+        {billData !== "" ? (
+          <div hidden={true}>
+            <TemporyBillPDF
+              ref={componentRef}
+              invoiceData={billData !== "" ? billData : ""}
+              itemData={billItems ? billItems : []}
+              greenTax={billData.greenTax}
+            />
+          </div>
+        ) : (
+          ""
+        )}
+      </Container>
+    </Page>
   );
 }

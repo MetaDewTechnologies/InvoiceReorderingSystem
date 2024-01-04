@@ -12,25 +12,16 @@ import {
   CardHeader,
   Button,
   FormControl,
-  MenuItem,
 } from "@material-ui/core";
 import Page from "../../../components/Page";
 import services from "../Services";
-import { useNavigate } from "react-router-dom";
 import { trackPromise } from "react-promise-tracker";
 import MaterialTable from "material-table";
-import { useFormik, Form, FormikProvider, Formik } from "formik";
+import { useFormik, Form, FormikProvider } from "formik";
 import * as Yup from "yup";
 import { LoadingComponent } from "../../../utils/newLoader";
 import CreatePDF from "../../ManageInvoice/Pages/CreatePDF";
-import ReactToPrint from "react-to-print";
 import { useReactToPrint } from "react-to-print";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogContentText from "@material-ui/core/DialogContentText";
-import DialogTitle from "@material-ui/core/DialogTitle";
-import PaymentIcon from "@material-ui/icons/Payment";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -59,14 +50,10 @@ export default function Invoices(props) {
     fromdate: "",
     todate: "",
   });
-  const navigate = useNavigate();
   const componentRef = useRef();
   const [isViewTable, setIsViewTable] = useState(true);
   const [invoices, setInvoices] = useState([]);
   const [selectedRows, setSelectedRows] = useState("");
-  const [open, setOpen] = useState(false);
-  const [greenTax, setGreenTax] = useState("0");
-  const [rowId, setRowId] = useState("");
   const [gTax, setGTax] = useState("");
   const [print, setprint] = useState(false);
   const [cashierName, setCashierName] = useState("");
@@ -173,22 +160,11 @@ export default function Invoices(props) {
     setInvoices([]);
     setTotalNet({ total: 0 });
   };
-  const handleOpen = (row) => {
-    setRowId(row.invoiceId);
-    setOpen(true);
-  };
-  async function handleGreenTax() {
-    const model = {
-      greenTax: parseFloat(greenTax),
-    };
-    const greenTaxresponse = await services.saveGreenTax(rowId, model);
-    setOpen(false);
-  }
+
   async function customHandlePrint(row) {
     const gTax = await services.getGreenTaxByInvoiceId(row.invoiceId);
     setGTax(gTax);
     const response = await services.handleCreateInvoice(row.invoiceId);
-    console.log("response", response);
     setInvoiceID(response);
     setprint(true);
     setSelectedRows(row);
