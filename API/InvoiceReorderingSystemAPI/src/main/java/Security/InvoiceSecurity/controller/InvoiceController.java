@@ -251,7 +251,38 @@ invoiceWithItemsResponse.getInvoiceDetail().setReorderedInvoiceDetail(null);
 }
         return ResponseEntity.ok(completedInvoices);
     }
+    //2024
+    @CrossOrigin
+    @PostMapping("/all-invoices")
+    public ResponseEntity<List<InvoiceWithItemsResponse>> getAllInvoicesBetweenDates(
+            @RequestBody DateRange dateRange) {
 
+        LocalDateTime arrivalDate = dateRange.getArrivalDate();
+        LocalDateTime departureDate = dateRange.getDepartureDate();
+
+
+
+        if (dateRange.getArrivalDate() == null || dateRange.getDepartureDate() == null) {
+            // Handle missing or invalid date values
+            return ResponseEntity.badRequest().build();
+        }
+
+        List<InvoiceWithItemsResponse> completedInvoices = invoiceDetailService.getAllInvoicesBetweenDates(
+
+                arrivalDate,
+                departureDate
+        );
+
+        if (completedInvoices.isEmpty()) {
+            return ResponseEntity.ok(completedInvoices);
+        }
+
+        for(InvoiceWithItemsResponse invoiceWithItemsResponse: completedInvoices){
+            invoiceWithItemsResponse.getInvoiceDetail().setReorderedInvoiceDetail(null);
+//invoiceDetail.setReorderedInvoiceDetail(null);
+        }
+        return ResponseEntity.ok(completedInvoices);
+    }
     @CrossOrigin
     @PostMapping("/reorder-invoices")
     public ResponseEntity<?> reorderInvoices(@RequestBody ReorderInvoiceRequest request) {

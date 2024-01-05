@@ -39,4 +39,10 @@ public interface InvoiceDetailRepository extends JpaRepository<InvoiceDetailDTO,
             @Param("arrivalDate") LocalDateTime arrivalDate,
             @Param("departureDate") LocalDateTime departureDate
     );
+    @Query("SELECT i FROM InvoiceDetailDTO i LEFT JOIN FETCH i.invoiceItems WHERE i.isInvoiceCompleted = false AND " +
+            "i.arrivalDate >= :arrivalDate AND i.departureDate <= :departureDate")
+    List<InvoiceDetailDTO> findAllInvoicesBetweenDates(
+            @Param("arrivalDate") LocalDateTime arrivalDate,
+            @Param("departureDate") LocalDateTime departureDate
+    );
 }
