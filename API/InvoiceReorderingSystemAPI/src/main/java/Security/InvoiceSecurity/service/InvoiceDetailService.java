@@ -215,7 +215,23 @@ public class InvoiceDetailService {
         return responseList;
 
     }
+    //2024
+    public List<InvoiceWithItemsResponse> getAllInvoicesBetweenDates(LocalDateTime arrivalDate,LocalDateTime departureDate){
+        List<InvoiceDetailDTO> invoiceDetailDTOList = invoiceDetailRepository.findAllInvoicesBetweenDates(arrivalDate, departureDate);
+        List<InvoiceWithItemsResponse> responseList = new ArrayList<>();
 
+        for (InvoiceDetailDTO invoiceDetail : invoiceDetailDTOList) {
+            Integer id = invoiceDetail.getInvoiceId();
+            List<InvoiceItemDetailDTO> invoiceItemDetailDTOList = invoiceItemDetailRepository.findByInvoiceDetail_InvoiceId(id);
+            Integer reorderId = reorderedInvoiceDetailRepository.reorderInvoiceId(id);
+            // Create an InvoiceWithItemsResponse object and add it to the responseList
+            InvoiceWithItemsResponse response = new InvoiceWithItemsResponse(invoiceDetail, invoiceItemDetailDTOList);
+            responseList.add(response);
+        }
+
+        return responseList;
+
+    }
     public boolean reorderInvoices(ReorderInvoiceRequest request) {
         List<Integer> invoiceIds = request.getInvoiceIds();
 
