@@ -13,13 +13,11 @@ import {
 
 export default class ComponentToPrint extends React.Component {
   render() {
-    const invoiceID = this.props.invoiceID;
     const invoiceData = this.props.invoiceData;
     const itemData = this.props.itemData;
     const greenTax = this.props.greenTax;
-    const cashierName = this.props.cashierName;
 
-    var totalDebit = 0;
+    let totalDebit = 0;
     let totalCredit = 0;
     itemData.forEach((data) => {
       totalDebit += data.debit !== "" ? data.debit : 0;
@@ -64,16 +62,9 @@ export default class ComponentToPrint extends React.Component {
         <div>&nbsp;</div>
         <Box>
           <Box mb={3} style={{ display: "flex", justifyContent: "center" }}>
-            <img
-              style={{
-                width: 250,
-                height: 155,
-                marginLeft: 0,
-                marginBottom: 10,
-              }}
-              src="/static/images/logo/clientLogo.jpg"
-              alt="logo"
-            />
+            <div className="col pb-4 pt-4 pl-2">
+              <h2>Temporary Bill</h2>
+            </div>
           </Box>
           <Grid container>
             <Grid item md={8} xs={6}>
@@ -106,26 +97,12 @@ export default class ComponentToPrint extends React.Component {
                 >
                   <b>Departure Date: </b> {invoiceData.departureDate}
                 </div>
-                <div
-                  className="col"
-                  align={"left"}
-                  style={{ paddingBottom: "10px" }}
-                >
-                  <b>Cashier: </b> {cashierName}
-                </div>
-                <div
-                  className="col"
-                  align={"left"}
-                  style={{ paddingBottom: "10px" }}
-                >
-                  <b>Invoice Date: </b> {new Date().toISOString().split("T")[0]}
-                </div>
                 <div>&nbsp;</div>
               </div>
             </Grid>
             <Grid md={4} xs={6}>
               <div className="col pb-4 pt-4 pl-2">
-                {/* <h3 style={{ paddingBottom: "10px" }}>
+                <h3 style={{ paddingBottom: "10px" }}>
                   <left>Billing Profile</left>
                 </h3>
                 <div
@@ -134,7 +111,7 @@ export default class ComponentToPrint extends React.Component {
                   style={{ paddingBottom: "10px" }}
                 >
                   <b>Name : </b> {invoiceData.customerName}
-                </div> */}
+                </div>
                 <div>&nbsp;</div>
               </div>
             </Grid>
@@ -145,39 +122,34 @@ export default class ComponentToPrint extends React.Component {
             <TableContainer>
               <Table aria-label="caption table">
                 <TableHead>
-                  <TableRow style={{ borderTop: "1px solid black"}}>
+                  <TableRow style={{ borderTop: "1px solid black" }}>
                     <TableCell
                       align={"center"}
-                      padding="none"
-                      style={{ borderBottom: "1px solid black" , padding:'10px'}}
+                      style={{ borderBottom: "1px solid black" }}
                     >
                       {"Date"}
                     </TableCell>
                     <TableCell
                       align={"center"}
-                      padding="none"
-                      style={{ borderBottom: "1px solid black", padding:'10px'}}
+                      style={{ borderBottom: "1px solid black" }}
                     >
                       {"Description"}
                     </TableCell>
                     <TableCell
                       align={"center"}
-                      padding="none"
-                      style={{ borderBottom: "1px solid black",padding:'10px' }}
+                      style={{ borderBottom: "1px solid black" }}
                     >
                       {"Comment"}
                     </TableCell>
                     <TableCell
                       align={"center"}
-                      padding="none"
-                      style={{ borderBottom: "1px solid black",padding:'10px' }}
+                      style={{ borderBottom: "1px solid black" }}
                     >
                       {"Debit"}
                     </TableCell>
                     <TableCell
                       align={"center"}
-                      padding="none"
-                      style={{ borderBottom: "1px solid black",padding:'10px' }}
+                      style={{ borderBottom: "1px solid black" }}
                     >
                       {"Credit"}
                     </TableCell>
@@ -191,8 +163,7 @@ export default class ComponentToPrint extends React.Component {
                           align={"left"}
                           component="th"
                           scope="row"
-                          padding="none"
-                          style={{ borderBottom: "none", paddingTop:'10px'}}
+                          style={{ borderBottom: "none" }}
                         >
                           {data.date.split("T")[0]}
                         </TableCell>
@@ -200,8 +171,7 @@ export default class ComponentToPrint extends React.Component {
                           align={"center"}
                           component="th"
                           scope="row"
-                          padding="none"
-                          style={{ borderBottom: "none", paddingTop:'10px'}}
+                          style={{ borderBottom: "none" }}
                         >
                           {data.description}
                         </TableCell>
@@ -209,8 +179,7 @@ export default class ComponentToPrint extends React.Component {
                           align={"center"}
                           component="th"
                           scope="row"
-                          padding="none"
-                          style={{ borderBottom: "none", paddingTop:'10px'}}
+                          style={{ borderBottom: "none" }}
                         >
                           {data.comment}
                         </TableCell>
@@ -218,8 +187,7 @@ export default class ComponentToPrint extends React.Component {
                           align={"center"}
                           component="th"
                           scope="row"
-                          padding="none"
-                          style={{ borderBottom: "none", paddingTop:'10px'}}
+                          style={{ borderBottom: "none" }}
                         >
                           {data.debit !== ""
                             ? parseFloat(data.debit).toFixed(2)
@@ -229,8 +197,7 @@ export default class ComponentToPrint extends React.Component {
                           align={"center"}
                           component="th"
                           scope="row"
-                          padding="none"
-                          style={{ borderBottom: "none",paddingTop:'10px'}}
+                          style={{ borderBottom: "none" }}
                         >
                           {data.credit !== ""
                             ? parseFloat(data.credit).toFixed(2)
@@ -262,32 +229,28 @@ export default class ComponentToPrint extends React.Component {
             <TableContainer style={{ maxWidth: "100%" }}>
               <Table>
                 <TableHead>
-                  <TableRow style={{ borderTop: "1px solid black",padding:'10px' }}>
+                  <TableRow style={{ borderTop: "1px solid black" }}>
                     <TableCell
                       align={"center"}
-                      padding="none"
-                      style={{ borderBottom: "1px solid black",padding:'10px' }}
+                      style={{ borderBottom: "1px solid black" }}
                     >
-                      {"Tax Details"}
+                      {"Other Charges"}
                     </TableCell>
                     <TableCell
                       align={"center"}
-                      padding="none"
-                      style={{ borderBottom: "1px solid black",padding:'10px' }}
+                      style={{ borderBottom: "1px solid black" }}
                     >
-                      {"Taxes"}
+                      {"Amount"}
                     </TableCell>
                     <TableCell
                       align={"center"}
-                      padding="none"
-                      style={{ borderBottom: "1px solid black",padding:'10px' }}
+                      style={{ borderBottom: "1px solid black" }}
                     >
                       {"Net"}
                     </TableCell>
                     <TableCell
                       align={"center"}
-                      padding="none"
-                      style={{ borderBottom: "1px solid black",padding:'10px' }}
+                      style={{ borderBottom: "1px solid black" }}
                     >
                       {"Gross"}
                     </TableCell>
@@ -301,8 +264,7 @@ export default class ComponentToPrint extends React.Component {
                           align={"left"}
                           component="th"
                           scope="row"
-                          padding="none"
-                          style={{ borderBottom: "none",paddingTop:'10px' }}
+                          style={{ borderBottom: "none" }}
                         >
                           {data.taxDetail}
                         </TableCell>
@@ -310,8 +272,7 @@ export default class ComponentToPrint extends React.Component {
                           align={"center"}
                           component="th"
                           scope="row"
-                          padding="none"
-                          style={{ borderBottom: "none",paddingTop:'10px' }}
+                          style={{ borderBottom: "none" }}
                         >
                           {parseFloat(data.taxes).toFixed(2)}
                         </TableCell>
@@ -319,17 +280,15 @@ export default class ComponentToPrint extends React.Component {
                           align={"center"}
                           component="th"
                           scope="row"
-                          padding="none"
-                          style={{ borderBottom: "none",paddingTop:'10px' }}
+                          style={{ borderBottom: "none" }}
                         >
-                          {data.net}
+                          {parseFloat(data.net).toFixed(2)}
                         </TableCell>
                         <TableCell
                           align={"center"}
                           component="th"
                           scope="row"
-                          padding="none"
-                          style={{ borderBottom: "none",paddingTop:'10px' }}
+                          style={{ borderBottom: "none" }}
                         >
                           {parseFloat(data.gross).toFixed(2)}
                         </TableCell>
@@ -337,7 +296,7 @@ export default class ComponentToPrint extends React.Component {
                     ))}
                   <TableRow>
                     <TableCell colSpan={1} align={"right"}>
-                      {"Total Tax"}
+                      {"Total"}
                     </TableCell>
                     <TableCell align={"center"}>
                       {parseFloat(totalTax).toFixed(2)}
@@ -345,7 +304,7 @@ export default class ComponentToPrint extends React.Component {
                     <TableCell align={"center"}>
                       {parseFloat(totalNetTaxes).toFixed(2)}
                     </TableCell>
-                    <TableCell align={"center"}>{parseFloat(totalGrossTaxes).toFixed(2)}</TableCell>
+                    <TableCell align={"center"}>{totalGrossTaxes}</TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
@@ -363,82 +322,7 @@ export default class ComponentToPrint extends React.Component {
             }}
           >
             <h3>Open Balance</h3>
-            {/* <h3>{parseInt(totalGrossTaxes - totalDebit).toFixed(2)}</h3> */}
-            <h3>{parseFloat(0.00).toFixed(2)}</h3>
-          </Box>
-          <Box
-            maxWidth="70%"
-            display="flex"
-            style={{ paddingTop: "5px", marginLeft: "40%" }}
-          >
-            <h5 style={{ paddingBottom: "10px" }}>
-              TAX INVOICE TIN No: 1047945GST501
-            </h5>
-          </Box>
-          <Divider style={{ background: "black" }} />
-          <Box style={{ paddingTop: "5px" }}>
-            <Grid container>
-              <Grid item md={6} xs={6}>
-                <div
-                  className="col"
-                  align={"left"}
-                  style={{ paddingBottom: "10px" }}
-                >
-                  kiha beach
-                </div>
-                <div
-                  className="col"
-                  align={"left"}
-                  style={{ paddingBottom: "10px" }}
-                >
-                  Dharavandhoo, Maldives
-                </div>
-                <div
-                  className="col"
-                  align={"left"}
-                  style={{ paddingBottom: "10px" }}
-                >
-                  Dharavandhoo
-                </div>
-                <div
-                  className="col"
-                  align={"left"}
-                  style={{ paddingBottom: "10px" }}
-                >
-                  Maldives
-                </div>
-              </Grid>
-              <Grid item md={6} xs={6}>
-                <div
-                  className="col"
-                  align={"left"}
-                  style={{ paddingBottom: "10px" }}
-                >
-                  Telephone: +960 7779667
-                </div>
-                <div
-                  className="col"
-                  align={"left"}
-                  style={{ paddingBottom: "10px" }}
-                >
-                  Fax: +960 7779667
-                </div>
-                <div
-                  className="col"
-                  align={"left"}
-                  style={{ paddingBottom: "10px" }}
-                >
-                  Email: reservations@kihabeach.com
-                </div>
-                <div
-                  className="col"
-                  align={"left"}
-                  style={{ paddingBottom: "10px" }}
-                >
-                  Website: http://kihabeach.com/
-                </div>
-              </Grid>
-            </Grid>
+            <h3>0.00</h3>
           </Box>
         </div>
       </div>

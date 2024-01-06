@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import PerfectScrollbar from 'react-perfect-scrollbar';
+import React, { useState, useEffect, useRef } from "react";
+import PerfectScrollbar from "react-perfect-scrollbar";
 import {
   Box,
   Card,
@@ -12,95 +12,76 @@ import {
   CardHeader,
   Button,
   FormControl,
-  MenuItem,
-} from '@material-ui/core';
-import Page from '../../../components/Page';
-import services from '../Services';
-import { useNavigate } from 'react-router-dom';
-import { trackPromise } from 'react-promise-tracker';
-import MaterialTable from 'material-table';
-import { useFormik, Form, FormikProvider, Formik } from 'formik';
-import * as Yup from 'yup';
-import { LoadingComponent } from '../../../utils/newLoader';
-import CreatePDF from '../../ManageInvoice/Pages/CreatePDF';
-import ReactToPrint from 'react-to-print';
-import { useReactToPrint } from 'react-to-print';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import PaymentIcon from '@material-ui/icons/Payment';
+} from "@material-ui/core";
+import Page from "../../../components/Page";
+import services from "../Services";
+import { trackPromise } from "react-promise-tracker";
+import MaterialTable from "material-table";
+import { useFormik, Form, FormikProvider } from "formik";
+import * as Yup from "yup";
+import { LoadingComponent } from "../../../utils/newLoader";
+import CreatePDF from "../../ManageInvoice/Pages/CreatePDF";
+import { useReactToPrint } from "react-to-print";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   root: {
     backgroundColor: theme.palette.background.dark,
-    minHeight: '100%',
+    minHeight: "100%",
     paddingBottom: theme.spacing(3),
-    paddingTop: theme.spacing(3)
+    paddingTop: theme.spacing(3),
   },
   avatar: {
-    marginRight: theme.spacing(2)
-  }, 
+    marginRight: theme.spacing(2),
+  },
   colorCancel: {
-    backgroundColor: 'red'
+    backgroundColor: "red",
   },
   colorRecordAndNew: {
-    backgroundColor: '#FFBE00'
+    backgroundColor: "#FFBE00",
   },
   colorRecord: {
-    backgroundColor: 'green'
-  }
+    backgroundColor: "green",
+  },
 }));
 
 export default function Invoices(props) {
   const classes = useStyles();
   const [invoiceList, setInvoiceList] = useState({
-    fromdate: '',
-    todate: ''
+    fromdate: "",
+    todate: "",
   });
-  const navigate = useNavigate();
   const componentRef = useRef();
   const [isViewTable, setIsViewTable] = useState(true);
   const [invoices, setInvoices] = useState([]);
-  const [selectedRows, setSelectedRows] = useState('');
-  const [open, setOpen] = useState(false)
-  const [greenTax, setGreenTax] = useState('0')
-  const [rowId, setRowId] = useState('')
-  const [gTax,setGTax] = useState("")
-  const [print, setprint] = useState(false)
-  const [cashierName, setCashierName] = useState("")
-  const [invoiceID, setInvoiceID] = useState('')
+  const [selectedRows, setSelectedRows] = useState("");
+  const [gTax, setGTax] = useState("");
+  const [print, setprint] = useState(false);
+  const [cashierName, setCashierName] = useState("");
+  const [invoiceID, setInvoiceID] = useState("");
 
   const ProductSaveSchema = Yup.object().shape({
-    fromdate: Yup.date().required('From Date is required'),
-    todate: Yup.date().required('To Date is required')
+    fromdate: Yup.date().required("From Date is required"),
+    todate: Yup.date().required("To Date is required"),
   });
 
   const formik = useFormik({
     initialValues: {
       fromdate: invoiceList.fromdate,
-      todate: invoiceList.todate
+      todate: invoiceList.todate,
     },
     validationSchema: ProductSaveSchema,
-    onSubmit: values => {
+    onSubmit: (values) => {
       trackPromise(SearchData());
-    }
+    },
   });
 
-  const {
-    errors,
-    setValues,
-    touched,
-    handleSubmit,
-    values
-  } = formik;
+  const { errors, setValues, touched, handleSubmit, values } = formik;
   const [totalNet, setTotalNet] = useState({
-    total: 0
+    total: 0,
   });
 
   useEffect(() => {
-    setInvoices([])
+    setInvoices([]);
   }, [formik.values.fromdate || formik.values.todate]);
 
   function handleChange(e) {
@@ -108,7 +89,7 @@ export default function Invoices(props) {
     const value = target.value;
     setValues({
       ...values,
-      [e.target.name]: value
+      [e.target.name]: value,
     });
   }
 
@@ -125,43 +106,47 @@ export default function Invoices(props) {
   async function SearchData() {
     let model = {
       arrivalDate: new Date(formik.values.fromdate),
-      departureDate: new Date(formik.values.todate)
+      departureDate: new Date(formik.values.todate),
     };
     var response = await services.getInvoicesByDateRange(model);
-    var filteredResponse = response.filter(item => item.invoiceDetail.isReordered == true); 
+    var filteredResponse = response.filter(
+      (item) => item.invoiceDetail.isReordered == true
+    );
     const modifiedInvoices = filteredResponse.map((invoice) => {
       if (invoice.invoiceDetail.isInvoiceGenerated === true) {
-        return { ...invoice, status: 'Printed' };
-      }
-      else if(invoice.invoiceDetail.isReordered === true && invoice.invoiceDetail.isInvoiceGenerated === false){
-        return {...invoice, status:'To Be Printed'}
-      }
-      else if(invoice.invoiceDetail.isReordered === false){
-        return {...invoice, status:'Reorder Process Pending'}
-      }
-       else {
+        return { ...invoice, status: "Printed" };
+      } else if (
+        invoice.invoiceDetail.isReordered === true &&
+        invoice.invoiceDetail.isInvoiceGenerated === false
+      ) {
+        return { ...invoice, status: "To Be Printed" };
+      } else if (invoice.invoiceDetail.isReordered === false) {
+        return { ...invoice, status: "Reorder Process Pending" };
+      } else {
         return invoice;
       }
     });
-    const modifiedDates = modifiedInvoices.map((item)=>{
-      return { ...item, 
-                invoiceId: item.invoiceDetail.invoiceId,
-                reservationNum: item.invoiceDetail.reservationNum,
-                roomNum: item.invoiceDetail.roomNum,
-                customerName: item.invoiceDetail.customerName,
-                arrivalDate: item.invoiceDetail.arrivalDate.split('T')[0],
-                departureDate: item.invoiceDetail.departureDate.split('T')[0],
-                greenTax:item.invoiceDetail.greenTax,
-                isReordered: item.invoiceDetail.isReordered,
-                invoiceItems : item.invoiceItems.map((item)=>{
-                  return{
-                    ...item,
-                    debit: item.paymentType === "Debit" ? item.amount:'',
-                    credit : item.paymentType === "Credit" ? item.amount:'',
-                  }
-                })}
-    })
-    const name = sessionStorage.getItem("userName")
+    const modifiedDates = modifiedInvoices.map((item) => {
+      return {
+        ...item,
+        invoiceId: item.invoiceDetail.invoiceId,
+        reservationNum: item.invoiceDetail.reservationNum,
+        roomNum: item.invoiceDetail.roomNum,
+        customerName: item.invoiceDetail.customerName,
+        arrivalDate: item.invoiceDetail.arrivalDate.split("T")[0],
+        departureDate: item.invoiceDetail.departureDate.split("T")[0],
+        greenTax: item.invoiceDetail.greenTax,
+        isReordered: item.invoiceDetail.isReordered,
+        invoiceItems: item.invoiceItems.map((item) => {
+          return {
+            ...item,
+            debit: item.paymentType === "Debit" ? item.amount : "",
+            credit: item.paymentType === "Credit" ? item.amount : "",
+          };
+        }),
+      };
+    });
+    const name = sessionStorage.getItem("userName");
     setCashierName(name);
     setInvoices(modifiedDates);
     setIsViewTable(false);
@@ -170,41 +155,27 @@ export default function Invoices(props) {
   const clearFields = () => {
     formik.resetForm();
     setInvoiceList({
-      ...invoiceList
-    })
+      ...invoiceList,
+    });
     setInvoices([]);
     setTotalNet({ total: 0 });
   };
-  const handleClose = () => {
-    setOpen(false);
-  };
-  const handleOpen=(row)=>{
-    setRowId(row.invoiceId)
-    setOpen(true)
-  }
-  async function handleGreenTax(){
-    const model = {
-      greenTax: parseFloat(greenTax)
-    }
-  const greenTaxresponse = await services.saveGreenTax(rowId,model)
-   setOpen(false)
-  }
- async function customHandlePrint(row){
-   const gTax = await services.getGreenTaxByInvoiceId(row.invoiceId)
-   setGTax(gTax)
-    const response = await services.handleCreateInvoice(row.invoiceId)
-    console.log("response", response);
-    setInvoiceID(response)
-    setprint(true)
-    setSelectedRows(row);
- }
 
- useEffect(() => {
-   if(selectedRows !=""){
-    setprint(false)
-    handlePrint();
-   }
-}, [selectedRows,print]);
+  async function customHandlePrint(row) {
+    const gTax = await services.getGreenTaxByInvoiceId(row.invoiceId);
+    setGTax(gTax);
+    const response = await services.handleCreateInvoice(row.invoiceId);
+    setInvoiceID(response);
+    setprint(true);
+    setSelectedRows(row);
+  }
+
+  useEffect(() => {
+    if (selectedRows != "") {
+      setprint(false);
+      handlePrint();
+    }
+  }, [selectedRows, print]);
 
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
@@ -222,10 +193,10 @@ export default function Invoices(props) {
           >
             <Box mt={0}>
               <Card>
-                <CardHeader title={cardTitle('Invoices')} />
+                <CardHeader title={cardTitle("Invoices")} />
                 <PerfectScrollbar>
                   <Divider />
-                  <CardContent style={{ marginBottom: '2rem' }}>
+                  <CardContent style={{ marginBottom: "2rem" }}>
                     <Grid container spacing={4}>
                       <Grid item md={4} xs={12}>
                         <FormControl
@@ -234,9 +205,7 @@ export default function Invoices(props) {
                           label="fromdate"
                         >
                           <TextField
-                            error={Boolean(
-                              touched.fromdate && errors.fromdate
-                            )}
+                            error={Boolean(touched.fromdate && errors.fromdate)}
                             fullWidth
                             helperText={touched.fromdate && errors.fromdate}
                             name="fromdate"
@@ -244,7 +213,7 @@ export default function Invoices(props) {
                             type="date"
                             InputLabelProps={{ shrink: true }}
                             value={formik.values.fromdate}
-                            onChange={e => handleChange(e)}
+                            onChange={(e) => handleChange(e)}
                             variant="outlined"
                             size="small"
                           />
@@ -264,7 +233,7 @@ export default function Invoices(props) {
                             label="To Date *"
                             type="date"
                             InputLabelProps={{ shrink: true }}
-                            onChange={e => handleChange(e)}
+                            onChange={(e) => handleChange(e)}
                             value={formik.values.todate}
                             variant="outlined"
                             size="small"
@@ -273,7 +242,10 @@ export default function Invoices(props) {
                       </Grid>
                       <Grid item md={4} xs={12}>
                         <Button
-                          style={{color:'#FFFFFF', backgroundColor:"#489EE7"}}
+                          style={{
+                            color: "#FFFFFF",
+                            backgroundColor: "#489EE7",
+                          }}
                           type="submit"
                           variant="contained"
                         >
@@ -281,7 +253,7 @@ export default function Invoices(props) {
                         </Button>
                         &nbsp;
                         <Button
-                          style={{color:'#489EE7'}}
+                          style={{ color: "#489EE7" }}
                           type="button"
                           variant="outlined"
                           onClick={clearFields}
@@ -290,82 +262,91 @@ export default function Invoices(props) {
                         </Button>
                       </Grid>
                     </Grid>
-                    </CardContent>
-                    <CardContent>
-                  <Box minWidth={1050} >
-                    <Box minWidth={1050} >
-                      <MaterialTable
-                        hidden={isViewTable}
-                        title="Multiple Actions Preview"
-                        columns={[
-                          { title: 'Reservation No.', align: 'left', field: 'reservationNum' },
-                          { title: 'Room No.', align: 'center', field: 'roomNum' },
-                          { title: 'Arrival Date', align: 'center', field: 'arrivalDate' },
-                          { title: 'Departure Date', align: 'center', field: 'departureDate' },
-                          { title: 'Customer Name', align: 'center', field: 'customerName' },
-                          { title: 'Status', align: 'center', field: 'status'},
-                        ]}
-                        data={invoices}
-                        title="Invoice List"
-                        options={{
-                          exportButton: false,
-                          cellStyle: { textAlign: 'left' },
-                          columnResizable: false,
-                          addRowPosition: "first",
-                          headerStyle: { textAlign: "left", height: '1%' },
-                          actionsColumnIndex: -1
-                        }}
-                        actions={[
-                          {
-                            icon: ()=> <PaymentIcon/>,
-                            tooltip: 'Add green tax',
-                            onClick: (event, rowData) => { handleOpen(rowData) },
-                          },
-                          {
-                            icon: 'print',
-                            tooltip: 'Print Invoice',
-                            onClick: (event, rowData) => { customHandlePrint(rowData) }
-                          },
-                        ]}
-                      />
+                  </CardContent>
+                  <CardContent>
+                    <Box minWidth={1050}>
+                      <Box minWidth={1050}>
+                        <MaterialTable
+                          hidden={isViewTable}
+                          columns={[
+                            {
+                              title: "Reservation No.",
+                              align: "left",
+                              field: "reservationNum",
+                            },
+                            {
+                              title: "Room No.",
+                              align: "center",
+                              field: "roomNum",
+                            },
+                            {
+                              title: "Arrival Date",
+                              align: "center",
+                              field: "arrivalDate",
+                            },
+                            {
+                              title: "Departure Date",
+                              align: "center",
+                              field: "departureDate",
+                            },
+                            {
+                              title: "Customer Name",
+                              align: "center",
+                              field: "customerName",
+                            },
+                            {
+                              title: "Status",
+                              align: "center",
+                              field: "status",
+                            },
+                          ]}
+                          data={invoices}
+                          title="Invoice List"
+                          options={{
+                            exportButton: false,
+                            cellStyle: { textAlign: "left" },
+                            columnResizable: false,
+                            addRowPosition: "first",
+                            headerStyle: { textAlign: "left", height: "1%" },
+                            actionsColumnIndex: -1,
+                          }}
+                          actions={[
+                            {
+                              icon: "print",
+                              tooltip: "Print Invoice",
+                              onClick: (event, rowData) => {
+                                customHandlePrint(rowData);
+                              },
+                            },
+                          ]}
+                        />
+                      </Box>
                     </Box>
-                    </Box>
-                    {selectedRows.invoiceDetail !==""?
-                    <div hidden={true}>
-                    <CreatePDF ref={componentRef}
-                      invoiceData={selectedRows!==""?selectedRows:''} itemData={selectedRows.invoiceItems?selectedRows.invoiceItems:[]} greenTax={gTax} cashierName={cashierName} invoiceID={invoiceID}
-                    />
-                  </div>:''
-                    }                   
-                </CardContent>
+                    {selectedRows.invoiceDetail !== "" ? (
+                      <div hidden={true}>
+                        <CreatePDF
+                          ref={componentRef}
+                          invoiceData={selectedRows !== "" ? selectedRows : ""}
+                          itemData={
+                            selectedRows.invoiceItems
+                              ? selectedRows.invoiceItems
+                              : []
+                          }
+                          greenTax={gTax}
+                          cashierName={cashierName}
+                          invoiceID={invoiceID}
+                        />
+                      </div>
+                    ) : (
+                      ""
+                    )}
+                  </CardContent>
                 </PerfectScrollbar>
               </Card>
             </Box>
           </Form>
         </FormikProvider>
-        <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
-        <DialogTitle id="form-dialog-title">Green Tax</DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            id="greenTax"
-            label="Green Tax"
-            type="greenTax"
-            fullWidth
-            onChange = {e => setGreenTax(e.target.value)}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleGreenTax} color="primary">
-            Add
-          </Button>
-        </DialogActions>
-      </Dialog>
-      </Container >
-    </Page >
+      </Container>
+    </Page>
   );
 }
