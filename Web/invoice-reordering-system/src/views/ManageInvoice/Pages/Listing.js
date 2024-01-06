@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import PerfectScrollbar from 'react-perfect-scrollbar';
+import React, { useState } from "react";
+import PerfectScrollbar from "react-perfect-scrollbar";
 import {
   Box,
   Card,
@@ -9,78 +9,137 @@ import {
   CardContent,
   Grid,
   TextField,
-  MenuItem,
-  InputLabel,
   CardHeader,
   Button,
-  FormControl
-} from '@material-ui/core';
-import Page from '../../../components/Page';
-import PageHeader from '../../Common/PageHeader'
-// import services from '../Services';
-import { useNavigate } from 'react-router-dom';
-import { trackPromise } from 'react-promise-tracker';
+  FormControl,
+} from "@material-ui/core";
+import Page from "../../../components/Page";
+import PageHeader from "../../Common/PageHeader";
+import { useNavigate } from "react-router-dom";
+import { trackPromise } from "react-promise-tracker";
 import MaterialTable from "material-table";
-// import authService from '../../../utils/permissionAuth';
-import { LoadingComponent } from '../../../utils/newLoader';
-import services from '../Services';
+import { LoadingComponent } from "../../../utils/newLoader";
+import services from "../Services";
+import { useFormik, Form, FormikProvider } from "formik";
+import * as Yup from "yup";
 
 const useStyles = makeStyles((theme) => ({
   root: {
     backgroundColor: theme.palette.background.dark,
-    minHeight: '100%',
+    minHeight: "100%",
     paddingBottom: theme.spacing(3),
-    paddingTop: theme.spacing(3)
+    paddingTop: theme.spacing(3),
   },
   avatar: {
-    marginRight: theme.spacing(2)
-  }
-
+    marginRight: theme.spacing(2),
+  },
 }));
-
-const screenCode = 'RETAILERREGISTRATION';
 export default function ManageInvoiceListing(props) {
   const classes = useStyles();
   const [roomNo, setRoomNo] = useState({
-    roomNumber:''
-  })
+    roomNumber: "",
+  });
   const [invoiceData, setInvoiceData] = useState([]);
-  const [tableData, setTableData] = useState([]);
+  const dateRange = {
+    fromdate: "",
+    todate: "",
+  };
   const navigate = useNavigate();
   let encryptedID = "";
   const handleClick = () => {
-    encryptedID = btoa('0');
-    navigate('/app/manageInvoices/addEdit/' + encryptedID);
+    encryptedID = btoa("0");
+    navigate("/app/manageInvoices/addEdit/" + encryptedID);
+  };
+
+  const DateSaveScheme = Yup.object().shape({
+    fromdate: Yup.date().required("From Date is required"),
+    todate: Yup.date().required("To Date is required"),
+  });
+
+  const formik = useFormik({
+    initialValues: {
+      fromdate: dateRange.fromdate,
+      todate: dateRange.todate,
+    },
+    validationSchema: DateSaveScheme,
+    onSubmit: (values) => {
+      trackPromise(SearchData());
+    },
+  });
+  function handleChange(e) {
+    const target = e.target;
+    const value = target.value;
+    setValues({
+      ...values,
+      [e.target.name]: value,
+    });
   }
 
-  async function GetInvoiceDetailsByRoomNumber() {
-    setInvoiceData([])
-    var result = await services.GetInvoiceDetailsByRoomNumber(roomNo.roomNumber);
+  const clearFields = () => {
+    formik.resetForm();
+  };
+  const { errors, setValues, touched, handleSubmit, values } = formik;
+
+  async function SearchData() {
+    let model = {
+      arrivalDate: new Date(formik.values.fromdate),
+      departureDate: new Date(formik.values.todate),
+    };
+    var response = await services.getBillsByDateRange(model);
+    const newBillArray = response.map((item) => {
+      return {
+        ...item,
+        arrivalDate: item.invoiceDetail.arrivalDate,
+        departureDate: item.invoiceDetail.departureDate,
+        customerName: item.invoiceDetail.customerName,
+        roomNum: item.invoiceDetail.roomNum,
+        reservationNum: item.invoiceDetail.reservationNum,
+        invoiceId: item.invoiceDetail.invoiceId,
+      };
+    });
     const updatedItems = [];
-    if(result.length>0){
-      for (const item of result) {
+    if (newBillArray.length > 0) {
+      for (const item of newBillArray) {
         const updatedItem = {
           ...item,
-          arrivalDate: item.arrivalDate.split('T')[0],
-          departureDate : item.departureDate.split('T')[0]
+          arrivalDate: item.arrivalDate.split("T")[0],
+          departureDate: item.departureDate.split("T")[0],
         };
         updatedItems.push(updatedItem);
       }
     }
-    setInvoiceData(updatedItems)
+    setInvoiceData(updatedItems);
+  }
+
+  async function GetInvoiceDetailsByRoomNumber() {
+    setInvoiceData([]);
+    var result = await services.GetInvoiceDetailsByRoomNumber(
+      roomNo.roomNumber
+    );
+    const updatedItems = [];
+    if (result.length > 0) {
+      for (const item of result) {
+        const updatedItem = {
+          ...item,
+          arrivalDate: item.arrivalDate.split("T")[0],
+          departureDate: item.departureDate.split("T")[0],
+        };
+        updatedItems.push(updatedItem);
+      }
+    }
+    setInvoiceData(updatedItems);
   }
 
   const EditInvoiceDetails = (invoiceId) => {
     encryptedID = btoa(invoiceId.toString());
-    navigate('/app/manageInvoices/addEdit/' + encryptedID);
-  }
+    navigate("/app/manageInvoices/addEdit/" + encryptedID);
+  };
 
-  function handleChange(e) {
-    const target = e.target;
-    const value = target.value
+  function handleRoomNoChange(e) {
+    const value = e.target.value;
     setRoomNo({
       ...roomNo,
-      [e.target.name]: value
+      [e.target.name]: value,
     });
   }
 
@@ -94,94 +153,174 @@ export default function ManageInvoiceListing(props) {
           <PageHeader
             onClick={handleClick}
             isEdit={true}
-            customLabel = "New Billing"
+            customLabel="New Billing"
           />
         </Grid>
       </Grid>
-    )
+    );
   }
 
   return (
-    <Page
-      className={classes.root}
-      title="View Bills"
-    >
-        <LoadingComponent />
+    <Page className={classes.root} title="View Bills">
+      <LoadingComponent />
       <Container maxWidth={false}>
-        <Box mt={0}>
-          <Card>
-            <CardHeader
-              title={cardTitle("View Bills")}
-            />
-            <PerfectScrollbar>
-              <Divider />
-              <CardContent >
-                <Grid container spacing={3}>
-                  <Grid item md={4} xs={12}>
-                    <FormControl variant="outlined" fullWidth label="Room Number *">
-                      <TextField
-                        //error={Boolean(touched.mobilenumber && errors.mobilenumber)}
-                        fullWidth
-                        //helperText={touched.mobilenumber && errors.mobilenumber}
-                        name="roomNumber"
-                        label="Room Number *"
-                        //onBlur={handleBlur}
-                        onChange={(e) => handleChange(e)}
-                        value={roomNo.roomNumber}
-                        variant="outlined"
-                        size='small'
+        <FormikProvider value={formik}>
+          <Form
+            autoComplete="off"
+            disabled={!(formik.isValid && formik.dirty)}
+            noValidate
+            onSubmit={handleSubmit}
+          >
+            <Box mt={0}>
+              <Card>
+                <CardHeader title={cardTitle("View Bills")} />
+                <PerfectScrollbar>
+                  <Divider />
+                  <CardContent>
+                    <Grid container spacing={4}>
+                      <Grid item md={4} xs={12}>
+                        <FormControl
+                          variant="outlined"
+                          fullWidth
+                          label="Room Number *"
+                        >
+                          <TextField
+                            fullWidth
+                            name="roomNumber"
+                            label="Room Number *"
+                            onChange={(e) => handleRoomNoChange(e)}
+                            value={roomNo.roomNumber}
+                            variant="outlined"
+                            size="small"
+                          />
+                        </FormControl>
+                      </Grid>
+                      <Grid item md={4} xs={12}>
+                        <Button
+                          type="button"
+                          size="medium"
+                          variant="contained"
+                          style={{
+                            color: "#FFFFFF",
+                            backgroundColor: "#489EE7",
+                          }}
+                          onClick={() =>
+                            trackPromise(GetInvoiceDetailsByRoomNumber())
+                          }
+                        >
+                          Search
+                        </Button>
+                      </Grid>
+                    </Grid>
+                    <Grid container spacing={3} style={{ paddingTop: "5px" }}>
+                      <Grid item md={4} xs={12}>
+                        <FormControl
+                          variant="outlined"
+                          fullWidth
+                          label="fromdate"
+                        >
+                          <TextField
+                            error={Boolean(touched.fromdate && errors.fromdate)}
+                            fullWidth
+                            helperText={touched.fromdate && errors.fromdate}
+                            name="fromdate"
+                            label="From Date *"
+                            type="date"
+                            InputLabelProps={{ shrink: true }}
+                            value={formik.values.fromdate}
+                            onChange={(e) => handleChange(e)}
+                            variant="outlined"
+                            size="small"
+                          />
+                        </FormControl>
+                      </Grid>
+                      <Grid item md={4} xs={12}>
+                        <FormControl
+                          variant="outlined"
+                          fullWidth
+                          label="todate"
+                        >
+                          <TextField
+                            error={Boolean(touched.todate && errors.todate)}
+                            fullWidth
+                            helperText={touched.todate && errors.todate}
+                            name="todate"
+                            label="To Date *"
+                            type="date"
+                            InputLabelProps={{ shrink: true }}
+                            onChange={(e) => handleChange(e)}
+                            value={formik.values.todate}
+                            variant="outlined"
+                            size="small"
+                          />
+                        </FormControl>
+                      </Grid>
+                      <Grid item md={4} xs={12}>
+                        <Button
+                          style={{
+                            color: "#FFFFFF",
+                            backgroundColor: "#489EE7",
+                          }}
+                          type="submit"
+                          variant="contained"
+                          size="medium"
+                        >
+                          Search
+                        </Button>
+                        &nbsp;
+                        <Button
+                          style={{ color: "#489EE7" }}
+                          type="button"
+                          variant="outlined"
+                          size="medium"
+                          onClick={clearFields}
+                        >
+                          Clear
+                        </Button>
+                      </Grid>
+                    </Grid>
+                  </CardContent>
+                  {invoiceData.length > 0 ? (
+                    <Box minWidth={1050} style={{ margin: "1rem" }}>
+                      <MaterialTable
+                        title="Invoice"
+                        columns={[
+                          {
+                            title: "Reservation Num.",
+                            field: "reservationNum",
+                          },
+                          { title: "Room Num", field: "roomNum" },
+                          { title: "Arrival Date", field: "arrivalDate" },
+                          { title: "Departure Date", field: "departureDate" },
+                          { title: "Customer Name", field: "customerName" },
+                        ]}
+                        data={invoiceData}
+                        options={{
+                          exportButton: false,
+                          showTitle: false,
+                          headerStyle: { textAlign: "left", height: "1%" },
+                          cellStyle: { textAlign: "left" },
+                          columnResizable: false,
+                          actionsColumnIndex: -1,
+                        }}
+                        actions={[
+                          {
+                            icon: "mode",
+                            tooltip: "Edit Invoice",
+                            onClick: (event, rowData) => {
+                              EditInvoiceDetails(rowData.invoiceId);
+                            },
+                          },
+                        ]}
                       />
-                    </FormControl>
-                  </Grid>
-                <Grid item md={4} xs={12}>
-                    <Button
-                      type="button"
-                      size='medium'
-                      variant="contained"
-                      style={{ marginLeft: '1rem', color:'#FFFFFF', backgroundColor:"#489EE7"}}
-                      onClick={() => trackPromise(GetInvoiceDetailsByRoomNumber())}
-                    >
-                      Search
-                    </Button>
-                </Grid>
-              </Grid>
-              </CardContent>
-              {(invoiceData.length > 0) ?
-                <Box minWidth={1050} style={{margin:'1rem'}}>
-                  <MaterialTable
-                    title="Invoice"
-                    columns={[
-                      { title: 'Reservation Num.', field: 'reservationNum' },
-                      { title: 'Room Num', field: 'roomNum' },
-                      { title: 'Arrival Date', field: 'arrivalDate' },
-                      { title: 'Departure Date', field: 'departureDate' },
-                      // { title: 'Balance Payments', field: 'payments' },
-                      { title: 'Customer Name', field: 'customerName' },
-                    ]}
-                    data={invoiceData}
-                    options={{
-                      exportButton: false,
-                      showTitle: false,
-                      headerStyle: { textAlign: "left", height: '1%' },
-                      cellStyle: { textAlign: "left" },
-                      columnResizable: false,
-                      actionsColumnIndex: -1
-                    }}
-                    actions={[
-                      {
-                        icon: 'mode',
-                        tooltip: 'Edit Invoice',
-                        onClick: (event, rowData) => { EditInvoiceDetails(rowData.invoiceId) }
-                      },
-                    ]}
-                  />
-                </Box>
-                : null}
-            </PerfectScrollbar>
-          </Card>
-        </Box>
+                    </Box>
+                  ) : null}
+                </PerfectScrollbar>
+              </Card>
+            </Box>
+          </Form>
+        </FormikProvider>
       </Container>
     </Page>
   );
-};
-
+}
