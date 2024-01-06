@@ -10,7 +10,8 @@ export default {
   deleteInvoiceItem,
   handleCreateInvoice,
   saveGreenTax,
-  getGreenTaxByInvoiceId
+  getGreenTaxByInvoiceId,
+  getBillsByDateRange,
 };
 
 async function saveInvoice(data) {
@@ -79,7 +80,15 @@ async function saveGreenTax(invoiceId, model) {
   const response = await CommonPostAxios("/api/v1/greenTax", invoiceId, model);
   return response;
 }
-async function getGreenTaxByInvoiceId(invoiceId){
-  const response = await CommonPostAxios('/api/v1/checkGreenTax',invoiceId,null)
+async function getGreenTaxByInvoiceId(invoiceId) {
+  const response = await CommonPostAxios(
+    "/api/v1/checkGreenTax",
+    invoiceId,
+    null
+  );
+  return response;
+}
+async function getBillsByDateRange(model) {
+  const response = await CommonPostAxios("/api/v1/all-invoices", null, model);
   return response;
 }
