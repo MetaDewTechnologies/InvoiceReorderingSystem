@@ -107,8 +107,6 @@ export default function InvoiceAddEdit(props) {
     });
   }, [itemData.paymentType]);
 
-  const [open, setOpen] = React.useState(false);
-
   async function getGreenTax() {
     const gTax = await services.getGreenTaxByInvoiceId(
       atob(invoiceId.toString())
@@ -118,7 +116,7 @@ export default function InvoiceAddEdit(props) {
 
   async function getInvoiceDetails(invoiceId) {
     console.log(invoiceId);
-    let response = await services.getInvoiceDetailsByID(invoiceId);
+    let response = await services.getcompletedInvoiceDetailsByID(invoiceId);
     console.log("res :", response);
     const invoiceDetails = response.invoiceDetail;
     setInvoiceData({

@@ -3,7 +3,7 @@ import { CommonPostAxios, CommonGetAxios } from "../../helpers/HttpClient";
 export default {
   getInvoicesByDateRange,
   getGreenTaxByInvoiceId,
-  getInvoiceDetailsByID,
+  getcompletedInvoiceDetailsByID,
 };
 
 async function getInvoicesByDateRange(data) {
@@ -22,7 +22,11 @@ async function getGreenTaxByInvoiceId(invoiceId) {
   );
   return response;
 }
-async function getInvoiceDetailsByID(invoiceId) {
-  const response = await CommonGetAxios("/api/v1", invoiceId);
-  return response;
+async function getcompletedInvoiceDetailsByID(invoiceId) {
+  const response = await CommonGetAxios(
+    "/api/v1/completedInvoices",
+    invoiceId,
+    null
+  );
+  return response[0];
 }
