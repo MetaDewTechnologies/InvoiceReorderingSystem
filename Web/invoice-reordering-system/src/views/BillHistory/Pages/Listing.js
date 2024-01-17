@@ -22,13 +22,9 @@ import * as Yup from "yup";
 import { LoadingComponent } from "../../../utils/newLoader";
 import VisibilityIcon from "@material-ui/icons/Visibility";
 import { useAlert } from "react-alert";
-// import Dialog from "@material-ui/core/Dialog";
-// import DialogContent from "@material-ui/core/DialogContent";
-// import DialogContentText from "@material-ui/core/DialogContentText";
-// import DialogTitle from "@material-ui/core/DialogTitle";
 import CreatePDF from "../../ManageInvoice/Pages/CreatePDF";
 import { useReactToPrint } from "react-to-print";
-import TemporyBillPDF from "../../ManageInvoice/Pages/TemporyPDF";
+import { useNavigate } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -51,7 +47,8 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function ReorderInvoice(props) {
+export default function BillHistory(props) {
+  const navigate = useNavigate();
   const alert = useAlert();
   const classes = useStyles();
   const [invoiceList, setInvoiceList] = useState({
@@ -87,10 +84,6 @@ export default function ReorderInvoice(props) {
   useEffect(() => {
     setInvoices([]);
   }, [formik.values.fromdate || formik.values.todate]);
-
-  const handleSelectionChange = (rows) => {
-    setSelectedRows(rows);
-  };
 
   function handleChange(e) {
     const target = e.target;
@@ -146,40 +139,8 @@ export default function ReorderInvoice(props) {
   }
 
   function handleView(data) {
-    const invoiceDetails = data.invoiceDetail;
-    setBillData({
-      ...data,
-      reservationNum: invoiceDetails.reservationNum,
-      roomNum: invoiceDetails.roomNum,
-      departureDate: invoiceDetails.departureDate.split("T")[0],
-      customerName: invoiceDetails.customerName,
-      customerEmail: invoiceDetails.customerEmail,
-      address: invoiceDetails.address,
-      city: invoiceDetails.city,
-      country: invoiceDetails.country,
-      bookingType: invoiceDetails.bookingType == "Online" ? "1" : "2",
-      arrivalDate: invoiceDetails.arrivalDate.split("T")[0],
-      greenTax: invoiceDetails.greenTax,
-    });
-
-    const itemData = data.invoiceItems;
-    const updatedItems = [];
-    var filteredResponse = [];
-    if (itemData.length > 0) {
-      for (const item of itemData) {
-        const updatedItem = {
-          ...item,
-          date: item.date.split("T")[0],
-          debit: item.paymentType === "Debit" ? item.amount : "",
-          credit: item.paymentType === "Credit" ? item.amount : "",
-          paymentMethod: item.paymentMethod,
-        };
-        updatedItems.push(updatedItem);
-      }
-      filteredResponse = updatedItems.filter((item) => item.isActive == true);
-    }
-    setBillItems(filteredResponse);
-    setOpen(true);
+    let encryptedID = btoa(data.invoiceId.toString());
+    navigate("/app/billHistory/addEdit/" + encryptedID);
   }
 
   useEffect(() => {
@@ -193,19 +154,6 @@ export default function ReorderInvoice(props) {
     content: () => componentRef.current,
   });
 
-  async function handleReordering() {
-    const arrayOfInvoiceIds = selectedRows.map((obj) => obj.invoiceId);
-    const model = {
-      invoiceIds: arrayOfInvoiceIds,
-    };
-    const response = await services.reorderingInvoices(model);
-    if (response.statusCode === "SUCCESS") {
-      alert.success(response.message);
-    } else {
-      alert.success("Error in reordering");
-    }
-    clearFields();
-  }
   const clearFields = () => {
     formik.resetForm();
   };
@@ -213,14 +161,14 @@ export default function ReorderInvoice(props) {
   const actions = [
     {
       icon: () => <VisibilityIcon />,
-      tooltip: <p>View Payments</p>,
+      tooltip: <p>View Bill</p>,
       onClick: (event, rowData) => handleView(rowData),
       position: "row",
     },
   ];
 
   return (
-    <Page className={classes.root} title="Reorder Invoices">
+    <Page className={classes.root} title="Bill History">
       <LoadingComponent />
       <Container maxWidth={false}>
         <FormikProvider value={formik}>
@@ -232,7 +180,7 @@ export default function ReorderInvoice(props) {
           >
             <Box mt={0}>
               <Card>
-                <CardHeader title={cardTitle("Reorder Invoices")} />
+                <CardHeader title={cardTitle("Bill History")} />
                 <PerfectScrollbar>
                   <Divider />
                   <CardContent style={{ marginBottom: "2rem" }}>
@@ -308,7 +256,6 @@ export default function ReorderInvoice(props) {
                         <MaterialTable
                           actions={actions}
                           hidden={isViewTable}
-                          title="Multiple Actions Preview"
                           columns={[
                             {
                               title: "Reservation No.",
@@ -330,14 +277,9 @@ export default function ReorderInvoice(props) {
                               align: "center",
                               field: "departureDate",
                             },
-                            {
-                              title: "Status",
-                              align: "center",
-                              field: "status",
-                            },
                           ]}
                           data={invoices}
-                          title="Invoice List"
+                          title="Bill List"
                           options={{
                             exportButton: false,
                             cellStyle: { textAlign: "left" },
@@ -345,31 +287,8 @@ export default function ReorderInvoice(props) {
                             addRowPosition: "first",
                             headerStyle: { textAlign: "left", height: "1%" },
                             actionsColumnIndex: -1,
-                            selection: true,
-                            selectionProps: (rowData) => ({
-                              disabled:
-                                rowData.invoiceDetail.isReordered === true ||
-                                rowData.invoiceDetail.isInvoiceGenerated ===
-                                  true,
-                              color: "primary",
-                            }),
                           }}
-                          onSelectionChange={(e) => handleSelectionChange(e)}
                         />
-                      </Box>
-                      <Box display="flex" justifyContent="flex-end" p={2}>
-                        <Button
-                          style={{
-                            color: selectedRows.length > 0 ? "#FFFFFF" : "",
-                            backgroundColor:
-                              selectedRows.length > 0 ? "#489EE7" : "",
-                          }}
-                          variant="contained"
-                          onClick={() => handleReordering()}
-                          disabled={selectedRows.length == 0}
-                        >
-                          Reorder
-                        </Button>
                       </Box>
                     </Box>
                   </CardContent>
@@ -378,50 +297,6 @@ export default function ReorderInvoice(props) {
             </Box>
           </Form>
         </FormikProvider>
-        {/* <Dialog
-          maxWidth
-          open={open}
-          onClose={handleClose}
-          aria-labelledby="form-dialog-title"
-        >
-          <DialogTitle id="form-dialog-title">Payment Details</DialogTitle>
-          <DialogContent>
-            <Box minWidth={1000}>
-              <MaterialTable
-                title="Multiple Actions Preview"
-                columns={[
-                  { title: "Date", field: "date" },
-                  { title: "Description", field: "description" },
-                  { title: "Comment", field: "comment" },
-                  { title: "Amount", field: "amount" },
-                  { title: "Payment Method", field: "paymentMethod" },
-                  { title: "Payment Type", field: "paymentType" },
-                  { title: "Cashier", field: "cashier" },
-                ]}
-                data={ItemDataList}
-                options={{
-                  exportButton: false,
-                  showTitle: false,
-                  headerStyle: { textAlign: "left" },
-                  cellStyle: { textAlign: "left" },
-                  columnResizable: false,
-                }}
-              />
-            </Box>
-          </DialogContent>
-        </Dialog> */}
-        {billData !== "" ? (
-          <div hidden={true}>
-            <TemporyBillPDF
-              ref={componentRef}
-              invoiceData={billData !== "" ? billData : ""}
-              itemData={billItems ? billItems : []}
-              greenTax={billData.greenTax}
-            />
-          </div>
-        ) : (
-          ""
-        )}
       </Container>
     </Page>
   );

@@ -111,7 +111,7 @@ export default function InvoiceAddEdit(props) {
   const [openBillSettle, setOpenBillSettle] = useState(false);
   const [paymentToBePaid, setPaymentToBePaid] = useState("");
   const [isSettledBill, setIsSettledBill] = useState(false);
-  const [isItemAddToEdit, setIsItemAddToEdit] = useState(false)
+  const [isItemAddToEdit, setIsItemAddToEdit] = useState(false);
   const navigate = useNavigate();
   const handleClick = () => {
     navigate("/app/manageInvoices/listing/");
@@ -369,13 +369,12 @@ export default function InvoiceAddEdit(props) {
   }
 
   function handleClickEdit(data) {
-    setIsItemAddToEdit(true)
+    setIsItemAddToEdit(true);
     const dataDelete = [...ItemDataList];
     const index = data.tableData.id;
     var deletedValue = dataDelete.splice(index, 1)[0];
     setSelectedRow(deletedValue);
     setItemDataList([...dataDelete]);
-    setIsUpdate(true);
     setItemData({
       itemId: data.itemId,
       date: data.date,
@@ -444,7 +443,7 @@ export default function InvoiceAddEdit(props) {
   }
 
   function addInvoiceData() {
-    setIsItemAddToEdit(false)
+    setIsItemAddToEdit(false);
     let dataModel = {
       itemId: itemData.itemId,
       date: itemData.date,
@@ -1050,7 +1049,7 @@ export default function InvoiceAddEdit(props) {
                             {
                               icon: "edit",
                               tooltip: "Edit",
-                              disabled:isItemAddToEdit,
+                              disabled: isItemAddToEdit,
                               onClick: (event, rowData) =>
                                 handleClickEdit(rowData),
                             },
