@@ -45,4 +45,10 @@ public interface InvoiceDetailRepository extends JpaRepository<InvoiceDetailDTO,
             @Param("arrivalDate") LocalDateTime arrivalDate,
             @Param("departureDate") LocalDateTime departureDate
     );
+
+    @Query("SELECT i FROM InvoiceDetailDTO i LEFT JOIN FETCH i.invoiceItems WHERE i.isInvoiceCompleted = true AND " +
+            "i.invoiceId = :invoiceId")
+    List<InvoiceDetailDTO> findInvoiceByID(
+            @Param("invoiceId") Integer invoiceId
+    );
 }

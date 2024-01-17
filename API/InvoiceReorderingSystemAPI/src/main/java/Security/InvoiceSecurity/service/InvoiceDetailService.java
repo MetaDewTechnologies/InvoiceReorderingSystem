@@ -263,4 +263,21 @@ public class InvoiceDetailService {
         }
         return true;
     }
+
+    public List<InvoiceWithItemsResponse> getAllInvoicesByID(Integer invoiceId){
+        List<InvoiceDetailDTO> invoiceDetailDTOList = invoiceDetailRepository.findInvoiceByID(invoiceId);
+        List<InvoiceWithItemsResponse> responseList = new ArrayList<>();
+
+        for (InvoiceDetailDTO invoiceDetail : invoiceDetailDTOList) {
+            Integer id = invoiceDetail.getInvoiceId();
+            List<InvoiceItemDetailDTO> invoiceItemDetailDTOList = invoiceItemDetailRepository.findByInvoiceDetail_InvoiceId(id);
+            Integer reorderId = reorderedInvoiceDetailRepository.reorderInvoiceId(id);
+            // Create an InvoiceWithItemsResponse object and add it to the responseList
+            InvoiceWithItemsResponse response = new InvoiceWithItemsResponse(invoiceDetail, invoiceItemDetailDTOList);
+            responseList.add(response);
+        }
+
+        return responseList;
+
+    }
 }
