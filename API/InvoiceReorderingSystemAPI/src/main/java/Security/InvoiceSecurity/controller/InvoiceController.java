@@ -331,5 +331,26 @@ invoiceWithItemsResponse.getInvoiceDetail().setReorderedInvoiceDetail(null);
             return ResponseEntity.ok(0);
     }
 
+    @CrossOrigin
+    @PostMapping("/{invoiceId}")
+    public ResponseEntity<List<InvoiceWithItemsResponse>> getCompleteInvoiceWithItemsById(@PathVariable Integer invoiceId) {
+        //InvoiceWithItemsResponse invoiceWithItems = invoiceDetailService.getInvoiceWithItemsById(invoiceId);
 
+//        if (invoiceWithItems == null) {
+//            return ResponseEntity.badRequest().build();
+//        }
+        List<InvoiceWithItemsResponse> completedInvoicesByID = invoiceDetailService.getAllInvoicesByID(
+                invoiceId
+        );
+
+        if (completedInvoicesByID.isEmpty()) {
+            return ResponseEntity.ok(completedInvoicesByID);
+        }
+
+        for (InvoiceWithItemsResponse invoiceWithItemsResponse : completedInvoicesByID) {
+            invoiceWithItemsResponse.getInvoiceDetail().setReorderedInvoiceDetail(null);
+        }
+        return ResponseEntity.ok(completedInvoicesByID);
+
+    }
 }
