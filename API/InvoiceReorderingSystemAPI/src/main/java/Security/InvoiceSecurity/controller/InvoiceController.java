@@ -332,7 +332,7 @@ invoiceWithItemsResponse.getInvoiceDetail().setReorderedInvoiceDetail(null);
     }
 
     @CrossOrigin
-    @PostMapping("/{invoiceId}")
+    @GetMapping("/completedInvoices/{invoiceId}")
     public ResponseEntity<List<InvoiceWithItemsResponse>> getCompleteInvoiceWithItemsById(@PathVariable Integer invoiceId) {
         //InvoiceWithItemsResponse invoiceWithItems = invoiceDetailService.getInvoiceWithItemsById(invoiceId);
 
