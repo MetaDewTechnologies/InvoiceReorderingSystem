@@ -89,6 +89,8 @@ export default function InvoiceAddEdit(props) {
     amount: "0",
     paymentMethod: "0",
     cashier: "",
+    serviceCharge: 0,
+    governmentTax: 0,
   });
   const [ItemDataList, setItemDataList] = useState([]);
   const [isDisableButton, setIsDisableButton] = useState(false);
@@ -112,6 +114,7 @@ export default function InvoiceAddEdit(props) {
   const [paymentToBePaid, setPaymentToBePaid] = useState("");
   const [isSettledBill, setIsSettledBill] = useState(false);
   const [isItemAddToEdit, setIsItemAddToEdit] = useState(false);
+  const [totalAmount, setTotalAmount] = useState(0);
   const navigate = useNavigate();
   const handleClick = () => {
     navigate("/app/manageInvoices/listing/");
@@ -135,6 +138,20 @@ export default function InvoiceAddEdit(props) {
       paymentMethod: "0",
     });
   }, [itemData.paymentType]);
+
+  useEffect(() => {
+    setItemData({
+      ...itemData,
+      serviceCharge: (itemData.amount * (10 / 100)).toFixed(2),
+      governmentTax: (itemData.amount * (16 / 100)).toFixed(2),
+    });
+    let total =
+      parseFloat(itemData.amount) +
+      parseFloat(itemData.amount * (10 / 100)) +
+      parseFloat(itemData.amount * (16 / 100));
+
+    setTotalAmount(total.toFixed(2) || 0);
+  }, [itemData.amount]);
 
   const [open, setOpen] = React.useState(false);
 
@@ -455,6 +472,8 @@ export default function InvoiceAddEdit(props) {
       amount: parseFloat(itemData.amount),
       paymentMethod: itemData.paymentMethod,
       cashier: itemData.cashier,
+      governmentTax: itemData.governmentTax,
+      serviceCharge: itemData.serviceCharge,
       isActive: true,
     };
     setItemDataList((ItemDataList) => [...ItemDataList, dataModel]);
@@ -463,7 +482,7 @@ export default function InvoiceAddEdit(props) {
       description: "",
       comment: "",
       paymentType: "Debit",
-      amount: "",
+      amount: "0",
       paymentMethod: "1",
       cashier: "",
     });
@@ -791,6 +810,8 @@ export default function InvoiceAddEdit(props) {
                           amount: itemData.amount,
                           paymentMethod: itemData.paymentMethod,
                           cashier: itemData.cashier,
+                          serviceCharge: itemData.serviceCharge,
+                          governmentTax: itemData.governmentTax,
                         }}
                         validationSchema={Yup.object().shape({
                           description: Yup.string().required(
@@ -997,6 +1018,42 @@ export default function InvoiceAddEdit(props) {
                                     value={itemData.cashier}
                                     variant="outlined"
                                   />
+                                </Grid>
+                                <Grid item md={6} xs={12}>
+                                  <InputLabel shrink id="serviceCharge">
+                                    Service Charge
+                                  </InputLabel>
+                                  <TextField
+                                    fullWidth
+                                    name="serviceCharge"
+                                    size="small"
+                                    value={itemData.serviceCharge}
+                                    disabled
+                                    variant="outlined"
+                                  />
+                                </Grid>
+                                <Grid item md={6} xs={12}>
+                                  <InputLabel shrink id="governmentTax">
+                                    Government Tax
+                                  </InputLabel>
+                                  <TextField
+                                    fullWidth
+                                    name="governmentTax"
+                                    size="small"
+                                    value={itemData.governmentTax}
+                                    disabled
+                                    variant="outlined"
+                                  />
+                                </Grid>
+                                <Grid item md={6} xs={12}>
+                                  <Typography
+                                    style={{
+                                      fontWeight: "Bold",
+                                      fontSize: "18px",
+                                    }}
+                                  >
+                                    Total:{totalAmount}
+                                  </Typography>
                                 </Grid>
                               </Grid>
                               <Box
