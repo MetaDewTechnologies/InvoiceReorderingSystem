@@ -76,6 +76,8 @@ public class InvoiceDetailService {
         existingInvoiceDetail.setIsInvoiceCompleted(updatedInvoiceDetail.getIsInvoiceCompleted());
         existingInvoiceDetail.setIsInvoiceGenerated(updatedInvoiceDetail.getIsInvoiceGenerated());
         existingInvoiceDetail.setIsReordered(updatedInvoiceDetail.getIsReordered());
+        existingInvoiceDetail.setGovernmentTax(updatedInvoiceDetail.getGovernmentTax());
+        existingInvoiceDetail.setServiceCharge(updatedInvoiceDetail.getServiceCharge());
 
         // ... Update other properties ...
 

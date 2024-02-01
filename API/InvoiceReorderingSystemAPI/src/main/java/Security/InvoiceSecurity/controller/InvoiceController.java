@@ -5,6 +5,7 @@ import Security.InvoiceSecurity.auth.AuthenticationService;
 import Security.InvoiceSecurity.models.*;
 import Security.InvoiceSecurity.service.InvoiceDetailService;
 import Security.InvoiceSecurity.service.InvoiceItemDetailService;
+import Security.InvoiceSecurity.service.PaymentDetailService;
 import Security.InvoiceSecurity.service.TestService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,6 +23,7 @@ import java.util.List;
 public class InvoiceController {
     private final InvoiceDetailService invoiceDetailService;
     private final InvoiceItemDetailService invoiceItemDetailService;
+    private final PaymentDetailService paymentDetailService;
 
     private final TestService testservice;
 
@@ -352,5 +354,24 @@ invoiceWithItemsResponse.getInvoiceDetail().setReorderedInvoiceDetail(null);
         }
         return ResponseEntity.ok(completedInvoicesByID);
 
+    }
+
+
+    @CrossOrigin
+    @PostMapping("/payment-invoices")
+    public ResponseEntity<?> billPayment(@RequestBody PaymentDetails request) {
+
+        boolean success = paymentDetailService.paymentDetailAdd(request);
+        if(success) {
+            InvoiceResponse invoiceResponse = new InvoiceResponse();
+            invoiceResponse.setMessage("Payment Success");
+            invoiceResponse.setStatusCode("SUCCESS");
+            return ResponseEntity.ok(invoiceResponse);
+        }else{
+            InvoiceResponse invoiceResponse = new InvoiceResponse();
+            invoiceResponse.setMessage("Cannot pay");
+            invoiceResponse.setStatusCode("ERROR");
+            return ResponseEntity.ok(invoiceResponse);
+        }
     }
 }
