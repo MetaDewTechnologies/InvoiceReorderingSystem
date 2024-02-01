@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -31,6 +32,7 @@ public class PaymentDetails {
     private LocalDateTime paymentDateTime;
     private String paymentMethod;
     private Integer invoiceId;
+    private BigDecimal amount;
     @OneToOne(fetch = FetchType.LAZY)
     // @JoinColumn(name = "invoice_id", referencedColumnName = "invoiceId", unique = true)
     private InvoiceDetailDTO paymentDetail;
