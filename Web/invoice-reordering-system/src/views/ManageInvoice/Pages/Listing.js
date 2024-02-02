@@ -12,6 +12,9 @@ import {
   CardHeader,
   Button,
   FormControl,
+  Typography,
+  InputLabel,
+  MenuItem,
 } from "@material-ui/core";
 import Page from "../../../components/Page";
 import PageHeader from "../../Common/PageHeader";
@@ -20,8 +23,12 @@ import { trackPromise } from "react-promise-tracker";
 import MaterialTable from "material-table";
 import { LoadingComponent } from "../../../utils/newLoader";
 import services from "../Services";
-import { useFormik, Form, FormikProvider } from "formik";
+import { useFormik, Form, FormikProvider, Formik } from "formik";
+import VisibilityIcon from "@material-ui/icons/Visibility";
 import * as Yup from "yup";
+import Dialog from "@material-ui/core/Dialog";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogTitle from "@material-ui/core/DialogTitle";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -39,11 +46,16 @@ export default function ManageInvoiceListing(props) {
   const [roomNo, setRoomNo] = useState({
     roomNumber: "",
   });
+  const [open, setOpen] = useState(false);
   const [invoiceData, setInvoiceData] = useState([]);
   const dateRange = {
     fromdate: "",
     todate: "",
   };
+  const [paymentData, setPaymentData] = useState({
+    paymentAmount: "0",
+    paymentMethod: "0",
+  });
   const navigate = useNavigate();
   let encryptedID = "";
   const handleClick = () => {
@@ -160,6 +172,39 @@ export default function ManageInvoiceListing(props) {
     );
   }
 
+  function handleView(data) {
+    setOpen(true);
+    console.log(data);
+  }
+  const actions = [
+    {
+      icon: () => <VisibilityIcon />,
+      tooltip: <p>Payments</p>,
+      onClick: (event, rowData) => handleView(rowData),
+      position: "row",
+    },
+    {
+      icon: "mode",
+      tooltip: "Edit Invoice",
+      onClick: (event, rowData) => {
+        EditInvoiceDetails(rowData.invoiceId);
+      },
+    },
+  ];
+  function handleClose() {
+    setOpen(false);
+  }
+  function addPaymentData() {
+    console.log(paymentData);
+  }
+  function handleChange2(e) {
+    const target = e.target;
+    const value = target.value;
+    setPaymentData({
+      ...paymentData,
+      [e.target.name]: value,
+    });
+  }
   return (
     <Page className={classes.root} title="View Bills">
       <LoadingComponent />
@@ -303,15 +348,7 @@ export default function ManageInvoiceListing(props) {
                           columnResizable: false,
                           actionsColumnIndex: -1,
                         }}
-                        actions={[
-                          {
-                            icon: "mode",
-                            tooltip: "Edit Invoice",
-                            onClick: (event, rowData) => {
-                              EditInvoiceDetails(rowData.invoiceId);
-                            },
-                          },
-                        ]}
+                        actions={actions}
                       />
                     </Box>
                   ) : null}
@@ -320,6 +357,178 @@ export default function ManageInvoiceListing(props) {
             </Box>
           </Form>
         </FormikProvider>
+        <Dialog
+          maxWidth
+          open={open}
+          onClose={handleClose}
+          aria-labelledby="form-dialog-title"
+        >
+          <DialogTitle id="form-dialog-title">Payment Details</DialogTitle>
+          <DialogContent>
+            <PerfectScrollbar>
+              <Box minWidth={1000}>
+                <MaterialTable
+                  title="Multiple Actions Preview"
+                  columns={[
+                    { title: "Date", field: "" },
+                    { title: "Amount", field: "" },
+                    { title: "Payment Method", field: "" },
+                  ]}
+                  // data={ItemDataList}
+                  options={{
+                    exportButton: false,
+                    showTitle: false,
+                    headerStyle: { textAlign: "left" },
+                    cellStyle: { textAlign: "left" },
+                    columnResizable: false,
+                  }}
+                />
+              </Box>
+              <CardContent>
+                <Grid container spacing={4}>
+                  <Grid item md={4} xs={12}>
+                    <Typography
+                      style={{
+                        fontSize: "18px",
+                      }}
+                    >
+                      Total Amount:{}
+                    </Typography>
+                  </Grid>
+                  <Grid item md={4} xs={12}>
+                    <Typography
+                      style={{
+                        fontSize: "18px",
+                      }}
+                    >
+                      Payments:{}
+                    </Typography>
+                  </Grid>
+                  <Grid item md={4} xs={12}>
+                    {" "}
+                    <Typography
+                      style={{
+                        fontSize: "18px",
+                      }}
+                    >
+                      Due Payments:{}
+                    </Typography>
+                  </Grid>
+                </Grid>
+                <Box style={{ marginBottom: 20, marginTop: 20 }}>
+                  <Typography color={"textPrimary"} variant="h4">
+                    Payment :
+                  </Typography>
+                </Box>
+                <Formik
+                  initialValues={{
+                    paymentAmount: paymentData.paymentAmount,
+                    paymentMethod: paymentData.paymentMethod,
+                  }}
+                  validationSchema={Yup.object().shape({
+                    paymentAmount: Yup.string()
+                      .required("Amount is required")
+                      .matches(
+                        /^-?[0-9]*(\.[0-9]{0,2})?$/,
+                        "Only allow numbers with atmost two decimal places"
+                      ),
+                    paymentMethod:
+                      paymentData.paymentMethod === "0"
+                        ? Yup.number()
+                            .required("Payment method is required")
+                            .min("Credit", "Payment method is required")
+                        : null,
+                  })}
+                  enableReinitialize
+                  onSubmit={addPaymentData}
+                >
+                  {({
+                    errors,
+                    handleBlur,
+                    touched,
+                    handleSubmit: AddPaymentData,
+                  }) => (
+                    <Form>
+                      <Grid container spacing={4}>
+                        <Grid item xs={12} md={6}>
+                          <InputLabel shrink id="paymentAmount">
+                            Amount *
+                          </InputLabel>
+                          <TextField
+                            fullWidth
+                            error={Boolean(
+                              touched.paymentAmount && errors.paymentAmount
+                            )}
+                            fullWidth
+                            helperText={
+                              touched.paymentAmount && errors.paymentAmount
+                            }
+                            size="small"
+                            name="paymentAmount"
+                            id="paymentAmount"
+                            onBlur={handleBlur}
+                            onChange={(e) => handleChange2(e)}
+                            value={paymentData.paymentAmount}
+                            variant="outlined"
+                            required
+                          />
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                          <InputLabel shrink id="paymentMethod">
+                            Payment Method *
+                          </InputLabel>
+                          <TextField
+                            select
+                            error={Boolean(
+                              touched.paymentMethod && errors.paymentMethod
+                            )}
+                            fullWidth
+                            size="small"
+                            helperText={
+                              touched.paymentMethod && errors.paymentMethod
+                            }
+                            name="paymentMethod"
+                            onBlur={handleBlur}
+                            onChange={(e) => handleChange2(e)}
+                            value={paymentData.paymentMethod}
+                            variant="outlined"
+                            id="paymentMethod"
+                          >
+                            <MenuItem value="0">
+                              --Select Payment Method--
+                            </MenuItem>
+                            <MenuItem value="Cash">Cash</MenuItem>
+                            <MenuItem value="Card">Card</MenuItem>
+                            <MenuItem value="Bank Transfer">
+                              Bank Transfer
+                            </MenuItem>
+                          </TextField>
+                        </Grid>
+                      </Grid>
+                      <Box
+                        display="flex"
+                        justifyContent="flex-end"
+                        style={{ paddingBottom: 10, marginTop: 10 }}
+                      >
+                        <Button
+                          variant="contained"
+                          type="button"
+                          style={{
+                            color: "#FFFFFF",
+                            backgroundColor: "#489EE7",
+                          }}
+                          onClick={AddPaymentData}
+                        >
+                          Add
+                        </Button>
+                      </Box>
+                    </Form>
+                  )}
+                </Formik>
+              </CardContent>
+            </PerfectScrollbar>
+          </DialogContent>
+        </Dialog>
       </Container>
     </Page>
   );
