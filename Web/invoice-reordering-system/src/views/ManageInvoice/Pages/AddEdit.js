@@ -825,7 +825,8 @@ export default function InvoiceAddEdit(props) {
                             ),
                           cashier: Yup.string().required("Cashier is required"),
                           paymentMethod:
-                            itemData.paymentType === "1"
+                            itemData.paymentMethod === "0" &&
+                            itemData.paymentType !== "Credit"
                               ? Yup.number()
                                   .required("Payment method is required")
                                   .min("1", "Payment method is required")
