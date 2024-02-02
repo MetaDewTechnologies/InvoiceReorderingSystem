@@ -96,6 +96,8 @@ public class InvoiceDetailDTO {
     private LocalDateTime invoiceGeneratedDate;
     private String cashierName;
     private BigDecimal greenTax;
+    private BigDecimal governmentTax;
+    private BigDecimal serviceCharge;
     @JsonIgnore
     @OneToMany(mappedBy = "invoiceDetail", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<InvoiceItemDetailDTO> invoiceItems;
@@ -103,6 +105,9 @@ public class InvoiceDetailDTO {
 @OneToOne(mappedBy = "invoiceDetailnew", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = false)
 //@JoinColumn(name = "invoice_id", referencedColumnName = "invoiceId")
 private ReorderedInvoiceDetailDTO reorderedInvoiceDetail;
+
+@OneToOne(mappedBy = "paymentDetail", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = false)
+private PaymentDetails paymentDetails;
 
 
 }
