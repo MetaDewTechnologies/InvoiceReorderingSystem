@@ -374,4 +374,13 @@ invoiceWithItemsResponse.getInvoiceDetail().setReorderedInvoiceDetail(null);
             return ResponseEntity.ok(invoiceResponse);
         }
     }
+
+    @CrossOrigin
+    @GetMapping("/allPayment/{invoiceId}")
+    public ResponseEntity<PaymentDetailResponse> getAllPayment(@PathVariable Integer invoiceId) {
+
+        return invoiceDetailService.getPaymentDetails(invoiceId);
+
+    }
+
 }

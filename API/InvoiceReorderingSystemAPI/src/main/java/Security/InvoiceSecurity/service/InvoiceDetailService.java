@@ -3,8 +3,10 @@ package Security.InvoiceSecurity.service;
 import Security.InvoiceSecurity.models.*;
 import Security.InvoiceSecurity.repository.InvoiceDetailRepository;
 import Security.InvoiceSecurity.repository.InvoiceItemDetailRepository;
+import Security.InvoiceSecurity.repository.PaymentDetailRepository;
 import Security.InvoiceSecurity.repository.ReorderedInvoiceDetailRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -20,6 +22,7 @@ public class InvoiceDetailService {
     private final InvoiceDetailRepository invoiceDetailRepository;
     private final InvoiceItemDetailRepository invoiceItemDetailRepository;
     private final ReorderedInvoiceDetailRepository reorderedInvoiceDetailRepository;
+    private final PaymentDetailRepository paymentDetailRepository;
 
     public InvoiceDetailDTO saveInvoiceDetail(InvoiceDetailDTO invoiceDetail) {
         Integer invoiceId = invoiceDetail.getInvoiceId();
@@ -282,4 +285,49 @@ public class InvoiceDetailService {
         return responseList;
 
     }
+
+//    public ResponseEntity<PaymentDetailResponse> getPaymentDetails(Integer invoiceId){
+//        PaymentDetailResponse paymentDetailResponse = new PaymentDetailResponse(); // Instantiate the response object
+//            BigDecimal sumOfCredits = invoiceDetailRepository.sumOfCreditForBill(invoiceId);
+//            BigDecimal sumOfDebits = invoiceDetailRepository.sumOfDebitForBill(invoiceId);
+//            BigDecimal sumOfPayments= sumOfCredits.add(sumOfDebits);
+//            BigDecimal payment = paymentDetailRepository.sumAmountForPayment(invoiceId);
+//            BigDecimal remain = sumOfDebits.add(payment);
+//            paymentDetailResponse.setTotal(sumOfPayments);
+//            paymentDetailResponse.setRemain(remain);
+//            return ResponseEntity.ok(paymentDetailResponse);
+//
+//
+//    }
+
+    public ResponseEntity<PaymentDetailResponse> getPaymentDetails(Integer invoiceId) {
+        PaymentDetailResponse paymentDetailResponse = new PaymentDetailResponse();
+
+        // Initialize variables to hold payment amounts
+        BigDecimal sumOfCredits = BigDecimal.ZERO;
+        BigDecimal sumOfDebits = BigDecimal.ZERO;
+        BigDecimal payment = BigDecimal.ZERO;
+
+        // Check if invoiceId is not null before retrieving sums from repositories
+        if (invoiceId != null) {
+            sumOfCredits = invoiceDetailRepository.sumOfCreditForBill(invoiceId);
+            sumOfCredits = (sumOfCredits != null) ? sumOfCredits : BigDecimal.ZERO;
+            sumOfDebits = invoiceDetailRepository.sumOfDebitForBill(invoiceId);
+            sumOfDebits = (sumOfDebits != null) ? sumOfDebits : BigDecimal.ZERO;
+            if (paymentDetailRepository.existsPaymentDetailsByInvoiceId(invoiceId)) {
+                payment = paymentDetailRepository.sumAmountForPayment(invoiceId);
+            }
+        }
+
+        // Calculate total and remaining amounts
+        BigDecimal sumOfPayments = sumOfCredits.add(sumOfDebits);
+        BigDecimal remain = sumOfDebits.add(payment);
+
+        // Set total and remain in the response object
+        paymentDetailResponse.setTotal(sumOfPayments != null ? sumOfPayments : BigDecimal.ZERO);
+        paymentDetailResponse.setRemain(remain != null ? remain : BigDecimal.ZERO);
+
+        return ResponseEntity.ok(paymentDetailResponse);
+    }
+
 }
