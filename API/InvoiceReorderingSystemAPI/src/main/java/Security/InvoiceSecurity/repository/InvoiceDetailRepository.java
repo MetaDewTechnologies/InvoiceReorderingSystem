@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -51,4 +52,23 @@ public interface InvoiceDetailRepository extends JpaRepository<InvoiceDetailDTO,
     List<InvoiceDetailDTO> findInvoiceByID(
             @Param("invoiceId") Integer invoiceId
     );
+
+    @Query("SELECT SUM(item.amount) FROM InvoiceDetailDTO invoice " +
+            "JOIN invoice.invoiceItems item " +
+            "WHERE item.paymentType IN ('credit') " +
+            "AND invoice.invoiceId = :invoiceId " +
+            "GROUP BY invoice.invoiceId")
+    BigDecimal sumOfCreditForBill(
+            @Param("invoiceId") Integer invoiceId
+    );
+
+    @Query("SELECT SUM(item.amount) FROM InvoiceDetailDTO invoice " +
+            "JOIN invoice.invoiceItems item " +
+            "WHERE item.paymentType IN ('credit') " +
+            "AND invoice.invoiceId = :invoiceId " +
+            "GROUP BY invoice.invoiceId")
+    BigDecimal sumOfDebitForBill(
+            @Param("invoiceId") Integer invoiceId
+    );
 }
+
