@@ -323,9 +323,12 @@ public class InvoiceDetailService {
         BigDecimal sumOfPayments = sumOfCredits.add(sumOfDebits);
         BigDecimal remain = sumOfDebits.add(payment);
 
+        List<PaymentDetails> paymentDetailsList = paymentDetailRepository.findAllPaymentByInvoiceId(invoiceId);
+
         // Set total and remain in the response object
         paymentDetailResponse.setTotal(sumOfPayments != null ? sumOfPayments : BigDecimal.ZERO);
         paymentDetailResponse.setRemain(remain != null ? remain : BigDecimal.ZERO);
+        paymentDetailResponse.setPaymentDetails(paymentDetailsList);
 
         return ResponseEntity.ok(paymentDetailResponse);
     }
