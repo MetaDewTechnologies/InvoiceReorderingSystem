@@ -12,6 +12,8 @@ export default {
   saveGreenTax,
   getGreenTaxByInvoiceId,
   getBillsByDateRange,
+  addPaymentData,
+  getPaymentDetails,
 };
 
 async function saveInvoice(data) {
@@ -90,5 +92,19 @@ async function getGreenTaxByInvoiceId(invoiceId) {
 }
 async function getBillsByDateRange(model) {
   const response = await CommonPostAxios("/api/v1/all-invoices", null, model);
+  return response;
+}
+async function addPaymentData(model) {
+  const response = await CommonPostAxios(
+    "/api/v1/payment-invoices",
+    null,
+    model
+  );
+  return response;
+}
+
+async function getPaymentDetails(invoiceId) {
+  console.log(invoiceId);
+  const response = await CommonGetAxios("/api/v1/allPayment", invoiceId);
   return response;
 }
