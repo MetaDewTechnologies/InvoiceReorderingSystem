@@ -32,7 +32,8 @@ public class PaymentDetails {
     private LocalDateTime paymentDateTime;
     private String paymentMethod;
     private Integer invoiceId;
-    private BigDecimal amount;
+    @Column(columnDefinition = "NUMERIC(19, 2) DEFAULT 0.0")
+    private BigDecimal amount = BigDecimal.ZERO;
     @OneToOne(fetch = FetchType.LAZY)
     // @JoinColumn(name = "invoice_id", referencedColumnName = "invoiceId", unique = true)
     private InvoiceDetailDTO paymentDetail;
