@@ -29,6 +29,7 @@ import * as Yup from "yup";
 import Dialog from "@material-ui/core/Dialog";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import { useAlert } from "react-alert";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -43,6 +44,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 export default function ManageInvoiceListing(props) {
   const classes = useStyles();
+  const alert = useAlert();
   const [roomNo, setRoomNo] = useState({
     roomNumber: "",
   });
@@ -56,6 +58,7 @@ export default function ManageInvoiceListing(props) {
     paymentAmount: "0",
     paymentMethod: "0",
   });
+  const [invoiceID, setInvoiceID] = useState("");
   const navigate = useNavigate();
   let encryptedID = "";
   const handleClick = () => {
@@ -172,9 +175,11 @@ export default function ManageInvoiceListing(props) {
     );
   }
 
-  function handleView(data) {
+  async function handleView(data) {
+    const result = await services.getPaymentDetails(data.invoiceId);
+    console.log(result);
     setOpen(true);
-    console.log(data);
+    setInvoiceID(data.invoiceId);
   }
   const actions = [
     {
@@ -194,8 +199,20 @@ export default function ManageInvoiceListing(props) {
   function handleClose() {
     setOpen(false);
   }
-  function addPaymentData() {
-    console.log(paymentData);
+  async function addPaymentData() {
+    let model = {
+      paymentDateTime: new Date(),
+      paymentMethod: paymentData.paymentMethod,
+      invoiceId: invoiceID,
+      amount: paymentData.paymentAmount,
+    };
+    var result = await services.addPaymentData(model);
+    if (result.statusCode === "SUCCESS") {
+      alert.success(result.message);
+      setOpen(false);
+    } else {
+      alert.error(result.message);
+    }
   }
   function handleChange2(e) {
     const target = e.target;
