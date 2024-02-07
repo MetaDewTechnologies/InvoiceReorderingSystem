@@ -56,6 +56,7 @@ public interface InvoiceDetailRepository extends JpaRepository<InvoiceDetailDTO,
     @Query("SELECT SUM(item.amount) FROM InvoiceDetailDTO invoice " +
             "JOIN invoice.invoiceItems item " +
             "WHERE item.paymentType IN ('credit') " +
+            "AND item.isActive = True " +
             "AND invoice.invoiceId = :invoiceId " +
             "GROUP BY invoice.invoiceId")
     BigDecimal sumOfCreditForBill(
@@ -64,7 +65,8 @@ public interface InvoiceDetailRepository extends JpaRepository<InvoiceDetailDTO,
 
     @Query("SELECT SUM(item.amount) FROM InvoiceDetailDTO invoice " +
             "JOIN invoice.invoiceItems item " +
-            "WHERE item.paymentType IN ('credit') " +
+            "WHERE item.paymentType IN ('debit') " +
+            "AND item.isActive = True " +
             "AND invoice.invoiceId = :invoiceId " +
             "GROUP BY invoice.invoiceId")
     BigDecimal sumOfDebitForBill(
