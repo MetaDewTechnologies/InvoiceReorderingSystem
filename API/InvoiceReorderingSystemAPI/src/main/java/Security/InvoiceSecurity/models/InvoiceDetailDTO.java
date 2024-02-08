@@ -96,8 +96,6 @@ public class InvoiceDetailDTO {
     private LocalDateTime invoiceGeneratedDate;
     private String cashierName;
     private BigDecimal greenTax;
-    private BigDecimal governmentTax;
-    private BigDecimal serviceCharge;
     @JsonIgnore
     @OneToMany(mappedBy = "invoiceDetail", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<InvoiceItemDetailDTO> invoiceItems;
