@@ -425,7 +425,7 @@ export default function ManageInvoiceListing(props) {
                         fontSize: "18px",
                       }}
                     >
-                      Total Amount: {totalAmountToPay}
+                      Total Amount: {totalAmountToPay.toFixed(2)}
                     </Typography>
                   </Grid>
                   <Grid item md={4} xs={12}>
@@ -434,7 +434,7 @@ export default function ManageInvoiceListing(props) {
                         fontSize: "18px",
                       }}
                     >
-                      Payments: {paidAmount}
+                      Payments: {paidAmount.toFixed(2)}
                     </Typography>
                   </Grid>
                   <Grid item md={4} xs={12}>
@@ -444,7 +444,7 @@ export default function ManageInvoiceListing(props) {
                         fontSize: "18px",
                       }}
                     >
-                      Due Payments: {totalAmountToPay - paidAmount}
+                      Due Payments: {(totalAmountToPay - paidAmount).toFixed(2)}
                     </Typography>
                   </Grid>
                 </Grid>
