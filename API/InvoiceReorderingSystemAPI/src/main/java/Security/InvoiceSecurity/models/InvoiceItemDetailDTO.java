@@ -47,7 +47,8 @@ public class InvoiceItemDetailDTO {
 
     @NonNull
     private String cashier;
-
+    private BigDecimal governmentTax;
+    private BigDecimal serviceCharge;
     private Boolean isActive;
 
     @ManyToOne(fetch = FetchType.LAZY)

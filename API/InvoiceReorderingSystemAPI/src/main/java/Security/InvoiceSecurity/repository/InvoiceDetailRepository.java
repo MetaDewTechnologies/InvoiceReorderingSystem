@@ -53,7 +53,7 @@ public interface InvoiceDetailRepository extends JpaRepository<InvoiceDetailDTO,
             @Param("invoiceId") Integer invoiceId
     );
 
-    @Query("SELECT SUM(item.amount) FROM InvoiceDetailDTO invoice " +
+    @Query("SELECT SUM(item.amount + item.governmentTax + item.serviceCharge) FROM InvoiceDetailDTO invoice " +
             "JOIN invoice.invoiceItems item " +
             "WHERE item.paymentType IN ('credit') " +
             "AND item.isActive = True " +
@@ -63,7 +63,7 @@ public interface InvoiceDetailRepository extends JpaRepository<InvoiceDetailDTO,
             @Param("invoiceId") Integer invoiceId
     );
 
-    @Query("SELECT SUM(item.amount) FROM InvoiceDetailDTO invoice " +
+    @Query("SELECT SUM(item.amount + item.governmentTax + item.serviceCharge) FROM InvoiceDetailDTO invoice " +
             "JOIN invoice.invoiceItems item " +
             "WHERE item.paymentType IN ('debit') " +
             "AND item.isActive = True " +
@@ -72,5 +72,15 @@ public interface InvoiceDetailRepository extends JpaRepository<InvoiceDetailDTO,
     BigDecimal sumOfDebitForBill(
             @Param("invoiceId") Integer invoiceId
     );
+
+//    @Query("SELECT SUM(item.amount) FROM InvoiceDetailDTO invoice " +
+//            "JOIN invoice.invoiceItems item " +
+//            "WHERE item paymentType IN ('debit') " +
+//            "AND item.isActive = True " +
+//            "AND invoice.invoiceId = :invoiceId " +
+//            "GROUP BY invoice.invoiceId")
+//    BigDecimal sumOfGovernmentTaxForBill(
+//            @Param("invoiceId") Integer invoiceId
+//    );
 }
 

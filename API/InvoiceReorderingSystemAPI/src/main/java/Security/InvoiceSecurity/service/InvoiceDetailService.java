@@ -79,8 +79,8 @@ public class InvoiceDetailService {
         existingInvoiceDetail.setIsInvoiceCompleted(updatedInvoiceDetail.getIsInvoiceCompleted());
         existingInvoiceDetail.setIsInvoiceGenerated(updatedInvoiceDetail.getIsInvoiceGenerated());
         existingInvoiceDetail.setIsReordered(updatedInvoiceDetail.getIsReordered());
-        existingInvoiceDetail.setGovernmentTax(updatedInvoiceDetail.getGovernmentTax());
-        existingInvoiceDetail.setServiceCharge(updatedInvoiceDetail.getServiceCharge());
+//        existingInvoiceDetail.setGovernmentTax(updatedInvoiceDetail.getGovernmentTax());
+//        existingInvoiceDetail.setServiceCharge(updatedInvoiceDetail.getServiceCharge());
 
         // ... Update other properties ...
 
@@ -103,7 +103,8 @@ public class InvoiceDetailService {
                     newItem.setCashier(updatedItem.getCashier());
                     newItem.setIsActive(updatedItem.getIsActive());
                     newItem.setInvoiceDetail(existingInvoiceDetail);
-
+                    newItem.setGovernmentTax(updatedItem.getGovernmentTax());
+                    newItem.setServiceCharge(updatedItem.getServiceCharge());
                     // ... Set other properties ...
 
                     invoiceItemDetailRepository.save(newItem);
@@ -119,6 +120,8 @@ public class InvoiceDetailService {
                         existingItem.setPaymentMethod(updatedItem.getPaymentMethod());
                         existingItem.setCashier(updatedItem.getCashier());
                         existingItem.setIsActive(updatedItem.getIsActive());
+                        existingItem.setGovernmentTax(updatedItem.getGovernmentTax());
+                        existingItem.setServiceCharge(updatedItem.getServiceCharge());
 
                         // ... Update other properties ...
 
