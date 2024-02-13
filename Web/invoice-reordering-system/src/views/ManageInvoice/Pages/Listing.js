@@ -59,6 +59,9 @@ export default function ManageInvoiceListing(props) {
     paymentMethod: "0",
   });
   const [invoiceID, setInvoiceID] = useState("");
+  const [paymentHistory, setPaymentHistory] = useState([]);
+  const [totalAmountToPay, setTotalAmountToPay] = useState(0);
+  const [paidAmount, setPaidAmount] = useState(0);
   const navigate = useNavigate();
   let encryptedID = "";
   const handleClick = () => {
@@ -177,7 +180,20 @@ export default function ManageInvoiceListing(props) {
 
   async function handleView(data) {
     const result = await services.getPaymentDetails(data.invoiceId);
-    console.log(result);
+    setTotalAmountToPay(result.total);
+    setPaidAmount(result.remain);
+    const paymentHistoryArray = result.paymentDetails.map((item) => {
+      return {
+        ...item,
+        amount: item.amount,
+        paymentDateTime:
+          item.paymentDateTime !== null
+            ? item.paymentDateTime.split("T")[0]
+            : "",
+        paymentMethod: item.paymentMethod,
+      };
+    });
+    setPaymentHistory(paymentHistoryArray);
     setOpen(true);
     setInvoiceID(data.invoiceId);
   }
@@ -387,11 +403,11 @@ export default function ManageInvoiceListing(props) {
                 <MaterialTable
                   title="Multiple Actions Preview"
                   columns={[
-                    { title: "Date", field: "" },
-                    { title: "Amount", field: "" },
-                    { title: "Payment Method", field: "" },
+                    { title: "Date", field: "paymentDateTime" },
+                    { title: "Amount", field: "amount" },
+                    { title: "Payment Method", field: "paymentMethod" },
                   ]}
-                  // data={ItemDataList}
+                  data={paymentHistory}
                   options={{
                     exportButton: false,
                     showTitle: false,
@@ -409,7 +425,7 @@ export default function ManageInvoiceListing(props) {
                         fontSize: "18px",
                       }}
                     >
-                      Total Amount:{}
+                      Total Amount: {totalAmountToPay.toFixed(2)}
                     </Typography>
                   </Grid>
                   <Grid item md={4} xs={12}>
@@ -418,7 +434,7 @@ export default function ManageInvoiceListing(props) {
                         fontSize: "18px",
                       }}
                     >
-                      Payments:{}
+                      Payments: {paidAmount.toFixed(2)}
                     </Typography>
                   </Grid>
                   <Grid item md={4} xs={12}>
@@ -428,7 +444,7 @@ export default function ManageInvoiceListing(props) {
                         fontSize: "18px",
                       }}
                     >
-                      Due Payments:{}
+                      Due Payments: {(totalAmountToPay - paidAmount).toFixed(2)}
                     </Typography>
                   </Grid>
                 </Grid>
