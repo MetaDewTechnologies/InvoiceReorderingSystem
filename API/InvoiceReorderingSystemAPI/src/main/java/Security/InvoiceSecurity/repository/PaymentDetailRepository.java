@@ -18,4 +18,5 @@ public interface PaymentDetailRepository extends JpaRepository<PaymentDetails, I
 
     List<PaymentDetails> findAllPaymentByInvoiceId(Integer invoiceId);
 
+    PaymentDetails getPaymentDetailsByInvoiceId(Integer invoiceId);
 }

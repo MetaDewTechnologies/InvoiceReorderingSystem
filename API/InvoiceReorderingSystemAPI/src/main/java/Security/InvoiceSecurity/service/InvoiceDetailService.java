@@ -56,6 +56,11 @@ public class InvoiceDetailService {
         if (invoiceDetail == null) {
             return null; // Return null if invoice not found
         }
+        if (paymentDetailRepository.existsPaymentDetailsByInvoiceId(invoiceId)){
+
+           // invoiceDetail.setPaymentDetails(paymentDetailRepository.getPaymentDetailsByInvoiceId(invoiceId));
+
+        }
         return new InvoiceWithItemsResponse(invoiceDetail, invoiceItemDetailRepository.findByInvoiceDetail_InvoiceId(invoiceId));
     }
 
