@@ -8,7 +8,6 @@ import {
   TableRow,
   Table,
   Grid,
-  Divider,
 } from "@material-ui/core";
 
 export default class ComponentToPrint extends React.Component {
@@ -19,13 +18,15 @@ export default class ComponentToPrint extends React.Component {
 
     let totalDebit = 0;
     let totalCredit = 0;
+    let governmentTax = 0;
+    let serviceCharge = 0;
     itemData.forEach((data) => {
       totalDebit += data.debit !== "" ? data.debit : 0;
       totalCredit += data.credit !== "" ? data.credit : 0;
+      governmentTax += data.governmentTax !== "" ? data.governmentTax : 0;
+      serviceCharge += data.serviceCharge !== "" ? data.serviceCharge : 0;
     });
     const totalPayments = totalCredit + totalDebit;
-    const serviceCharge = (totalPayments * 10) / 100;
-    const governmentTax = ((totalPayments + serviceCharge) * 16) / 100;
     const totalGrossTaxes =
       totalPayments + serviceCharge + greenTax + governmentTax;
     const totalNetTaxes = totalPayments;
