@@ -58,7 +58,7 @@ public class InvoiceDetailService {
         }
         if (paymentDetailRepository.existsPaymentDetailsByInvoiceId(invoiceId)){
 
-            invoiceDetail.setPaymentDetails(paymentDetailRepository.getPaymentDetailsByInvoiceId(invoiceId));
+           // invoiceDetail.setPaymentDetails(paymentDetailRepository.getPaymentDetailsByInvoiceId(invoiceId));
 
         }
         return new InvoiceWithItemsResponse(invoiceDetail, invoiceItemDetailRepository.findByInvoiceDetail_InvoiceId(invoiceId));
