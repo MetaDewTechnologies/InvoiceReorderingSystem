@@ -5,6 +5,8 @@ import Security.InvoiceSecurity.repository.PaymentDetailRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+
 @Service
 @RequiredArgsConstructor
 public class PaymentDetailService {
@@ -20,5 +22,9 @@ public class PaymentDetailService {
     public boolean paymentDetailAdd(PaymentDetails request) {
         paymentDetailRepository.save(request);
         return true;
+    }
+
+    public BigDecimal sumOfPayment(Integer invoiceId){
+       return paymentDetailRepository.sumAmountForPayment(invoiceId);
     }
 }

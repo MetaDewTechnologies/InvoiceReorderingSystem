@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -100,14 +101,17 @@ public class InvoiceController {
 
     @CrossOrigin
     @GetMapping("/{invoiceId}")
-    public ResponseEntity<InvoiceWithItemsResponse> getInvoiceWithItemsById(@PathVariable Integer invoiceId) {
+    public ResponseEntity<InvoiceWithItemResponseWithSumOfPayments> getInvoiceWithItemsById(@PathVariable Integer invoiceId) {
         InvoiceWithItemsResponse invoiceWithItems = invoiceDetailService.getInvoiceWithItemsById(invoiceId);
-
+        BigDecimal sumofpayments =  paymentDetailService.sumOfPayment(invoiceId);
+        InvoiceWithItemResponseWithSumOfPayments invoiceWithItemResponseWithSumOfPayments=new InvoiceWithItemResponseWithSumOfPayments();
+        invoiceWithItemResponseWithSumOfPayments.setSumOfPayments(sumofpayments);
+        invoiceWithItemResponseWithSumOfPayments.setInvoiceWithItemsResponse(invoiceWithItems);
         if (invoiceWithItems == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        return new ResponseEntity<>(invoiceWithItems, HttpStatus.OK);
+        return new ResponseEntity<>(invoiceWithItemResponseWithSumOfPayments, HttpStatus.OK);
     }
 
 
