@@ -115,6 +115,7 @@ export default function InvoiceAddEdit(props) {
   const [isSettledBill, setIsSettledBill] = useState(false);
   const [isItemAddToEdit, setIsItemAddToEdit] = useState(false);
   const [totalAmount, setTotalAmount] = useState(0);
+  const [sumOfPayments, setSumOfPayments] = useState(0);
   const navigate = useNavigate();
   const handleClick = () => {
     navigate("/app/manageInvoices/listing/");
@@ -230,7 +231,8 @@ export default function InvoiceAddEdit(props) {
   async function getInvoiceDetails(invoiceId) {
     let response = await services.getInvoiceDetailsByID(invoiceId);
     setTitle("Update Bill");
-    const invoiceDetails = response.invoiceDetail;
+    const invoiceDetails = response.invoiceWithItemsResponse.invoiceDetail;
+    setSumOfPayments(response.sumOfPayments);
     setInvoiceData({
       ...invoiceData,
       reservationNum: invoiceDetails.reservationNum,
@@ -257,7 +259,7 @@ export default function InvoiceAddEdit(props) {
       bookingType: invoiceDetails.bookingType == "Online" ? "1" : "2",
       arrivalDate: invoiceDetails.arrivalDate.split("T")[0],
     });
-    const itemData = response.invoiceItems;
+    const itemData = response.invoiceWithItemsResponse.invoiceItems;
     const updatedItems = [];
     var filteredResponse = [];
     if (itemData.length > 0) {
@@ -418,15 +420,6 @@ export default function InvoiceAddEdit(props) {
   }
 
   async function handleCompleteBilling() {
-    let totalDebit = 0;
-    let totalCredit = 0;
-    checkoutItemList.forEach((data) => {
-      totalDebit += data.debit !== "" ? data.debit : 0;
-      totalCredit += data.credit !== "" ? data.credit : 0;
-    });
-    const totalPayments = totalCredit + totalDebit;
-    const serviceCharge = (totalPayments * 10) / 100;
-    const grandTotal = serviceCharge + totalPayments + gTax;
     const cashierName = sessionStorage.getItem("userName");
     const response = await services.handleCompleteBilling(
       atob(invoiceId.toString()),
@@ -516,17 +509,14 @@ export default function InvoiceAddEdit(props) {
         atob(invoiceId.toString())
       );
       setGTax(grTax);
-      let totalDebit = 0;
       let totalCredit = 0;
       checkoutItemList.forEach((data) => {
-        totalDebit += data.debit !== "" ? data.debit : 0;
-        totalCredit += data.credit !== "" ? data.credit : 0;
+        totalCredit +=
+          data.credit !== ""
+            ? data.credit + data.serviceCharge + data.governmentTax
+            : 0;
       });
-      const totalPayments = totalCredit + totalDebit;
-      const serviceCharge = (totalPayments * 10) / 100;
-      const governmentTax = ((totalPayments + serviceCharge) * 16) / 100;
-      const grandTotal = serviceCharge + totalPayments + grTax + governmentTax;
-      setPaymentToBePaid(grandTotal - totalDebit);
+      setPaymentToBePaid(totalCredit + grTax - sumOfPayments);
       setOpenBillSettle(true);
     }
   }
@@ -1087,6 +1077,8 @@ export default function InvoiceAddEdit(props) {
                             { title: "Comment", field: "comment" },
                             { title: "Debit", field: "debit" },
                             { title: "Credit", field: "credit" },
+                            { title: "Governemt Tax", field: "governmentTax" },
+                            { title: "Service Charge", field: "serviceCharge" },
                           ]}
                           data={ItemDataList}
                           options={{

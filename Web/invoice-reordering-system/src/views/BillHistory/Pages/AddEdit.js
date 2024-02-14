@@ -389,6 +389,8 @@ export default function InvoiceAddEdit(props) {
                             { title: "Comment", field: "comment" },
                             { title: "Debit", field: "debit" },
                             { title: "Credit", field: "credit" },
+                            { title: "Governemt Tax", field: "governmentTax" },
+                            { title: "Service Charge", field: "serviceCharge" },
                             { title: "Payment Method", field: "paymentMethod" },
                             { title: "Cahier", field: "cashier" },
                           ]}
