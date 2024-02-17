@@ -165,6 +165,13 @@ public class InvoiceController {
     public ResponseEntity<?> markInvoiceAsCompleted(@PathVariable Integer invoiceId , @RequestBody CompleteInvoiceRequest request) {
 
         boolean success = invoiceDetailService.markInvoiceCompleted(invoiceId,request.getCashierName());
+        PaymentDetails paymentDetails=new PaymentDetails();
+        paymentDetails.setInvoiceId(invoiceId);
+        paymentDetails.setPaymentMethod("comp-pay");
+        paymentDetails.setAmount(request.getPayment());
+        paymentDetails.setPaymentDateTime(LocalDateTime.now());
+
+        boolean paymentSuccess = paymentDetailService.paymentDetailAdd(paymentDetails);
 
         if (success) {
             InvoiceResponse invoiceResponse=new InvoiceResponse();
