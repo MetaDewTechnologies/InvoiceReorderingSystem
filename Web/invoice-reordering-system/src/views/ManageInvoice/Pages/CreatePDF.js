@@ -8,52 +8,40 @@ import {
   TableRow,
   Table,
   Grid,
-  Divider,
 } from "@material-ui/core";
 
 export default class ComponentToPrint extends React.Component {
   render() {
-    const invoiceID = this.props.invoiceID;
+    //const invoiceID = this.props.invoiceID;
     const invoiceData = this.props.invoiceData;
     const itemData = this.props.itemData;
     const greenTax = this.props.greenTax;
-    const cashierName = this.props.cashierName;
+    const invoiceDetails = this.props.invoiceDetail;
+    //const cashierName = this.props.cashierName;
 
     var totalDebit = 0;
     let totalCredit = 0;
     let governmentTax = 0;
     let serviceCharge = 0;
+    let totalDebitWithTax = 0;
+    let totalCreditWithTax = 0;
+
     itemData.forEach((data) => {
       totalDebit += data.debit !== "" ? data.debit : 0;
       totalCredit += data.credit !== "" ? data.credit : 0;
+      totalDebitWithTax +=
+        data.debit !== ""
+          ? data.debit + data.governmentTax + data.serviceCharge
+          : 0;
+      totalCreditWithTax +=
+        data.credit !== ""
+          ? data.credit + data.governmentTax + data.serviceCharge
+          : 0;
       governmentTax += data.governmentTax !== "" ? data.governmentTax : 0;
       serviceCharge += data.serviceCharge !== "" ? data.serviceCharge : 0;
     });
     const totalPayments = totalCredit + totalDebit;
-    const totalGrossTaxes =
-      totalPayments + serviceCharge + greenTax + governmentTax;
-    const totalNetTaxes = totalPayments;
-    const totalTax = serviceCharge + greenTax + governmentTax;
-    const taxData = [
-      {
-        taxDetail: "Service Charge",
-        taxes: serviceCharge,
-        net: totalPayments,
-        gross: totalPayments + serviceCharge,
-      },
-      {
-        taxDetail: "Green Tax",
-        taxes: greenTax,
-        net: "0",
-        gross: greenTax,
-      },
-      {
-        taxDetail: "Government Service Tax",
-        taxes: governmentTax,
-        net: "0",
-        gross: governmentTax,
-      },
-    ];
+    const totalTax = governmentTax + serviceCharge;
     return (
       <div
         style={{
@@ -77,67 +65,170 @@ export default class ComponentToPrint extends React.Component {
               alt="logo"
             />
           </Box>
-          <Grid container>
+          <Grid container style={{ fontSize: "12px" }}>
             <Grid item md={8} xs={6}>
+              <div
+                className="col"
+                align={"left"}
+                style={{ paddingBottom: "10px" }}
+              >
+                <p>{invoiceDetails ? invoiceDetails.address : ""}</p>
+              </div>
+              <div
+                className="col"
+                align={"left"}
+                style={{ paddingBottom: "10px" }}
+              >
+                <p>{invoiceDetails ? invoiceDetails.city : ""}</p>
+              </div>
+              <div
+                className="col"
+                align={"left"}
+                style={{ paddingBottom: "10px" }}
+              >
+                <p>{invoiceDetails ? invoiceDetails.country : ""}</p>
+              </div>
+              <Grid container>
+                <Grid item xs={6}>
+                  <div className="col pl-2">
+                    <div
+                      className="col"
+                      align={"left"}
+                      style={{ paddingBottom: "10px" }}
+                    >
+                      <p>Folio No:</p>
+                    </div>
+                    <div
+                      className="col"
+                      align={"left"}
+                      style={{ paddingBottom: "10px" }}
+                    >
+                      <p>AR Number:</p>
+                    </div>
+                    <div
+                      className="col"
+                      align={"left"}
+                      style={{ paddingBottom: "10px" }}
+                    >
+                      <p>Guest Name:</p>
+                    </div>
+                    <div>&nbsp;</div>
+                  </div>
+                </Grid>
+                <Grid item xs={6}>
+                  <div
+                    className="col"
+                    align={"left"}
+                    style={{ paddingBottom: "10px" }}
+                  >
+                    <p>{"0000"}</p>
+                  </div>
+                  <div
+                    className="col"
+                    align={"left"}
+                    style={{ paddingBottom: "10px" }}
+                  >
+                    <p>{"0000"}</p>
+                  </div>
+                  <div
+                    className="col"
+                    align={"left"}
+                    style={{ paddingBottom: "10px" }}
+                  >
+                    <p>{invoiceData.customerName}</p>
+                  </div>
+                </Grid>
+              </Grid>
+            </Grid>
+            <Grid item md={8} xs={3}>
               <div className="col pb-4 pt-4 pl-2">
                 <div
                   className="col"
                   align={"left"}
                   style={{ paddingBottom: "10px" }}
                 >
-                  <b>Reservation ID: </b> {invoiceData.reservationNum}
+                  <p>Room Number:</p>
                 </div>
                 <div
                   className="col"
                   align={"left"}
                   style={{ paddingBottom: "10px" }}
                 >
-                  <b>Room Number: </b> {invoiceData.roomNum}
+                  <p>Arrival:</p>
                 </div>
                 <div
                   className="col"
                   align={"left"}
                   style={{ paddingBottom: "10px" }}
                 >
-                  <b>Arrival Date: </b> {invoiceData.arrivalDate}
+                  <p>Departure:</p>
                 </div>
                 <div
                   className="col"
                   align={"left"}
                   style={{ paddingBottom: "10px" }}
                 >
-                  <b>Departure Date: </b> {invoiceData.departureDate}
+                  <p>Page: </p>
                 </div>
                 <div
                   className="col"
                   align={"left"}
                   style={{ paddingBottom: "10px" }}
                 >
-                  <b>Cashier: </b> {cashierName}
-                </div>
-                <div
-                  className="col"
-                  align={"left"}
-                  style={{ paddingBottom: "10px" }}
-                >
-                  <b>Invoice Date: </b> {new Date().toISOString().split("T")[0]}
+                  <div
+                    className="col"
+                    align={"left"}
+                    style={{ paddingBottom: "10px" }}
+                  >
+                    <p>Date/Time:</p>
+                  </div>
+                  <p>Customer Ref:</p>
                 </div>
                 <div>&nbsp;</div>
               </div>
             </Grid>
-            <Grid md={4} xs={6}>
-              <div className="col pb-4 pt-4 pl-2">
-                {/* <h3 style={{ paddingBottom: "10px" }}>
-                  <left>Billing Profile</left>
-                </h3>
-                <div
-                  className="col"
-                  align={"left"}
-                  style={{ paddingBottom: "10px" }}
-                >
-                  <b>Name : </b> {invoiceData.customerName}
-                </div> */}
-                <div>&nbsp;</div>
+            <Grid item xs={3}>
+              <div
+                className="col"
+                align="left"
+                style={{ paddingBottom: "10px" }}
+              >
+                <p>{invoiceData.roomNum}</p>
+              </div>
+              <div
+                className="col"
+                align="left"
+                style={{ paddingBottom: "10px" }}
+              >
+                <p>{invoiceData.arrivalDate}</p>
+              </div>
+              <div
+                className="col"
+                align="left"
+                style={{ paddingBottom: "10px" }}
+              >
+                <p>{invoiceData.departureDate}</p>
+              </div>
+              <div
+                className="col"
+                align="left"
+                style={{ paddingBottom: "10px" }}
+              >
+                <p>{"1 of 1"}</p>
+              </div>
+              <div
+                className="col"
+                align="left"
+                style={{ paddingBottom: "10px" }}
+              >
+                <p>{new Date().toISOString().split("T")[0]}</p>
+              </div>
+              <div
+                className="col"
+                align="left"
+                style={{ paddingBottom: "10px" }}
+              >
+                <p> {invoiceData.reservationNum}</p>
               </div>
             </Grid>
           </Grid>
@@ -146,7 +237,7 @@ export default class ComponentToPrint extends React.Component {
           <Box minWidth={400}>
             <TableContainer>
               <Table aria-label="caption table">
-                <TableHead>
+                <TableHead style={{ backgroundColor: "#e0e0e0" }}>
                   <TableRow style={{ borderTop: "1px solid black" }}>
                     <TableCell
                       align={"center"}
@@ -154,6 +245,7 @@ export default class ComponentToPrint extends React.Component {
                       style={{
                         borderBottom: "1px solid black",
                         padding: "10px",
+                        fontSize: "12px",
                       }}
                     >
                       {"Date"}
@@ -164,6 +256,7 @@ export default class ComponentToPrint extends React.Component {
                       style={{
                         borderBottom: "1px solid black",
                         padding: "10px",
+                        fontSize: "12px",
                       }}
                     >
                       {"Description"}
@@ -174,42 +267,49 @@ export default class ComponentToPrint extends React.Component {
                       style={{
                         borderBottom: "1px solid black",
                         padding: "10px",
+                        fontSize: "12px",
                       }}
                     >
-                      {"Comment"}
+                      {"Reference"}
                     </TableCell>
                     <TableCell
-                      align={"center"}
+                      align={"right"}
                       padding="none"
                       style={{
                         borderBottom: "1px solid black",
                         padding: "10px",
+                        fontSize: "12px",
                       }}
                     >
                       {"Debit"}
                     </TableCell>
                     <TableCell
-                      align={"center"}
+                      align={"right"}
                       padding="none"
                       style={{
                         borderBottom: "1px solid black",
                         padding: "10px",
+                        fontSize: "12px",
                       }}
                     >
                       {"Credit"}
                     </TableCell>
                   </TableRow>
                 </TableHead>
-                <TableBody>
+                <TableBody style={{ borderBottom: "1px solid black" }}>
                   {itemData &&
                     itemData.map((data, index) => (
                       <TableRow key={index}>
                         <TableCell
-                          align={"left"}
+                          align={"center"}
                           component="th"
                           scope="row"
                           padding="none"
-                          style={{ borderBottom: "none", paddingTop: "10px" }}
+                          style={{
+                            borderBottom: "none",
+                            paddingTop: "10px",
+                            fontSize: "12px",
+                          }}
                         >
                           {data.date.split("T")[0]}
                         </TableCell>
@@ -218,7 +318,11 @@ export default class ComponentToPrint extends React.Component {
                           component="th"
                           scope="row"
                           padding="none"
-                          style={{ borderBottom: "none", paddingTop: "10px" }}
+                          style={{
+                            borderBottom: "none",
+                            paddingTop: "10px",
+                            fontSize: "12px",
+                          }}
                         >
                           {data.description}
                         </TableCell>
@@ -227,251 +331,220 @@ export default class ComponentToPrint extends React.Component {
                           component="th"
                           scope="row"
                           padding="none"
-                          style={{ borderBottom: "none", paddingTop: "10px" }}
+                          style={{
+                            borderBottom: "none",
+                            paddingTop: "10px",
+                            fontSize: "12px",
+                          }}
                         >
-                          {data.comment}
+                          {data.cashier}
                         </TableCell>
                         <TableCell
-                          align={"center"}
+                          align={"right"}
                           component="th"
                           scope="row"
                           padding="none"
-                          style={{ borderBottom: "none", paddingTop: "10px" }}
+                          style={{
+                            borderBottom: "none",
+                            paddingTop: "10px",
+                            fontSize: "12px",
+                          }}
                         >
                           {data.debit !== ""
-                            ? parseFloat(data.debit).toFixed(2)
+                            ? "$" +
+                              parseFloat(
+                                data.debit +
+                                  data.serviceCharge +
+                                  data.governmentTax
+                              ).toFixed(2)
                             : ""}
                         </TableCell>
                         <TableCell
-                          align={"center"}
+                          align={"right"}
                           component="th"
                           scope="row"
                           padding="none"
-                          style={{ borderBottom: "none", paddingTop: "10px" }}
+                          style={{
+                            borderBottom: "none",
+                            paddingTop: "10px",
+                            fontSize: "12px",
+                          }}
                         >
                           {data.credit !== ""
-                            ? parseFloat(data.credit).toFixed(2)
+                            ? "$" +
+                              parseFloat(
+                                data.credit +
+                                  data.serviceCharge +
+                                  data.governmentTax
+                              ).toFixed(2)
                             : ""}
                         </TableCell>
                       </TableRow>
                     ))}
-                  <TableRow>
-                    <TableCell colSpan={3} align={"right"}>
-                      {"Total"}
-                    </TableCell>
-                    <TableCell align={"center"}>
-                      {parseFloat(totalDebit).toFixed(2)}
-                    </TableCell>
-                    <TableCell align={"center"}>
-                      {parseFloat(totalCredit).toFixed(2)}
-                    </TableCell>
-                  </TableRow>
                 </TableBody>
               </Table>
             </TableContainer>
-          </Box>
-          <Box
-            maxWidth="60%"
-            display="flex"
-            justifyContent="flex-end"
-            style={{ paddingTop: "10px", marginLeft: "40%" }}
-          >
-            <TableContainer style={{ maxWidth: "100%" }}>
-              <Table>
-                <TableHead>
-                  <TableRow
-                    style={{ borderTop: "1px solid black", padding: "10px" }}
-                  >
-                    <TableCell
-                      align={"center"}
-                      padding="none"
+            <Grid container style={{ paddingTop: "5px", fontSize: "12px" }}>
+              <Grid item xs={6}></Grid>
+              <Grid item xs={6}>
+                <Grid container>
+                  <Grid item xs={4}>
+                    <div
+                      className="col"
+                      align={"left"}
                       style={{
-                        borderBottom: "1px solid black",
-                        padding: "10px",
+                        paddingBottom: "10px",
+                        marginLeft: "22px",
                       }}
                     >
-                      {"Tax Details"}
-                    </TableCell>
-                    <TableCell
-                      align={"center"}
-                      padding="none"
+                      <p>Total</p>
+                    </div>
+                  </Grid>
+                  <Grid item xs={4}>
+                    <div
+                      className="col"
+                      align={"right"}
                       style={{
-                        borderBottom: "1px solid black",
-                        padding: "10px",
+                        paddingBottom: "10px",
+                        marginLeft: "22px",
                       }}
                     >
-                      {"Taxes"}
-                    </TableCell>
-                    <TableCell
-                      align={"center"}
-                      padding="none"
+                      <p>$ {totalDebitWithTax}</p>
+                    </div>
+                  </Grid>
+                  <Grid item xs={4}>
+                    <div
+                      className="col"
+                      align={"right"}
                       style={{
-                        borderBottom: "1px solid black",
-                        padding: "10px",
+                        paddingBottom: "10px",
+                        marginLeft: "22px",
                       }}
                     >
-                      {"Net"}
-                    </TableCell>
-                    <TableCell
-                      align={"center"}
-                      padding="none"
-                      style={{
-                        borderBottom: "1px solid black",
-                        padding: "10px",
-                      }}
-                    >
-                      {"Gross"}
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {taxData &&
-                    taxData.map((data, index) => (
-                      <TableRow key={index}>
-                        <TableCell
-                          align={"left"}
-                          component="th"
-                          scope="row"
-                          padding="none"
-                          style={{ borderBottom: "none", paddingTop: "10px" }}
-                        >
-                          {data.taxDetail}
-                        </TableCell>
-                        <TableCell
-                          align={"center"}
-                          component="th"
-                          scope="row"
-                          padding="none"
-                          style={{ borderBottom: "none", paddingTop: "10px" }}
-                        >
-                          {parseFloat(data.taxes).toFixed(2)}
-                        </TableCell>
-                        <TableCell
-                          align={"center"}
-                          component="th"
-                          scope="row"
-                          padding="none"
-                          style={{ borderBottom: "none", paddingTop: "10px" }}
-                        >
-                          {data.net}
-                        </TableCell>
-                        <TableCell
-                          align={"center"}
-                          component="th"
-                          scope="row"
-                          padding="none"
-                          style={{ borderBottom: "none", paddingTop: "10px" }}
-                        >
-                          {parseFloat(data.gross).toFixed(2)}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  <TableRow>
-                    <TableCell colSpan={1} align={"right"}>
-                      {"Total Tax"}
-                    </TableCell>
-                    <TableCell align={"center"}>
-                      {parseFloat(totalTax).toFixed(2)}
-                    </TableCell>
-                    <TableCell align={"center"}>
-                      {parseFloat(totalNetTaxes).toFixed(2)}
-                    </TableCell>
-                    <TableCell align={"center"}>
-                      {parseFloat(totalGrossTaxes).toFixed(2)}
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Box>
-          <Box
-            display="flex"
-            justifyContent="space-between"
-            style={{
-              border: "1px solid",
-              padding: "5px 10px 5px 10px",
-              width: "60%",
-              marginLeft: "40%",
-              marginTop: "20px",
-            }}
-          >
-            <h3>Open Balance</h3>
-            {/* <h3>{parseInt(totalGrossTaxes - totalDebit).toFixed(2)}</h3> */}
-            <h3>{parseFloat(0.0).toFixed(2)}</h3>
-          </Box>
-          <Box
-            maxWidth="70%"
-            display="flex"
-            style={{ paddingTop: "5px", marginLeft: "40%" }}
-          >
-            <h5 style={{ paddingBottom: "10px" }}>
-              TAX INVOICE TIN No: 1047945GST501
-            </h5>
-          </Box>
-          <Divider style={{ background: "black" }} />
-          <Box style={{ paddingTop: "5px" }}>
-            <Grid container>
-              <Grid item md={6} xs={6}>
-                <div
-                  className="col"
-                  align={"left"}
-                  style={{ paddingBottom: "10px" }}
-                >
-                  kiha beach
-                </div>
-                <div
-                  className="col"
-                  align={"left"}
-                  style={{ paddingBottom: "10px" }}
-                >
-                  Dharavandhoo, Maldives
-                </div>
-                <div
-                  className="col"
-                  align={"left"}
-                  style={{ paddingBottom: "10px" }}
-                >
-                  Dharavandhoo
-                </div>
-                <div
-                  className="col"
-                  align={"left"}
-                  style={{ paddingBottom: "10px" }}
-                >
-                  Maldives
-                </div>
-              </Grid>
-              <Grid item md={6} xs={6}>
-                <div
-                  className="col"
-                  align={"left"}
-                  style={{ paddingBottom: "10px" }}
-                >
-                  Telephone: +960 7779667
-                </div>
-                <div
-                  className="col"
-                  align={"left"}
-                  style={{ paddingBottom: "10px" }}
-                >
-                  Fax: +960 7779667
-                </div>
-                <div
-                  className="col"
-                  align={"left"}
-                  style={{ paddingBottom: "10px" }}
-                >
-                  Email: reservations@kihabeach.com
-                </div>
-                <div
-                  className="col"
-                  align={"left"}
-                  style={{ paddingBottom: "10px" }}
-                >
-                  Website: http://kihabeach.com/
-                </div>
+                      <p>$ {totalCreditWithTax}</p>
+                    </div>
+                  </Grid>
+                </Grid>
               </Grid>
             </Grid>
+          </Box>
+          <Grid container style={{ marginTop: "10px" }}>
+            <Grid item md={8} xs={6}>
+              <div
+                className="col"
+                align={"left"}
+                style={{ paddingBottom: "10px", fontSize: "11px" }}
+              >
+                <p>
+                  I agree that my liability for the account is not waived and
+                  agree to <br />
+                  be held personally responsible in the event that the
+                  <br /> indicated person, company or association fails to pay
+                  <br />
+                  all or part of these charges
+                </p>
+              </div>
+            </Grid>
+            <Grid item md={8} xs={6}>
+              <Grid container style={{ fontSize: "12px" }}>
+                <Grid item xs={5}>
+                  <div
+                    className="col"
+                    align={"left"}
+                    style={{
+                      paddingBottom: "10px",
+                      marginLeft: "22px",
+                    }}
+                  >
+                    Vatable Amount
+                  </div>
+                </Grid>
+                <Grid item xs={3}>
+                  <div
+                    className="col"
+                    align={"right"}
+                    style={{
+                      paddingBottom: "10px",
+                      marginLeft: "22px",
+                    }}
+                  >
+                    $ {totalPayments}
+                  </div>
+                </Grid>
+                <Grid item xs={4}></Grid>
+                <Grid item xs={5}>
+                  <div
+                    className="col"
+                    align={"left"}
+                    style={{
+                      paddingBottom: "10px",
+                      marginLeft: "22px",
+                    }}
+                  >
+                    T-GST Amount
+                  </div>
+                </Grid>
+                <Grid item xs={3}>
+                  <div
+                    className="col"
+                    align={"right"}
+                    style={{
+                      paddingBottom: "10px",
+                      marginLeft: "22px",
+                    }}
+                  >
+                    $ {totalTax}
+                  </div>
+                </Grid>
+                <Grid item xs={4}></Grid>
+                <Grid item xs={4}>
+                  <div
+                    className="col"
+                    align={"left"}
+                    style={{
+                      paddingBottom: "10px",
+                      marginLeft: "22px",
+                    }}
+                  >
+                    Balance
+                  </div>
+                </Grid>
+                <Grid item xs={4}>
+                  <div
+                    className="col"
+                    align={"right"}
+                    style={{
+                      paddingBottom: "10px",
+                      marginLeft: "22px",
+                    }}
+                  >
+                    $ {totalPayments + totalTax}
+                  </div>
+                </Grid>
+                <Grid item xs={4}></Grid>
+              </Grid>
+            </Grid>
+          </Grid>
+          <Box maxWidth="70%" display="flex" style={{ paddingTop: "30px" }}>
+            <div style={{ paddingBottom: "10px", fontSize: "12px" }}>
+              Signature : ............................................
+            </div>
+          </Box>
+          <Box
+            style={{ paddingTop: "5px", textAlign: "center", fontSize: "12px" }}
+          >
+            <div className="col" style={{ paddingBottom: "7px" }}>
+              <b>Kiha Beach</b>
+            </div>
+            <div className="col" style={{ paddingBottom: "7px" }}>
+              <b>Dharavandhoo, Maldives.</b>
+            </div>
+            <div className="col" style={{ paddingBottom: "7px" }}>
+              Contact number: +960 7795533 - Email: reservations@kihabeach.com.
+            </div>
+            <div className="col" style={{ paddingBottom: "7px" }}>
+              www.kihabeach.com
+            </div>
           </Box>
         </div>
       </div>
