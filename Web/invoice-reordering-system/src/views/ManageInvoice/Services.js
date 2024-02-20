@@ -104,7 +104,6 @@ async function addPaymentData(model) {
 }
 
 async function getPaymentDetails(invoiceId) {
-  console.log(invoiceId);
   const response = await CommonGetAxios("/api/v1/allPayment", invoiceId);
   return response;
 }

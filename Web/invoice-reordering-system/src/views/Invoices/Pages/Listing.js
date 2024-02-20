@@ -332,6 +332,11 @@ export default function Invoices(props) {
                               ? selectedRows.invoiceItems
                               : []
                           }
+                          invoiceDetail={
+                            selectedRows.invoiceDetail !== ""
+                              ? selectedRows.invoiceDetail
+                              : ""
+                          }
                           greenTax={gTax}
                           cashierName={cashierName}
                           invoiceID={invoiceID}
