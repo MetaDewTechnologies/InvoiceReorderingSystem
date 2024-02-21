@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +36,17 @@ public class InvoiceDetailService {
         }
 
             return invoiceDetailRepository.save(invoiceDetail);
+
+    }
+
+    public void checkOutTimeSet(Integer invoiceId) {
+        Optional<InvoiceDetailDTO> invoiceDetailOptional = invoiceDetailRepository.findById(invoiceId);
+
+        if (invoiceDetailOptional.isPresent()) {
+            InvoiceDetailDTO invoiceDetail = invoiceDetailOptional.get();
+            invoiceDetail.setDepartureDate(LocalDateTime.now());
+            invoiceDetailRepository.save(invoiceDetail);
+        }
 
     }
 
@@ -84,6 +96,7 @@ public class InvoiceDetailService {
         existingInvoiceDetail.setIsInvoiceCompleted(updatedInvoiceDetail.getIsInvoiceCompleted());
         existingInvoiceDetail.setIsInvoiceGenerated(updatedInvoiceDetail.getIsInvoiceGenerated());
         existingInvoiceDetail.setIsReordered(updatedInvoiceDetail.getIsReordered());
+        existingInvoiceDetail.setCount(updatedInvoiceDetail.getCount());
 //        existingInvoiceDetail.setGovernmentTax(updatedInvoiceDetail.getGovernmentTax());
 //        existingInvoiceDetail.setServiceCharge(updatedInvoiceDetail.getServiceCharge());
 
@@ -154,12 +167,24 @@ public class InvoiceDetailService {
         return false;
     }
 
-    public boolean greenTaxInserting(Integer invoiceId, BigDecimal greenTax){
+    public boolean greenTaxInserting(Integer invoiceId){
         Optional<InvoiceDetailDTO> invoiceDetailOptional = invoiceDetailRepository.findById(invoiceId);
 
         if (invoiceDetailOptional.isPresent()) {
             InvoiceDetailDTO invoiceDetail = invoiceDetailOptional.get();
-            invoiceDetail.setGreenTax(greenTax);
+            Duration duration = Duration.between(invoiceDetail.getArrivalDate(),invoiceDetail.getDepartureDate());
+            int count = invoiceDetail.getCount();
+            long totalHours = duration.toHours();
+            int totalHoursInt = (int) totalHours;
+            if(totalHoursInt>=12){
+                long twelveHourPeriods = (long)Math.floor(duration.toHours() / 12.0);
+              BigDecimal greenTaxFinal = BigDecimal.valueOf(twelveHourPeriods*3*count);
+              invoiceDetail.setGreenTax(greenTaxFinal);
+            }
+            else {
+                invoiceDetail.setGreenTax(BigDecimal.valueOf(0));
+
+            }
             invoiceDetailRepository.save(invoiceDetail);
             return true;
         }

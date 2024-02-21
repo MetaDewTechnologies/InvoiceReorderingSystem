@@ -166,11 +166,14 @@ public class InvoiceController {
 
         boolean success = invoiceDetailService.markInvoiceCompleted(invoiceId,request.getCashierName());
         PaymentDetails paymentDetails=new PaymentDetails();
-        paymentDetails.setInvoiceId(invoiceId);
-        paymentDetails.setPaymentMethod("comp-pay");
-        paymentDetails.setAmount(request.getPayment());
-        paymentDetails.setPaymentDateTime(LocalDateTime.now());
+        if(request.getPayment()!=null) {
+            paymentDetails.setInvoiceId(invoiceId);
+            paymentDetails.setPaymentMethod("comp-pay");
+            paymentDetails.setAmount(request.getPayment());
+            paymentDetails.setPaymentDateTime(LocalDateTime.now());
+        }
 
+        invoiceDetailService.checkOutTimeSet(invoiceId);
         boolean paymentSuccess = paymentDetailService.paymentDetailAdd(paymentDetails);
 
         if (success) {
@@ -316,8 +319,8 @@ invoiceWithItemsResponse.getInvoiceDetail().setReorderedInvoiceDetail(null);
 
     @CrossOrigin
     @PostMapping("/greenTax/{invoiceId}")
-    public ResponseEntity<?> forGreenTaxInvoice(@PathVariable Integer invoiceId, @RequestBody GreenTaxRequest request) {
-        Boolean success = invoiceDetailService.greenTaxInserting(invoiceId,request.getGreenTax());
+    public ResponseEntity<?> forGreenTaxInvoice(@PathVariable Integer invoiceId) {
+        Boolean success = invoiceDetailService.greenTaxInserting(invoiceId);
         if(success) {
             InvoiceWithItemsResponse invoiceWithItems = invoiceDetailService.getInvoiceWithItemsById(invoiceId);
             invoiceWithItems.getInvoiceDetail().setReorderedInvoiceDetail(null);
