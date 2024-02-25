@@ -56,10 +56,21 @@ export default function InvoiceAddEdit(props) {
   const [title, setTitle] = useState("Add Bill");
   const [isUpdate, setIsUpdate] = useState(false);
   const classes = useStyles();
+
+  function DateFormatter(date) {
+    var year = date.getFullYear();
+    var month = (date.getMonth() + 1).toString().padStart(2, "0"); // Month is zero-based
+    var day = date.getDate().toString().padStart(2, "0");
+    var hours = date.getHours().toString().padStart(2, "0");
+    var minutes = date.getMinutes().toString().padStart(2, "0");
+    var formattedDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+    return formattedDateTime;
+  }
+
   const [invoiceData, setInvoiceData] = useState({
     reservationNum: "",
     roomNum: "",
-    arrivalDate: new Date().toISOString().split("T")[0],
+    arrivalDate: DateFormatter(new Date()),
     departureDate: new Date().toISOString().split("T")[0],
     customerName: "",
     customerEmail: "",
@@ -67,6 +78,7 @@ export default function InvoiceAddEdit(props) {
     city: "",
     country: "",
     bookingType: "0",
+    count: "0",
   });
   const [checkoutInvoiceData, setCheckoutInvoiceData] = useState({
     reservationNum: "",
@@ -79,6 +91,7 @@ export default function InvoiceAddEdit(props) {
     city: "",
     country: "",
     bookingType: "0",
+    count: "0",
   });
   const [itemData, setItemData] = useState({
     itemId: null,
@@ -111,7 +124,7 @@ export default function InvoiceAddEdit(props) {
   const [checkoutItemList, setCheckoutItemList] = useState([]);
   const [print, setprint] = useState(false);
   const [openBillSettle, setOpenBillSettle] = useState(false);
-  const [paymentToBePaid, setPaymentToBePaid] = useState("");
+  const [paymentToBePaid, setPaymentToBePaid] = useState(0);
   const [isSettledBill, setIsSettledBill] = useState(false);
   const [isItemAddToEdit, setIsItemAddToEdit] = useState(false);
   const [totalAmount, setTotalAmount] = useState(0);
@@ -163,25 +176,6 @@ export default function InvoiceAddEdit(props) {
   const handleClose = () => {
     setOpen(false);
   };
-  const handleCloseTax = () => {
-    setOpenTax(false);
-  };
-  async function handleGreenTax() {
-    const model = {
-      greenTax: parseFloat(greenTax),
-    };
-    const greenTaxresponse = await services.saveGreenTax(
-      atob(invoiceId.toString()),
-      model
-    );
-    if (greenTaxresponse.invoiceDetail.greenTax) {
-      alert.success("Green tax is added succesfully");
-      setGTax(greenTaxresponse.invoiceDetail.greenTax);
-      setOpenTax(false);
-    } else {
-      alert.error("Error in green tax adding");
-    }
-  }
   async function getGreenTax() {
     const gTax = await services.getGreenTaxByInvoiceId(
       atob(invoiceId.toString())
@@ -244,7 +238,8 @@ export default function InvoiceAddEdit(props) {
       city: invoiceDetails.city,
       country: invoiceDetails.country,
       bookingType: invoiceDetails.bookingType == "Online" ? "1" : "2",
-      arrivalDate: invoiceDetails.arrivalDate.split("T")[0],
+      arrivalDate: DateFormatter(new Date(invoiceDetails.arrivalDate)),
+      count: invoiceDetails.count,
     });
     setCheckoutInvoiceData({
       ...invoiceData,
@@ -258,6 +253,7 @@ export default function InvoiceAddEdit(props) {
       country: invoiceDetails.country,
       bookingType: invoiceDetails.bookingType == "Online" ? "1" : "2",
       arrivalDate: invoiceDetails.arrivalDate.split("T")[0],
+      count: invoiceDetails.count,
     });
     const itemData = response.invoiceWithItemsResponse.invoiceItems;
     const updatedItems = [];
@@ -298,7 +294,7 @@ export default function InvoiceAddEdit(props) {
           invoiceId: parseInt(atob(invoiceId.toString())),
           reservationNum: values.reservationNum,
           roomNum: values.roomNum,
-          arrivalDate: new Date(values.arrivalDate),
+          arrivalDate: values.arrivalDate,
           departureDate: new Date(values.departureDate),
           customerName: values.customerName,
           customerEmail: values.customerEmail,
@@ -309,6 +305,7 @@ export default function InvoiceAddEdit(props) {
           isInvoiceCompleted: false,
           isReordered: false,
           bookingType: values.bookingType == "1" ? "Online" : "Direct",
+          count: values.count,
         },
         invoiceItems: updatedItems.length == 0 ? null : updatedItems,
       };
@@ -328,7 +325,7 @@ export default function InvoiceAddEdit(props) {
         invoiceDetail: {
           reservationNum: values.reservationNum,
           roomNum: values.roomNum,
-          arrivalDate: new Date(values.arrivalDate),
+          arrivalDate: values.arrivalDate,
           departureDate: new Date(values.departureDate),
           customerName: values.customerName,
           customerEmail: values.customerEmail,
@@ -339,6 +336,7 @@ export default function InvoiceAddEdit(props) {
           isInvoiceCompleted: false,
           isReordered: false,
           bookingType: values.bookingType == "1" ? "Online" : "Direct",
+          count: values.count,
         },
         invoiceItems: updatedItems.length == 0 ? null : updatedItems,
       };
@@ -423,7 +421,8 @@ export default function InvoiceAddEdit(props) {
     const cashierName = sessionStorage.getItem("userName");
     const response = await services.handleCompleteBilling(
       atob(invoiceId.toString()),
-      cashierName
+      cashierName,
+      paymentToBePaid
     );
     if (response.statusCode === "SUCCESS") {
       alert.success(response.message);
@@ -499,25 +498,29 @@ export default function InvoiceAddEdit(props) {
   });
 
   async function handleSettleBillPopup() {
-    if (gTax === "") {
-      alert.show("Add green tax before checkout");
-    } else if (isSettledBill) {
+    var grTax = 0;
+    if (isSettledBill) {
       setPaymentToBePaid(0.0);
       setOpenBillSettle(true);
     } else {
-      const grTax = await services.getGreenTaxByInvoiceId(
+      const greenTaxresponse = await services.saveGreenTax(
         atob(invoiceId.toString())
       );
-      setGTax(grTax);
-      let totalCredit = 0;
-      checkoutItemList.forEach((data) => {
-        totalCredit +=
-          data.credit !== ""
-            ? data.credit + data.serviceCharge + data.governmentTax
-            : 0;
-      });
-      setPaymentToBePaid(totalCredit + grTax - sumOfPayments);
-      setOpenBillSettle(true);
+      if (greenTaxresponse.invoiceDetail.greenTax) {
+        grTax = greenTaxresponse.invoiceDetail.greenTax;
+        setGTax(greenTaxresponse.invoiceDetail.greenTax);
+        let totalCredit = 0;
+        checkoutItemList.forEach((data) => {
+          totalCredit +=
+            data.credit !== ""
+              ? data.credit + data.serviceCharge + data.governmentTax
+              : 0;
+        });
+        setPaymentToBePaid(totalCredit + grTax - sumOfPayments);
+        setOpenBillSettle(true);
+      } else {
+        alert.error("Error in completing bill");
+      }
     }
   }
   return (
@@ -537,6 +540,7 @@ export default function InvoiceAddEdit(props) {
               city: invoiceData.city,
               country: invoiceData.country,
               bookingType: invoiceData.bookingType,
+              count: invoiceData.count,
             }}
             validationSchema={Yup.object().shape({
               reservationNum: Yup.string().required(
@@ -550,6 +554,9 @@ export default function InvoiceAddEdit(props) {
                   /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/,
                   "Enter a valid email"
                 ),
+              count: Yup.string()
+                .required("Count is required")
+                .matches(/^-?[0-9]+$/, "Only allow whole numbers"),
               address: Yup.string().required("Address is required"),
               bookingType: Yup.number()
                 .required("Booking Type is required")
@@ -628,7 +635,7 @@ export default function InvoiceAddEdit(props) {
                                   touched.arrivalDate && errors.arrivalDate
                                 }
                                 name="arrivalDate"
-                                type="date"
+                                type="datetime-local"
                                 InputLabelProps={{ shrink: true }}
                                 value={invoiceData.arrivalDate}
                                 onChange={(e) => handleChange1(e)}
@@ -787,6 +794,23 @@ export default function InvoiceAddEdit(props) {
                               <MenuItem value="2">Direct</MenuItem>
                               <MenuItem value="3">Agent</MenuItem>
                             </TextField>
+                          </Grid>
+                          <Grid item xs={6}>
+                            <InputLabel shrink id="count">
+                              People Count *
+                            </InputLabel>
+                            <TextField
+                              error={Boolean(touched.count && errors.count)}
+                              fullWidth
+                              helperText={touched.count && errors.count}
+                              size="small"
+                              name="count"
+                              id="count"
+                              onBlur={handleBlur}
+                              onChange={(e) => handleChange1(e)}
+                              value={invoiceData.count}
+                              variant="outlined"
+                            />
                           </Grid>
                         </Grid>
                       </CardContent>
@@ -1130,22 +1154,6 @@ export default function InvoiceAddEdit(props) {
                               color: disableIsComplete ? "" : "#FFFFFF",
                               backgroundColor: disableIsComplete
                                 ? ""
-                                : "#2ef242",
-                            }}
-                            variant="contained"
-                            onClick={() => {
-                              setOpenTax(true);
-                            }}
-                            disabled={disableIsComplete}
-                          >
-                            Add Green Tax
-                          </Button>
-                          &nbsp;
-                          <Button
-                            style={{
-                              color: disableIsComplete ? "" : "#FFFFFF",
-                              backgroundColor: disableIsComplete
-                                ? ""
                                 : "#489EE7",
                             }}
                             id="btnRecord"
@@ -1155,20 +1163,6 @@ export default function InvoiceAddEdit(props) {
                           >
                             Settle the bill
                           </Button>
-                          {/* &nbsp;
-                          <Button
-                            style={{
-                              color: disableIsComplete ? "" : "#FFFFFF",
-                              backgroundColor: disableIsComplete
-                                ? ""
-                                : "#489EE7",
-                            }}
-                            variant="contained"
-                            onClick={handleCompleteBilling}
-                            disabled={disableIsComplete}
-                          >
-                            Complete Billing
-                          </Button> */}
                           &nbsp;
                           <Button
                             style={{
@@ -1282,39 +1276,15 @@ export default function InvoiceAddEdit(props) {
             </DialogActions>
           </Dialog>
           <Dialog
-            open={openTax}
-            onClose={handleCloseTax}
-            aria-labelledby="form-dialog-title"
-          >
-            <DialogTitle id="form-dialog-title">Green Tax</DialogTitle>
-            <DialogContent>
-              <TextField
-                autoFocus
-                margin="dense"
-                id="greenTax"
-                label="Green Tax"
-                type="greenTax"
-                fullWidth
-                onChange={(e) => setGreenTax(e.target.value)}
-              />
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={handleCloseTax} color="primary">
-                Cancel
-              </Button>
-              <Button onClick={handleGreenTax} color="primary">
-                Add
-              </Button>
-            </DialogActions>
-          </Dialog>
-
-          <Dialog
             open={openBillSettle}
             onClose={() => setOpenBillSettle(false)}
             aria-labelledby="form-dialog-title"
           >
             <DialogTitle id="form-dialog-title">Settle the bill</DialogTitle>
             <DialogContent>
+              <DialogContentText>
+                Green Tax : {parseFloat(gTax).toFixed(2)}
+              </DialogContentText>
               <DialogContentText>
                 Balance to be paid : {parseFloat(paymentToBePaid).toFixed(2)}
               </DialogContentText>
