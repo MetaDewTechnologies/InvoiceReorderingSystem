@@ -39,9 +39,10 @@ async function GetInvoiceDetailsByRoomNumber(roomNum) {
   return response;
 }
 
-async function handleCompleteBilling(invoiceId, cashierName) {
+async function handleCompleteBilling(invoiceId, cashierName, paymentToBePaid) {
   const model = {
     cashierName: cashierName,
+    payment: paymentToBePaid,
   };
   const response = await CommonPostAxios(
     "/api/v1/complete-invoice",
@@ -78,8 +79,8 @@ async function handleCreateInvoice(invoiceId) {
   return response;
 }
 
-async function saveGreenTax(invoiceId, model) {
-  const response = await CommonPostAxios("/api/v1/greenTax", invoiceId, model);
+async function saveGreenTax(invoiceId) {
+  const response = await CommonPostAxios("/api/v1/greenTax", invoiceId, null);
   return response;
 }
 async function getGreenTaxByInvoiceId(invoiceId) {
