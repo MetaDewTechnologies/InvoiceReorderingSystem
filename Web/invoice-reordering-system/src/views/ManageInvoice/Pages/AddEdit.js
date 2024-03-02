@@ -506,7 +506,7 @@ export default function InvoiceAddEdit(props) {
       const greenTaxresponse = await services.saveGreenTax(
         atob(invoiceId.toString())
       );
-      if (greenTaxresponse.invoiceDetail.greenTax) {
+      if (greenTaxresponse) {
         grTax = greenTaxresponse.invoiceDetail.greenTax;
         setGTax(greenTaxresponse.invoiceDetail.greenTax);
         let totalCredit = 0;
