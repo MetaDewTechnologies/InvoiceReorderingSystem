@@ -43,7 +43,6 @@ const useStyles = makeStyles((theme) => ({
 export default function InvoiceAddEdit(props) {
   const componentRef = useRef();
   const [title, setTitle] = useState("View Bill");
-  const [isUpdate, setIsUpdate] = useState(false);
   const classes = useStyles();
   const [invoiceData, setInvoiceData] = useState({
     reservationNum: "",
@@ -83,6 +82,7 @@ export default function InvoiceAddEdit(props) {
   const [gTax, setGTax] = useState("");
   const [checkoutItemList, setCheckoutItemList] = useState([]);
   const [print, setprint] = useState(false);
+  const [paymentDetails, setPaymentDetails] = useState([]);
 
   const navigate = useNavigate();
   const handleClick = () => {
@@ -115,9 +115,8 @@ export default function InvoiceAddEdit(props) {
   }
 
   async function getInvoiceDetails(invoiceId) {
-    console.log(invoiceId);
     let response = await services.getcompletedInvoiceDetailsByID(invoiceId);
-    console.log("res :", response);
+    const result = await services.getPaymentDetails(invoiceId);
     const invoiceDetails = response.invoiceDetail;
     setInvoiceData({
       ...invoiceData,
@@ -163,7 +162,18 @@ export default function InvoiceAddEdit(props) {
     }
     setItemDataList(filteredResponse);
     setCheckoutItemList(filteredResponse);
-    setIsUpdate(true);
+    const paymentDetailsArray = result.paymentDetails.map((item) => {
+      return {
+        ...item,
+        amount: item.amount,
+        paymentDateTime:
+          item.paymentDateTime !== null
+            ? item.paymentDateTime.split("T")[0]
+            : "",
+        paymentMethod: item.paymentMethod,
+      };
+    });
+    setPaymentDetails(paymentDetailsArray);
   }
 
   function cardTitle(titleName) {
@@ -405,24 +415,41 @@ export default function InvoiceAddEdit(props) {
                           }}
                         />
                       </Box>
-                      {isUpdate === true ? (
-                        <Box display="flex" justifyContent="flex-start" p={2}>
-                          <Button
-                            onClick={handleBillPrint}
-                            color="primary"
-                            variant="contained"
-                          >
-                            PDF
-                          </Button>
-                          <div hidden={true}>
-                            <TemporyBillPDF
-                              ref={componentRef}
-                              invoiceData={checkoutInvoiceData}
-                              itemData={checkoutItemList}
-                              greenTax={gTax}
-                            />
-                          </div>
-                          {/* {isPrintRequested === true ? (
+                      <Box minWidth={1000}>
+                        <MaterialTable
+                          title="Multiple Actions Preview"
+                          columns={[
+                            { title: "Date", field: "paymentDateTime" },
+                            { title: "Amount", field: "amount" },
+                            { title: "Payment Method", field: "paymentMethod" },
+                          ]}
+                          data={paymentDetails}
+                          options={{
+                            exportButton: false,
+                            showTitle: false,
+                            headerStyle: { textAlign: "left" },
+                            cellStyle: { textAlign: "left" },
+                            columnResizable: false,
+                          }}
+                        />
+                      </Box>
+                      <Box display="flex" justifyContent="flex-start" p={2}>
+                        <Button
+                          onClick={handleBillPrint}
+                          color="primary"
+                          variant="contained"
+                        >
+                          PDF
+                        </Button>
+                        <div hidden={true}>
+                          <TemporyBillPDF
+                            ref={componentRef}
+                            invoiceData={checkoutInvoiceData}
+                            itemData={checkoutItemList}
+                            greenTax={gTax}
+                          />
+                        </div>
+                        {/* {isPrintRequested === true ? (
                             <Box>
                               <ReactToPrint
                                 documentTitle={"Kiha Beach"}
@@ -455,8 +482,7 @@ export default function InvoiceAddEdit(props) {
                               </div>
                             </Box>
                           ) : null} */}
-                        </Box>
-                      ) : null}
+                      </Box>
                     </PerfectScrollbar>
                   </Card>
                 </Box>

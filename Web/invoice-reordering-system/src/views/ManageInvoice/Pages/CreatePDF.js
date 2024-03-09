@@ -409,7 +409,7 @@ export default class ComponentToPrint extends React.Component {
                         marginLeft: "22px",
                       }}
                     >
-                      <p>$ {totalDebitWithTax}</p>
+                      <p>$ {totalDebitWithTax.toFixed(2)}</p>
                     </div>
                   </Grid>
                   <Grid item xs={4}>
@@ -421,7 +421,7 @@ export default class ComponentToPrint extends React.Component {
                         marginLeft: "22px",
                       }}
                     >
-                      <p>$ {totalCreditWithTax}</p>
+                      <p>$ {totalCreditWithTax.toFixed(2)}</p>
                     </div>
                   </Grid>
                 </Grid>
@@ -468,7 +468,7 @@ export default class ComponentToPrint extends React.Component {
                       marginLeft: "22px",
                     }}
                   >
-                    $ {totalPayments}
+                    $ {totalPayments.toFixed(2)}
                   </div>
                 </Grid>
                 <Grid item xs={4}></Grid>
@@ -493,7 +493,7 @@ export default class ComponentToPrint extends React.Component {
                       marginLeft: "22px",
                     }}
                   >
-                    $ {totalTax}
+                    $ {totalTax.toFixed(2)}
                   </div>
                 </Grid>
                 <Grid item xs={4}></Grid>
@@ -518,7 +518,7 @@ export default class ComponentToPrint extends React.Component {
                       marginLeft: "22px",
                     }}
                   >
-                    $ {totalPayments + totalTax}
+                    $ {(totalPayments + totalTax).toFixed(2)}
                   </div>
                 </Grid>
                 <Grid item xs={4}></Grid>

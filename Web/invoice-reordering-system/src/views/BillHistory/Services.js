@@ -4,6 +4,7 @@ export default {
   getInvoicesByDateRange,
   getGreenTaxByInvoiceId,
   getcompletedInvoiceDetailsByID,
+  getPaymentDetails,
 };
 
 async function getInvoicesByDateRange(data) {
@@ -29,4 +30,8 @@ async function getcompletedInvoiceDetailsByID(invoiceId) {
     null
   );
   return response[0];
+}
+async function getPaymentDetails(invoiceId) {
+  const response = await CommonGetAxios("/api/v1/allPayment", invoiceId);
+  return response;
 }
