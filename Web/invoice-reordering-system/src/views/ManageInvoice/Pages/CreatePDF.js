@@ -12,12 +12,10 @@ import {
 
 export default class ComponentToPrint extends React.Component {
   render() {
-    //const invoiceID = this.props.invoiceID;
     const invoiceData = this.props.invoiceData;
     const itemData = this.props.itemData;
-    const greenTax = this.props.greenTax;
-    const invoiceDetails = this.props.invoiceDetail;
-    //const cashierName = this.props.cashierName;
+    const invoiceDetails = this.props.invoiceData.invoiceDetail == undefined ? this.props.invoiceData : this.props.invoiceData.invoiceDetail;
+    const gTax = this.props.greenTax ? this.props.greenTax :0
 
     var totalDebit = 0;
     let totalCredit = 0;
@@ -25,6 +23,7 @@ export default class ComponentToPrint extends React.Component {
     let serviceCharge = 0;
     let totalDebitWithTax = 0;
     let totalCreditWithTax = 0;
+    let greenTax = invoiceData.greenTax ? invoiceData.greenTax : gTax
 
     itemData.forEach((data) => {
       totalDebit += data.debit !== "" ? data.debit : 0;
@@ -41,13 +40,12 @@ export default class ComponentToPrint extends React.Component {
       serviceCharge += data.serviceCharge !== "" ? data.serviceCharge : 0;
     });
     const totalPayments = totalCredit + totalDebit;
-    const totalTax = governmentTax + serviceCharge;
+    const totalTax = governmentTax + serviceCharge+greenTax;
     return (
       <div
         style={{
-          marginLeft: "100px",
+          marginLeft: "75px",
           marginRight: "75px",
-          marginTop: "50px",
           fontFamily: "sans-serif",
         }}
       >
@@ -56,7 +54,7 @@ export default class ComponentToPrint extends React.Component {
           <Box mb={3} style={{ display: "flex", justifyContent: "center" }}>
             <img
               style={{
-                width: 250,
+                width: 155,
                 height: 155,
                 marginLeft: 0,
                 marginBottom: 10,
@@ -121,14 +119,14 @@ export default class ComponentToPrint extends React.Component {
                     align={"left"}
                     style={{ paddingBottom: "10px" }}
                   >
-                    <p>{"0000"}</p>
+                    <p>INV00{invoiceData.invoiceId}</p>
                   </div>
                   <div
                     className="col"
                     align={"left"}
                     style={{ paddingBottom: "10px" }}
                   >
-                    <p>{"0000"}</p>
+                    <p>{invoiceData.reservationNum}</p>
                   </div>
                   <div
                     className="col"
@@ -244,7 +242,7 @@ export default class ComponentToPrint extends React.Component {
                       padding="none"
                       style={{
                         borderBottom: "1px solid black",
-                        padding: "10px",
+                        padding: "5px",
                         fontSize: "12px",
                       }}
                     >
@@ -255,7 +253,7 @@ export default class ComponentToPrint extends React.Component {
                       padding="none"
                       style={{
                         borderBottom: "1px solid black",
-                        padding: "10px",
+                        padding: "5px",
                         fontSize: "12px",
                       }}
                     >
@@ -266,7 +264,7 @@ export default class ComponentToPrint extends React.Component {
                       padding="none"
                       style={{
                         borderBottom: "1px solid black",
-                        padding: "10px",
+                        padding: "5px",
                         fontSize: "12px",
                       }}
                     >
@@ -277,7 +275,7 @@ export default class ComponentToPrint extends React.Component {
                       padding="none"
                       style={{
                         borderBottom: "1px solid black",
-                        padding: "10px",
+                        padding: "5px",
                         fontSize: "12px",
                       }}
                     >
@@ -288,7 +286,7 @@ export default class ComponentToPrint extends React.Component {
                       padding="none"
                       style={{
                         borderBottom: "1px solid black",
-                        padding: "10px",
+                        padding: "5px",
                         fontSize: "12px",
                       }}
                     >
