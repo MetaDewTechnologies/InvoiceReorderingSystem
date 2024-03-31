@@ -49,7 +49,6 @@ const useStyles = makeStyles((theme) => ({
 
 export default function BillHistory(props) {
   const navigate = useNavigate();
-  const alert = useAlert();
   const classes = useStyles();
   const [invoiceList, setInvoiceList] = useState({
     fromdate: "",
@@ -58,10 +57,8 @@ export default function BillHistory(props) {
   const componentRef = useRef();
   const [isViewTable, setIsViewTable] = useState(true);
   const [invoices, setInvoices] = useState([]);
-  const [selectedRows, setSelectedRows] = useState([]);
   const [open, setOpen] = useState(false);
-  const [billData, setBillData] = useState("");
-  const [billItems, setBillItems] = useState([]);
+  const billData = "";
 
   const ProductSaveSchema = Yup.object().shape({
     fromdate: Yup.date().required("From Date is required"),

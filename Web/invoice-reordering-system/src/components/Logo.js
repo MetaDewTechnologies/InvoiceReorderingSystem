@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Badge, makeStyles, IconButton, Avatar } from '@material-ui/core';
+import { Box, makeStyles, Avatar } from '@material-ui/core';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -16,7 +16,7 @@ const Logo = (props) => {
   return (
     <Box>
       <Avatar
-        src="/static/images/logo/clientLogo.jpg"
+        src="/static/images/logo/clientLogo2.jpg"
         to="/newLoader"
         className={classes.avatar}
         variant="square"

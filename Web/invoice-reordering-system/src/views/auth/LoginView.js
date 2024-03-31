@@ -91,7 +91,7 @@ const LoginView = () => {
             }) => (
               <form onSubmit={handleSubmit}>
                 <Box mb={3} style={{display:'flex' ,justifyContent:'center'}}>
-                  <img style={{ width: 200, height: 115, marginLeft: 0, marginBottom: 10 }} src="/static/images/logo/clientLogo.jpg" alt="login" />
+                  <img style={{ width: 155, height: 155, marginLeft: 0, marginBottom: 10 }} src="/static/images/logo/clientLogo.jpg" alt="login" />
                 </Box>
                 <Grid
                   item
@@ -142,10 +142,10 @@ const LoginView = () => {
                   </Button>
                 </Box>
                 <Box style={{display:'flex', marginTop:30, justifyContent:'flex-end'}}>
-                  <Typography color={"textSecondary"}>META DEW TECHNOLOGIES</Typography>
+                  <Typography color={"textSecondary"} style={{fontSize:'12px'}}>META DEW TECHNOLOGIES</Typography>
                 </Box>
                 <Box style={{display:'flex',justifyContent:'flex-end'}}>
-                  <Typography color={"textSecondary"}>Customer Support:+94 71 733 6065</Typography>
+                  <Typography color={"textSecondary"} style={{fontSize:'12px'}}>Customer Support:+94 71 733 6065</Typography>
                 </Box>
               </form>
             )}

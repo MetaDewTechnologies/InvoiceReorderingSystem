@@ -226,6 +226,10 @@ export default function ManageInvoiceListing(props) {
     if (result.statusCode === "SUCCESS") {
       alert.success(result.message);
       setOpen(false);
+      setPaymentData({
+        paymentAmount: "0",
+        paymentMethod: "0",
+      })
     } else {
       alert.error(result.message);
     }
