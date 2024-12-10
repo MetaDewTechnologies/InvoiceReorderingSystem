@@ -24,7 +24,7 @@ import MaterialTable from "material-table";
 import { LoadingComponent } from "../../../utils/newLoader";
 import services from "../Services";
 import { useFormik, Form, FormikProvider, Formik } from "formik";
-import VisibilityIcon from "@material-ui/icons/Visibility";
+import PaymentIcon from "@material-ui/icons/Payment";
 import * as Yup from "yup";
 import Dialog from "@material-ui/core/Dialog";
 import DialogContent from "@material-ui/core/DialogContent";
@@ -199,7 +199,7 @@ export default function ManageInvoiceListing(props) {
   }
   const actions = [
     {
-      icon: () => <VisibilityIcon />,
+      icon: () => <PaymentIcon />,
       tooltip: <p>Payments</p>,
       onClick: (event, rowData) => handleView(rowData),
       position: "row",
@@ -264,12 +264,12 @@ export default function ManageInvoiceListing(props) {
                         <FormControl
                           variant="outlined"
                           fullWidth
-                          label="Room Number *"
+                          label="Room Number"
                         >
                           <TextField
                             fullWidth
                             name="roomNumber"
-                            label="Room Number *"
+                            label="Room Number"
                             onChange={(e) => handleRoomNoChange(e)}
                             value={roomNo.roomNumber}
                             variant="outlined"
