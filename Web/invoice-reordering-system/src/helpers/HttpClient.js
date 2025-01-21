@@ -2,6 +2,7 @@ import axios from "axios";
 
 // var serviceUrl = "https://api.matadewkiha.com";
 var serviceUrl = "http://localhost:8080";
+// var serviceUrl = "https://kihabeach.azurewebsites.net"
 
 export const CommonGetAxios = async (url, queryString) => {
   const bearerToken = sessionStorage.getItem("token");

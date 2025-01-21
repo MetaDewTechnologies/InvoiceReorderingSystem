@@ -11,7 +11,6 @@ import {
   CardContent,
   Divider,
   InputLabel,
-  Switch,
   CardHeader,
   MenuItem,
   Typography,
@@ -20,7 +19,7 @@ import {
 import Page from "../../../components/Page";
 import services from "../Services";
 import { useNavigate, useParams } from "react-router-dom";
-import { Formik, validateYupSchema, Form } from "formik";
+import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import PageHeader from "../../Common/PageHeader";
 import { useAlert } from "react-alert";
@@ -107,7 +106,6 @@ export default function InvoiceAddEdit(props) {
   });
   const [ItemDataList, setItemDataList] = useState([]);
   const [isDisableButton, setIsDisableButton] = useState(false);
-  const [selectedRow, setSelectedRow] = useState();
   const [isCompleteBilling, setIsCompleteBilling] = useState(false);
   const [isPrintRequested, setIsPrintRequested] = useState(false);
   const [userName, setUserName] = useState("");
@@ -115,10 +113,7 @@ export default function InvoiceAddEdit(props) {
   const [removeData, setRemoveData] = useState("");
   const [printRequest, setPrintRequest] = useState(false);
   const [removeRequest, setRemoveRequest] = useState(false);
-  const [disableIsComplete, setDisableIsComplete] = useState(false);
   const [invoiceID, setInvoiceID] = useState("");
-  const [openTax, setOpenTax] = useState(false);
-  const [greenTax, setGreenTax] = useState("0");
   const [gTax, setGTax] = useState("");
   const [cashierName, setCashierName] = useState("");
   const [checkoutItemList, setCheckoutItemList] = useState([]);
@@ -129,6 +124,9 @@ export default function InvoiceAddEdit(props) {
   const [isItemAddToEdit, setIsItemAddToEdit] = useState(false);
   const [totalAmount, setTotalAmount] = useState(0);
   const [sumOfPayments, setSumOfPayments] = useState(0);
+  const [isInvoiceGenerated, setIsInvoiceGenerated] = useState(false)
+  const [isInvoiceCompleted, setIsInvoiceCompleted] = useState(false)
+  const [finalPaymentMethod, setFinalPaymentMethod] = useState("Cash")
   const navigate = useNavigate();
   const handleClick = () => {
     navigate("/app/manageInvoices/listing/");
@@ -227,6 +225,8 @@ export default function InvoiceAddEdit(props) {
     setTitle("Update Bill");
     const invoiceDetails = response.invoiceWithItemsResponse.invoiceDetail;
     setSumOfPayments(response.sumOfPayments);
+    setIsInvoiceCompleted(invoiceDetails.isInvoiceCompleted)
+    setIsInvoiceGenerated(invoiceDetails.isInvoiceGenerated)
     setInvoiceData({
       ...invoiceData,
       reservationNum: invoiceDetails.reservationNum,
@@ -353,20 +353,6 @@ export default function InvoiceAddEdit(props) {
     }
   }
 
-  // function generateDropDownMenu(data) {
-  //   let items = [];
-  //   if (data != null) {
-  //     for (const [key, value] of Object.entries(data)) {
-  //       items.push(
-  //         <MenuItem key={key} value={key}>
-  //           {value}
-  //         </MenuItem>
-  //       );
-  //     }
-  //   }
-  //   return items;
-  // }
-
   function handleChange1(e) {
     const target = e.target;
     const value = target.value;
@@ -384,13 +370,17 @@ export default function InvoiceAddEdit(props) {
       [e.target.name]: value,
     });
   }
+  function handleChange3(e) {
+    const target = e.target;
+    const value = target.value;
+    setFinalPaymentMethod(value)
+  }
 
   function handleClickEdit(data) {
     setIsItemAddToEdit(true);
     const dataDelete = [...ItemDataList];
     const index = data.tableData.id;
     var deletedValue = dataDelete.splice(index, 1)[0];
-    setSelectedRow(deletedValue);
     setItemDataList([...dataDelete]);
     setItemData({
       itemId: data.itemId,
@@ -422,12 +412,13 @@ export default function InvoiceAddEdit(props) {
     const response = await services.handleCompleteBilling(
       atob(invoiceId.toString()),
       cashierName,
-      paymentToBePaid
+      paymentToBePaid,
+      finalPaymentMethod
     );
     if (response.statusCode === "SUCCESS") {
       alert.success(response.message);
       setIsCompleteBilling(true);
-      setDisableIsComplete(true);
+      setIsInvoiceCompleted(true)
     } else {
       alert.error(response.message);
     }
@@ -508,7 +499,7 @@ export default function InvoiceAddEdit(props) {
       );
       if (greenTaxresponse) {
         grTax = greenTaxresponse.invoiceDetail.greenTax;
-        setGTax(greenTaxresponse.invoiceDetail.greenTax);
+        setGTax(grTax);
         let totalCredit = 0;
         checkoutItemList.forEach((data) => {
           totalCredit +=
@@ -1067,7 +1058,7 @@ export default function InvoiceAddEdit(props) {
                                       fontSize: "18px",
                                     }}
                                   >
-                                    Total:{totalAmount}
+                                    Total:{parseFloat(totalAmount)}
                                   </Typography>
                                 </Grid>
                               </Grid>
@@ -1149,36 +1140,33 @@ export default function InvoiceAddEdit(props) {
                       </Box>
                       {isUpdate === true ? (
                         <Box display="flex" justifyContent="flex-start" p={2}>
+                          {!(isInvoiceCompleted)?
                           <Button
-                            style={{
-                              color: disableIsComplete ? "" : "#FFFFFF",
-                              backgroundColor: disableIsComplete
-                                ? ""
-                                : "#489EE7",
+                           style={{
+                              color: "#FFFFFF",
+                              backgroundColor: "#489EE7",
                             }}
                             id="btnRecord"
                             variant="contained"
                             onClick={handleSettleBillPopup}
-                            disabled={disableIsComplete}
                           >
                             Settle the bill
-                          </Button>
+                          </Button>: null}
                           &nbsp;
-                          <Button
-                            style={{
-                              color: isCompleteBilling ? "#FFFFFF" : "",
-                              backgroundColor: isCompleteBilling
-                                ? "#489EE7"
-                                : "",
-                            }}
-                            variant="contained"
-                            onClick={() => {
-                              handlePrintRequest();
-                            }}
-                            disabled={!isCompleteBilling}
-                          >
-                            Print Request
-                          </Button>
+                          {!(isInvoiceGenerated) && isInvoiceCompleted?  
+                            <Button
+                              style={{
+                                color: "#FFFFFF",
+                                backgroundColor: "#489EE7",
+                              }}
+                              variant="contained"
+                              onClick={() => {
+                                handlePrintRequest();
+                              }}
+                            >
+                              Print Request
+                            </Button>
+                          : null}
                           &nbsp;
                           {isPrintRequested === true ? (
                             <Box>
@@ -1288,6 +1276,23 @@ export default function InvoiceAddEdit(props) {
               <DialogContentText>
                 Balance to be paid : {parseFloat(paymentToBePaid).toFixed(2)}
               </DialogContentText>
+              <TextField
+                select
+                fullWidth
+                size="small"
+                name="finalPaymentMethod"
+                onChange={(e) => handleChange3(e)}
+                value={finalPaymentMethod}
+                variant="outlined"
+                id="finalPaymentMethod"
+                required
+              >
+                <MenuItem value="Cash">Cash</MenuItem>
+                <MenuItem value="Card">Card</MenuItem>
+                <MenuItem value="Bank Transfer">
+                  Bank Transfer
+                </MenuItem>
+              </TextField>
             </DialogContent>
             <DialogActions>
               <Button onClick={() => setOpenBillSettle(false)} color="primary">

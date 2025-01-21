@@ -35,14 +35,19 @@ async function getInvoiceDetailsByID(invoiceId) {
 }
 
 async function GetInvoiceDetailsByRoomNumber(roomNum) {
-  const response = await CommonGetAxios("/api/v1/room-invoices", roomNum);
+   const roomNumber = roomNum == "" ? "" : roomNum
+   const model = {
+     roomNumber : roomNumber
+   }
+  const response = await CommonPostAxios("/api/v1/room-invoices", null, model);
   return response;
 }
 
-async function handleCompleteBilling(invoiceId, cashierName, paymentToBePaid) {
+async function handleCompleteBilling(invoiceId, cashierName, paymentToBePaid, finalPaymentMethod) {
   const model = {
     cashierName: cashierName,
     payment: paymentToBePaid,
+    finalPaymentMethod: finalPaymentMethod
   };
   const response = await CommonPostAxios(
     "/api/v1/complete-invoice",

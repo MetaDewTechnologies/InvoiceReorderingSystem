@@ -107,20 +107,7 @@ export default function BillHistory(props) {
       departureDate: new Date(formik.values.todate),
     };
     var response = await services.getInvoicesByDateRange(model);
-    const modifiedInvoices = response.map((invoice) => {
-      if (invoice.invoiceDetail.isInvoiceGenerated === true) {
-        return { ...invoice, status: "Invoice Printed" };
-      } else if (
-        invoice.invoiceDetail.isReordered === true &&
-        invoice.invoiceDetail.isInvoiceGenerated === false
-      ) {
-        return { ...invoice, status: "Process Executed - To Be Printed" };
-      } else if (invoice.invoiceDetail.isReordered === false) {
-        return { ...invoice, status: "Reorder Process Pending" };
-      } else {
-        return invoice;
-      }
-    });
+    const modifiedInvoices = response.filter((invoice) =>  invoice.invoiceDetail.isReordered === false);
     const modifiedDates = modifiedInvoices.map((item) => {
       return {
         ...item,

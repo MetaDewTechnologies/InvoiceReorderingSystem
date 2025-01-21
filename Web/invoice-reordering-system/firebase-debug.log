@@ -1,0 +1,72 @@
+[debug] [2024-05-23T16:53:13.573Z] ----------------------------------------------------------------------
+[debug] [2024-05-23T16:53:13.575Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\AKILA\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy
+[debug] [2024-05-23T16:53:13.576Z] CLI Version:   12.6.1
+[debug] [2024-05-23T16:53:13.576Z] Platform:      win32
+[debug] [2024-05-23T16:53:13.576Z] Node Version:  v16.19.0
+[debug] [2024-05-23T16:53:13.577Z] Time:          Thu May 23 2024 22:23:13 GMT+0530 (India Standard Time)
+[debug] [2024-05-23T16:53:13.577Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2024-05-23T16:53:13.640Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2024-05-23T16:53:13.641Z] > authorizing via signed-in user (akilayapa1998@gmail.com)
+[debug] [2024-05-23T16:53:13.641Z] [iam] checking project kiha-c48e4 for permissions ["firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2024-05-23T16:53:13.643Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/kiha-c48e4:testIamPermissions [none]
+[debug] [2024-05-23T16:53:13.643Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/kiha-c48e4:testIamPermissions x-goog-quota-user=projects/kiha-c48e4
+[debug] [2024-05-23T16:53:13.643Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/kiha-c48e4:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2024-05-23T16:53:29.430Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/kiha-c48e4:testIamPermissions 200
+[debug] [2024-05-23T16:53:29.431Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/kiha-c48e4:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2024-05-23T16:53:29.434Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/kiha-c48e4 [none]
+[debug] [2024-05-23T16:53:43.526Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/kiha-c48e4 200
+[debug] [2024-05-23T16:53:43.527Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/kiha-c48e4 {"projectId":"kiha-c48e4","projectNumber":"896457838743","displayName":"Kiha","name":"projects/kiha-c48e4","resources":{"hostingSite":"kiha-c48e4"},"state":"ACTIVE","etag":"1_f1c4ea14-f251-416b-b59f-ea8305b9eb96"}
+[info] 
+[info] === Deploying to 'kiha-c48e4'...
+[info] 
+[info] i  deploying hosting 
+[debug] [2024-05-23T16:53:43.538Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/kiha-c48e4/versions [none]
+[debug] [2024-05-23T16:53:43.538Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/kiha-c48e4/versions {"status":"CREATED","labels":{"deployment-tool":"cli-firebase"}}
+[debug] [2024-05-23T16:54:21.285Z] <<< [apiv2][status] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/kiha-c48e4/versions 200
+[debug] [2024-05-23T16:54:21.285Z] <<< [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/kiha-c48e4/versions {"name":"projects/896457838743/sites/kiha-c48e4/versions/12551c4f53fa6576","status":"CREATED","config":{},"labels":{"deployment-tool":"cli-firebase"}}
+[info] i  hosting[kiha-c48e4]: beginning deploy... 
+[info] i  hosting[kiha-c48e4]: found 20 files in build 
+[debug] [2024-05-23T16:54:21.302Z] [hosting] uploading with 200 concurrency
+[debug] [2024-05-23T16:54:23.919Z] [hosting] hash cache [YnVpbGQ] stored for 20 files
+[debug] [2024-05-23T16:54:23.919Z] [hosting][hash queue][FINAL] {"max":821,"min":11,"avg":82.9,"active":0,"complete":20,"success":20,"errored":0,"retried":0,"total":20,"elapsed":845}
+[debug] [2024-05-23T16:54:23.920Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/896457838743/sites/kiha-c48e4/versions/12551c4f53fa6576:populateFiles [none]
+[debug] [2024-05-23T16:54:23.920Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/896457838743/sites/kiha-c48e4/versions/12551c4f53fa6576:populateFiles {"files":{"/favicon.ico":"88fdd4be0645b9bc64dd0a4eeb19669c8eca624d039349f9cf9161a51fe55ce4","/logo192.jpg":"be4f5800532a17b12233539b9fb36d9b2b2b8e511820ef906e9cc01f343577fd","/manifest.json":"3ac6657c84de889a7ecba1723e08c7955f9baaf4a3a85ae963f24d5ba356ce11","/static/images/logo/clientLogo.jpg":"9244ab340d0fd8d74863464d6350214dc1e8a1e6c435d2ece997243439cd9608","/static/images/logo/clientLogo2.jpg":"be4f5800532a17b12233539b9fb36d9b2b2b8e511820ef906e9cc01f343577fd","/asset-manifest.json":"c21550d5f2fddedaf3bc0ec9e3478b4b849aae59babc0f44ed25ed096c6d1c7a","/index.html":"a1848614a6af3e728c75e0d368617173db60bca777971f125de53783bc4ed780","/static/css/main.fd83c5f8.css":"00f71a06354725a4212eb29c9556ff075e72c4974010e89de301e47401b0e1ad","/static/css/main.fd83c5f8.css.map":"d6e1deb4afc0cbba4a82e63726fc726ab08863a36cbb5ac12242935e197b226f","/static/js/498.507b9478.chunk.js.LICENSE.txt":"2396ecbf0fd5cabdafa2bda8c7f34f244ecac9a8d61ff28597b2bf99a0ac20df","/static/js/703.056808d8.chunk.js":"a8cebbb896bcf4334dcec430c92fdd77dfce2a0cab2f25997b8bc4ba2b091cc4","/static/js/703.056808d8.chunk.js.LICENSE.txt":"3d8cec7287cdb0530baa88a78b7810defffd2f56cc2cccf447bc5889a622b212","/static/js/main.5b1da04b.js.LICENSE.txt":"9e50da36001d90257308be339be930f308bc061377c95a92c23df7e940af2252","/static/js/703.056808d8.chunk.js.map":"b9d7341a59e10904320d1f648d81d438e3076db85e38df5b793a65af8ac1b0eb","/static/js/513.d56ca553.chunk.js":"7225cd08bb8a321bf712345b22d4921d0adf7d0ae28ffd286d9d275ff5c50dad","/static/js/498.507b9478.chunk.js":"fd30614bd2417527a430c8ec062f63a2f319fa7e5fd46b667acff7a42ab7fa88","/static/js/513.d56ca553.chunk.js.map":"163bd79e8bae4b837109421098b7a3aa11ace970a24dc62651342d8ec8ea53a5","/static/js/498.507b9478.chunk.js.map":"79830e3a51a45e7bdf9d470cb337ed9aea4f7273128909514186f1890628a87f","/static/js/main.5b1da04b.js":"56e9e60b2b006a3df158dcd13884ed6a361a7775a2da40fddc5e626dd17cc618","/static/js/main.5b1da04b.js.map":"ab7fad71ccb94fb2cca50e2b2cce0585cb58e0e8acbb2fe708b6543a76aa5af5"}}
+[debug] [2024-05-23T16:54:41.837Z] <<< [apiv2][status] POST https://firebasehosting.googleapis.com/v1beta1/projects/896457838743/sites/kiha-c48e4/versions/12551c4f53fa6576:populateFiles 200
+[debug] [2024-05-23T16:54:41.838Z] <<< [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/896457838743/sites/kiha-c48e4/versions/12551c4f53fa6576:populateFiles {"uploadUrl":"https://upload-firebasehosting.googleapis.com/upload/sites/kiha-c48e4/versions/12551c4f53fa6576/files"}
+[debug] [2024-05-23T16:54:41.839Z] [hosting][populate queue][FINAL] {"max":17922,"min":17922,"avg":17922,"active":0,"complete":1,"success":1,"errored":0,"retried":0,"total":1,"elapsed":17922}
+[debug] [2024-05-23T16:54:41.839Z] [hosting] uploads queued: 0
+[debug] [2024-05-23T16:54:41.840Z] [hosting][upload queue][FINAL] {"max":0,"min":9999999999,"avg":0,"active":0,"complete":0,"success":0,"errored":0,"retried":0,"total":0,"elapsed":1716483281840}
+[info] +  hosting[kiha-c48e4]: file upload complete 
+[debug] [2024-05-23T16:54:41.842Z] [hosting] deploy completed after 20555ms
+[debug] [2024-05-23T16:54:41.843Z] [
+  {
+    "config": {
+      "public": "build",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "site": "kiha-c48e4"
+    },
+    "version": "projects/896457838743/sites/kiha-c48e4/versions/12551c4f53fa6576"
+  }
+]
+[info] i  hosting[kiha-c48e4]: finalizing version... 
+[debug] [2024-05-23T16:54:41.849Z] >>> [apiv2][query] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/kiha-c48e4/versions/12551c4f53fa6576 updateMask=status%2Cconfig
+[debug] [2024-05-23T16:54:41.850Z] >>> [apiv2][body] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/kiha-c48e4/versions/12551c4f53fa6576 {"status":"FINALIZED","config":{}}
+[debug] [2024-05-23T16:54:50.714Z] <<< [apiv2][status] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/kiha-c48e4/versions/12551c4f53fa6576 200
+[debug] [2024-05-23T16:54:50.715Z] <<< [apiv2][body] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/kiha-c48e4/versions/12551c4f53fa6576 {"name":"projects/896457838743/sites/kiha-c48e4/versions/12551c4f53fa6576","status":"FINALIZED","config":{},"labels":{"deployment-tool":"cli-firebase"},"createTime":"2024-05-23T16:54:05.300391Z","createUser":{"email":"akilayapa1998@gmail.com"},"finalizeTime":"2024-05-23T16:54:44.232620Z","finalizeUser":{"email":"akilayapa1998@gmail.com"}}
+[debug] [2024-05-23T16:54:50.715Z] [hosting] finalized version for kiha-c48e4:[object Object]
+[info] +  hosting[kiha-c48e4]: version finalized 
+[info] i  hosting[kiha-c48e4]: releasing new version... 
+[debug] [2024-05-23T16:54:50.719Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/kiha-c48e4/channels/live/releases versionName=projects%2F896457838743%2Fsites%2Fkiha-c48e4%2Fversions%2F12551c4f53fa6576
+[debug] [2024-05-23T16:54:50.720Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/kiha-c48e4/channels/live/releases {}
+[debug] [2024-05-23T16:54:59.415Z] *** [apiv2] error from fetch(https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/kiha-c48e4/channels/live/releases?versionName=projects%2F896457838743%2Fsites%2Fkiha-c48e4%2Fversions%2F12551c4f53fa6576, {"headers":{},"method":"POST","body":"{}"}): FetchError: request to https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/kiha-c48e4/channels/live/releases?versionName=projects%2F896457838743%2Fsites%2Fkiha-c48e4%2Fversions%2F12551c4f53fa6576 failed, reason: read ECONNRESET
+[debug] [2024-05-23T16:55:04.434Z] Error: Timed out.
+    at Timeout._onTimeout (C:\Users\AKILA\AppData\Roaming\npm\node_modules\firebase-tools\lib\utils.js:254:49)
+    at listOnTimeout (node:internal/timers:559:17)
+    at processTimers (node:internal/timers:502:7)
+[error] 
+[error] Error: An unexpected error has occurred.

@@ -20,13 +20,12 @@ import MaterialTable from "material-table";
 import { useFormik, Form, FormikProvider, Formik } from "formik";
 import * as Yup from "yup";
 import { LoadingComponent } from "../../../utils/newLoader";
-import VisibilityIcon from "@material-ui/icons/Visibility";
+import DescriptionIcon from '@material-ui/icons/Description';
+import ReceiptIcon from '@material-ui/icons/Receipt';
 import { useAlert } from "react-alert";
-// import Dialog from "@material-ui/core/Dialog";
-// import DialogContent from "@material-ui/core/DialogContent";
-// import DialogContentText from "@material-ui/core/DialogContentText";
-// import DialogTitle from "@material-ui/core/DialogTitle";
-import CreatePDF from "../../ManageInvoice/Pages/CreatePDF";
+import Dialog from "@material-ui/core/Dialog";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogTitle from "@material-ui/core/DialogTitle";
 import { useReactToPrint } from "react-to-print";
 import TemporyBillPDF from "../../ManageInvoice/Pages/TemporyPDF";
 
@@ -63,8 +62,10 @@ export default function ReorderInvoice(props) {
   const [invoices, setInvoices] = useState([]);
   const [selectedRows, setSelectedRows] = useState([]);
   const [open, setOpen] = useState(false);
+  const [openPayment, setOpenPayment] = useState(false);
   const [billData, setBillData] = useState("");
   const [billItems, setBillItems] = useState([]);
+  const [paymentHistory, setPaymentHistory] = useState([]);
 
   const ProductSaveSchema = Yup.object().shape({
     fromdate: Yup.date().required("From Date is required"),
@@ -91,6 +92,21 @@ export default function ReorderInvoice(props) {
   const handleSelectionChange = (rows) => {
     setSelectedRows(rows);
   };
+
+  useEffect(() => {
+    if (billData != "") {
+      setOpen(false);
+      handlePrint();
+    }
+  }, [billData, open]);
+
+  const handlePrint = useReactToPrint({
+    content: () => componentRef.current,
+  });
+
+  function handleClose() {
+    setOpenPayment(false);
+  }
 
   function handleChange(e) {
     const target = e.target;
@@ -145,6 +161,40 @@ export default function ReorderInvoice(props) {
     setIsViewTable(false);
   }
 
+  async function handleViewPayments(data) {
+    const result = await services.getPaymentDetails(data.invoiceId);
+    const paymentHistoryArray = result.paymentDetails.map((item) => {
+      return {
+        ...item,
+        amount: item.amount,
+        paymentDateTime:
+          item.paymentDateTime !== null
+            ? item.paymentDateTime.split("T")[0]
+            : "",
+        paymentMethod: item.paymentMethod,
+      };
+    });
+
+    const itemData = data.invoiceItems;
+    const updatedItems = [];
+    var filteredResponse = [];
+    if (itemData.length > 0) {
+      filteredResponse = itemData.filter((item) => item.isActive == true && item.paymentType === "Debit");
+      for (const item of filteredResponse) {
+        const updatedItem = {
+          ...item,
+          amount: item.amount,
+          paymentDateTime: item.date.split("T")[0],
+          paymentMethod: item.paymentMethod,
+        };
+        updatedItems.push(updatedItem);
+      }
+    }
+    const allPayments = updatedItems.concat(paymentHistoryArray)
+    setPaymentHistory(allPayments);
+    setOpenPayment(true);
+  }
+
   function handleView(data) {
     const invoiceDetails = data.invoiceDetail;
     setBillData({
@@ -182,17 +232,6 @@ export default function ReorderInvoice(props) {
     setOpen(true);
   }
 
-  useEffect(() => {
-    if (billData != "") {
-      setOpen(false);
-      handlePrint();
-    }
-  }, [billData, open]);
-
-  const handlePrint = useReactToPrint({
-    content: () => componentRef.current,
-  });
-
   async function handleReordering() {
     const arrayOfInvoiceIds = selectedRows.map((obj) => obj.invoiceId);
     const model = {
@@ -212,8 +251,14 @@ export default function ReorderInvoice(props) {
 
   const actions = [
     {
-      icon: () => <VisibilityIcon />,
-      tooltip: <p>View Payments</p>,
+      icon: () => <ReceiptIcon />,
+      tooltip: <p>Payments</p>,
+      onClick: (event, rowData) => handleViewPayments(rowData),
+      position: "row",
+    },
+    {
+      icon: () => <DescriptionIcon />,
+      tooltip: <p>View Invoice</p>,
       onClick: (event, rowData) => handleView(rowData),
       position: "row",
     },
@@ -378,9 +423,9 @@ export default function ReorderInvoice(props) {
             </Box>
           </Form>
         </FormikProvider>
-        {/* <Dialog
+        <Dialog
           maxWidth
-          open={open}
+          open={openPayment}
           onClose={handleClose}
           aria-labelledby="form-dialog-title"
         >
@@ -390,26 +435,21 @@ export default function ReorderInvoice(props) {
               <MaterialTable
                 title="Multiple Actions Preview"
                 columns={[
-                  { title: "Date", field: "date" },
-                  { title: "Description", field: "description" },
-                  { title: "Comment", field: "comment" },
-                  { title: "Amount", field: "amount" },
-                  { title: "Payment Method", field: "paymentMethod" },
-                  { title: "Payment Type", field: "paymentType" },
-                  { title: "Cashier", field: "cashier" },
+                  { title: "Date", field: "paymentDateTime",  align: "center", },
+                  { title: "Amount", field: "amount",  align: "center", },
+                  { title: "Payment Method", field: "paymentMethod",  align: "center", },
                 ]}
-                data={ItemDataList}
+                data={paymentHistory}
                 options={{
                   exportButton: false,
                   showTitle: false,
-                  headerStyle: { textAlign: "left" },
-                  cellStyle: { textAlign: "left" },
+                  headerStyle: { textAlign: "center" },
                   columnResizable: false,
                 }}
               />
             </Box>
           </DialogContent>
-        </Dialog> */}
+        </Dialog>
         {billData !== "" ? (
           <div hidden={true}>
             <TemporyBillPDF
